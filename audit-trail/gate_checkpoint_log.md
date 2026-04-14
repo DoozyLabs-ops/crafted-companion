@@ -154,9 +154,25 @@
   - JSON fields (steps, tool_deps, params, safety_rules) use CLOBTEXT for complex structures
   - Exec log includes `agent` field (claude/chatgpt) to supplement Oracle's built-in counters
 - **Branch:** `phase-0/foundation-sdf-objects`
-- **Approved by:** Pending HITM review
+- **Approved by:** Luke (HITM)
+
+### Checkpoint: Session 2 — SDF Deploy + Verify (M-0 Foundation Deployed)
+- **Date:** 2026-04-14
+- **Status:** Complete
+- **Deployed to:** TSTDRV1912378
+- **SuiteQL verification:** All 4 lists (18 values total), 2 records (26 fields total), 1 toolset confirmed queryable
+- **Deploy fixes applied:** selectrecordtype syntax, aidescription length, list name length, toolset scriptid length, removed unsupported aidescription from lists, removed unsupported isunique
+- **Lessons learned:** aidescription only on records/fields (not lists); selectrecordtype uses `[scriptid=xxx]`; toolset scriptid max 27 chars; list name max 30 chars
+- **List value IDs:** Edition (1-4), Complexity (1-4), Status (1-4), Domain (1-6)
+- **Approved by:** Luke (HITM)
 
 ### PLANNING → DEVELOPMENT
 - [x] SDF object XML written and reviewed
 - [x] Chunked task breakdown (`docs/task_plan.md` — 50 chunks across 5 phases, 17 sessions)
-- [ ] HITM approval to advance to development
+- [x] HITM approval to advance to development (M-0 gate passed 2026-04-14)
+
+### DEVELOPMENT → QA (Phase 1: Companion Toolset)
+- [ ] Extension record deployed and queryable (DONE — Phase 0)
+- [ ] All 4 companion tools implemented and tested
+- [ ] All barrel prompts have extension records
+- [ ] HITM approval recorded

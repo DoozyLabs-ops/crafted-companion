@@ -2,17 +2,17 @@
     "tools": [
         {
             "name": "getPromptMeta",
-            "description": "Retrieves orchestration metadata for a Crafted Intelligence companion prompt. Returns the extension record data: domain, toolset, tool chain, steps, edition, params, safety rules, governance level, and artifact hints. The AI calls this as its FIRST step when executing any Crafted prompt — it provides the full orchestration context needed to invoke the correct tools in the correct order. Pass either the Atlas prompt internal ID or the Crafted external ID (aiprompt_crafted_*). STUB — not yet implemented.",
+            "description": "Retrieves orchestration metadata for a Crafted Intelligence companion prompt. Returns the extension record data: domain, toolset, tool chain, steps (JSON), edition, params (JSON), safety rules (JSON), governance level, and artifact hints. The AI calls this as its FIRST step when executing any Crafted prompt — it provides the full context needed to invoke the correct tools in the correct order. Pass either the Atlas prompt internal ID or the Crafted external ID (aiprompt_crafted_*). Returns the prompt text along with all orchestration metadata. JSON fields (steps, params, safety_rules, tool_deps) are parsed into structured objects. If no extension record exists for the given prompt, returns an error — only Crafted prompts with extension records are supported.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "promptId": {
                         "type": "number",
-                        "description": "Internal ID of the Atlas AI Companion prompt record (customrecord_atlas_aicomp_prompts)."
+                        "description": "Internal ID of the Atlas AI Companion prompt record. Example: 101 for Barrel Profile Lookup. Use this when you know the prompt's internal ID."
                     },
                     "externalId": {
                         "type": "string",
-                        "description": "External ID of the Atlas prompt (e.g., 'aiprompt_crafted_barrel_001'). Used if promptId is not provided."
+                        "description": "External ID of the Atlas prompt (e.g., 'aiprompt_crafted_barrel_001'). Used if promptId is not provided. Matches the externalid field on customrecord_atlas_aicomp_prompts."
                     }
                 },
                 "required": []
@@ -20,10 +20,31 @@
             "outputSchema": {
                 "type": "object",
                 "properties": {
-                    "error": { "type": "string", "description": "Error message if tool is not yet implemented or if lookup fails." },
-                    "version": { "type": "string", "description": "Script version." }
+                    "meta_id": { "type": "number", "description": "Internal ID of the extension record (customrecord_dz_prompt_meta)." },
+                    "prompt_id": { "type": "number", "description": "Internal ID of the Atlas companion prompt." },
+                    "prompt_name": { "type": "string", "description": "Prompt display name from Atlas." },
+                    "prompt_text": { "type": "string", "description": "Full prompt text from Atlas (clean, user-facing)." },
+                    "domain": { "type": "string", "description": "Crafted domain: Barrel Operations, Lot Profitability, Inventory & Supply Chain, Compliance & Audit, MRP Intelligence, or Batch & Genealogy." },
+                    "subdomain": { "type": "string", "description": "Finer categorization within domain." },
+                    "toolset": { "type": "string", "description": "Primary toolset script ID." },
+                    "tool_chain": { "type": "string", "description": "Human-readable tool sequence (e.g., 'getBarrelProfile -> getBarrelCostTrace')." },
+                    "entry_tool": { "type": "string", "description": "First tool to call." },
+                    "steps": { "type": "object", "description": "Parsed JSON array of orchestration steps with call, purpose, condition, depends_on, params_from." },
+                    "tool_deps": { "type": "object", "description": "Parsed JSON array of required toolset script IDs." },
+                    "edition": { "type": "string", "description": "Target edition: Distillery, Winery, Brewery, or Cross-Edition." },
+                    "edition_notes": { "type": "string", "description": "Edition-specific behavior guidance." },
+                    "params": { "type": "object", "description": "Parsed JSON parameter schema with types, hints, resolves_to." },
+                    "safety_rules": { "type": "object", "description": "Parsed JSON array of non-hallucination and data quality rules." },
+                    "governance": { "type": "string", "description": "Governance tier: Minimal, Standard, Governed, or Supervised." },
+                    "artifact": { "type": "boolean", "description": "Whether this prompt generates a visual artifact." },
+                    "artifact_type": { "type": "string", "description": "Artifact format (e.g., cost-waterfall, kpi-dashboard)." },
+                    "version": { "type": "string", "description": "Semantic version of the extension record." },
+                    "author": { "type": "string", "description": "Prompt creator or maintainer." },
+                    "status": { "type": "string", "description": "Lifecycle status: Active, Draft, Deprecated, or Testing." },
+                    "error": { "type": "string", "description": "Error message if lookup fails." },
+                    "_version": { "type": "string", "description": "Script version." }
                 },
-                "required": ["version"]
+                "required": ["_version"]
             },
             "annotations": {
                 "readOnlyHint": true,
@@ -33,38 +54,102 @@
             }
         },
         {
-            "name": "seedPrompt",
-            "description": "Creates an Atlas AI Companion prompt and its Crafted extension record in a single idempotent operation. If a prompt with the given externalId already exists, returns the existing record instead of creating a duplicate. Used to programmatically seed domain prompts (e.g., barrel intelligence, lot profitability) into the Companion Library. STUB — not yet implemented.",
+            "name": "logExecution",
+            "description": "Creates a lightweight execution log record (customrecord_dz_exec_log) for a companion prompt run. Records which prompt was executed, which tools were called, whether it succeeded or failed, duration in seconds, which prompt version was running, and which AI agent ran it. Called by the AI after completing (or failing) a prompt execution. Returns the log record ID on success.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "Prompt display name (e.g., 'Barrel Cost Trace')."
+                    "promptId": {
+                        "type": "number",
+                        "description": "Internal ID of the Atlas prompt that was executed."
                     },
-                    "externalId": {
-                        "type": "string",
-                        "description": "Unique external ID for idempotent creation (e.g., 'aiprompt_crafted_barrel_003')."
+                    "success": {
+                        "type": "boolean",
+                        "description": "Whether the execution completed successfully."
                     },
-                    "promptText": {
+                    "toolsCalled": {
                         "type": "string",
-                        "description": "Clean, user-facing prompt text. No orchestration metadata — that goes in the extension record."
+                        "description": "JSON array string of tool names called during execution. Example: '[\"getBarrelProfile\",\"getBarrelCostTrace\"]'."
                     },
-                    "domain": {
-                        "type": "string",
-                        "description": "Crafted domain: 'Barrel Operations', 'Lot Profitability', 'Inventory & Supply Chain', 'Compliance & Audit', 'MRP Intelligence', 'Batch & Genealogy'."
+                    "duration": {
+                        "type": "number",
+                        "description": "Total execution duration in seconds from first tool call to final output."
                     },
-                    "toolset": {
+                    "error": {
                         "type": "string",
-                        "description": "Primary toolset script ID (e.g., 'barrel-intelligence')."
+                        "description": "Error message or failure reason if execution failed. Omit on success."
+                    },
+                    "promptVersion": {
+                        "type": "string",
+                        "description": "Semantic version of the prompt extension record at execution time (e.g., '1.0.0'). Copy from getPromptMeta response."
+                    },
+                    "agent": {
+                        "type": "string",
+                        "description": "AI agent name that executed the prompt. Valid values: 'claude', 'chatgpt'."
                     }
+                },
+                "required": ["promptId", "success"]
+            },
+            "outputSchema": {
+                "type": "object",
+                "properties": {
+                    "success": { "type": "boolean", "description": "Whether the log record was created." },
+                    "logId": { "type": "number", "description": "Internal ID of the created execution log record." },
+                    "message": { "type": "string", "description": "Confirmation message." },
+                    "error": { "type": "string", "description": "Error message if logging failed." },
+                    "version": { "type": "string", "description": "Script version." }
+                },
+                "required": ["version"]
+            },
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": false,
+                "idempotentHint": false,
+                "openWorldHint": false
+            }
+        },
+        {
+            "name": "seedPrompt",
+            "description": "Creates an Atlas AI Companion prompt and its Crafted extension record in a single idempotent operation. If a prompt with the given externalId already exists, returns the existing record IDs without creating a duplicate. Use to programmatically seed domain prompts into the Companion Library. Creates the Atlas prompt with category=Manufacturing, role=Administrator, industry=Food & Beverage defaults. Pass extension record fields (domain, toolset, steps, etc.) to create the orchestration metadata alongside the prompt.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string", "description": "Prompt display name (e.g., 'Barrel Cost Trace')." },
+                    "externalId": { "type": "string", "description": "Unique external ID for idempotent creation (e.g., 'aiprompt_crafted_barrel_003'). Must start with 'aiprompt_crafted_'." },
+                    "promptText": { "type": "string", "description": "Clean, user-facing prompt text. No orchestration metadata — that goes in extension record fields." },
+                    "domain": { "type": "number", "description": "Extension record domain list value ID. Values: 1=Barrel Operations, 2=Lot Profitability, 3=Inventory & Supply Chain, 4=Compliance & Audit, 5=MRP Intelligence, 6=Batch & Genealogy." },
+                    "subdomain": { "type": "string", "description": "Finer categorization (e.g., 'Barrel Valuation & Finance'). Also sets Atlas prompt subcategory." },
+                    "toolset": { "type": "string", "description": "Primary toolset script ID (e.g., 'barrel-intelligence')." },
+                    "toolChain": { "type": "string", "description": "Human-readable tool sequence (e.g., 'getBarrelProfile -> getBarrelCostTrace')." },
+                    "entryTool": { "type": "string", "description": "First tool to call (e.g., 'getBarrelProfile')." },
+                    "steps": { "type": "string", "description": "JSON string of orchestration steps array." },
+                    "toolDeps": { "type": "string", "description": "JSON string array of required toolset script IDs." },
+                    "edition": { "type": "number", "description": "Edition list value ID. Values: 1=Distillery, 2=Winery, 3=Brewery, 4=Cross-Edition." },
+                    "editionNotes": { "type": "string", "description": "Edition-specific behavior guidance text." },
+                    "params": { "type": "string", "description": "JSON string of parameter schema." },
+                    "safetyRules": { "type": "string", "description": "JSON string array of safety rules." },
+                    "governance": { "type": "number", "description": "Governance level list value ID. Values: 1=Minimal, 2=Standard, 3=Governed, 4=Supervised." },
+                    "artifact": { "type": "boolean", "description": "Whether prompt generates a visual artifact." },
+                    "artifactType": { "type": "string", "description": "Artifact format (e.g., 'cost-waterfall', 'kpi-dashboard')." },
+                    "version": { "type": "string", "description": "Semantic version (default: '1.0.0')." },
+                    "author": { "type": "string", "description": "Creator name (default: 'Doozy Labs')." },
+                    "status": { "type": "number", "description": "Status list value ID. Values: 1=Active, 2=Draft, 3=Deprecated, 4=Testing." },
+                    "category": { "type": "number", "description": "Atlas category override (default: 6=Manufacturing)." },
+                    "roleId": { "type": "number", "description": "Atlas role override (default: 5=Administrator)." },
+                    "industryId": { "type": "number", "description": "Atlas industry override (default: 17=Food & Beverage)." }
                 },
                 "required": ["name", "externalId", "promptText"]
             },
             "outputSchema": {
                 "type": "object",
                 "properties": {
-                    "error": { "type": "string", "description": "Error message if tool is not yet implemented or if creation fails." },
+                    "success": { "type": "boolean", "description": "Whether the operation succeeded." },
+                    "action": { "type": "string", "description": "'created' (new prompt + extension), 'extended' (existing prompt, new extension), or 'existing' (both already exist)." },
+                    "promptId": { "type": "number", "description": "Internal ID of the Atlas prompt." },
+                    "metaId": { "type": "number", "description": "Internal ID of the extension record." },
+                    "externalId": { "type": "string", "description": "External ID used." },
+                    "message": { "type": "string", "description": "Description of what was done." },
+                    "error": { "type": "string", "description": "Error message if operation failed." },
                     "version": { "type": "string", "description": "Script version." }
                 },
                 "required": ["version"]
@@ -78,29 +163,44 @@
         },
         {
             "name": "updatePrompt",
-            "description": "Updates an existing Atlas companion prompt text and/or its Crafted extension record fields. Bumps the version field on the extension record. Only provided fields are updated — omitted fields are left unchanged. STUB — not yet implemented.",
+            "description": "Updates an existing Atlas companion prompt text and/or its Crafted extension record fields. Automatically bumps the patch version on the extension record (e.g., 1.0.0 -> 1.0.1) unless a specific newVersion is provided. Only provided fields are updated — omitted fields are left unchanged. Can update Atlas-level fields (promptText, promptName) and extension record fields (domain, toolset, steps, safety rules, etc.) in a single call.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "promptId": {
-                        "type": "number",
-                        "description": "Internal ID of the Atlas prompt to update."
-                    },
-                    "promptText": {
-                        "type": "string",
-                        "description": "New prompt text. If omitted, prompt text is not changed."
-                    },
-                    "version": {
-                        "type": "string",
-                        "description": "New semantic version (e.g., '1.1.0'). If omitted, version is auto-incremented."
-                    }
+                    "promptId": { "type": "number", "description": "Internal ID of the Atlas prompt to update." },
+                    "promptText": { "type": "string", "description": "New prompt text. If omitted, prompt text is not changed." },
+                    "promptName": { "type": "string", "description": "New prompt display name. If omitted, name is not changed." },
+                    "subdomain": { "type": "string", "description": "New subdomain. Updates both extension record and Atlas subcategory." },
+                    "domain": { "type": "number", "description": "New domain list value ID (1-6)." },
+                    "toolset": { "type": "string", "description": "New toolset script ID." },
+                    "toolChain": { "type": "string", "description": "New tool chain string." },
+                    "entryTool": { "type": "string", "description": "New entry tool name." },
+                    "steps": { "type": "string", "description": "New steps JSON string." },
+                    "toolDeps": { "type": "string", "description": "New tool deps JSON string." },
+                    "edition": { "type": "number", "description": "New edition list value ID (1-4)." },
+                    "editionNotes": { "type": "string", "description": "New edition notes." },
+                    "params": { "type": "string", "description": "New params JSON string." },
+                    "safetyRules": { "type": "string", "description": "New safety rules JSON string." },
+                    "governance": { "type": "number", "description": "New governance level list value ID (1-4)." },
+                    "artifact": { "type": "boolean", "description": "New artifact flag." },
+                    "artifactType": { "type": "string", "description": "New artifact type." },
+                    "author": { "type": "string", "description": "New author." },
+                    "status": { "type": "number", "description": "New status list value ID (1-4)." },
+                    "newVersion": { "type": "string", "description": "Explicit new version (e.g., '2.0.0'). If omitted, patch version is auto-incremented." }
                 },
                 "required": ["promptId"]
             },
             "outputSchema": {
                 "type": "object",
                 "properties": {
-                    "error": { "type": "string", "description": "Error message if tool is not yet implemented or if update fails." },
+                    "success": { "type": "boolean", "description": "Whether the update succeeded." },
+                    "promptId": { "type": "number", "description": "Atlas prompt ID." },
+                    "metaId": { "type": "number", "description": "Extension record ID." },
+                    "previousVersion": { "type": "string", "description": "Version before update." },
+                    "newVersion": { "type": "string", "description": "Version after update." },
+                    "updatedFields": { "type": "object", "description": "Array of field names that were updated." },
+                    "message": { "type": "string", "description": "Summary of changes." },
+                    "error": { "type": "string", "description": "Error message if update failed." },
                     "version": { "type": "string", "description": "Script version." }
                 },
                 "required": ["version"]
@@ -109,54 +209,6 @@
                 "readOnlyHint": false,
                 "destructiveHint": false,
                 "idempotentHint": true,
-                "openWorldHint": false
-            }
-        },
-        {
-            "name": "logExecution",
-            "description": "Creates a lightweight execution log record for a companion prompt run. Records which prompt was executed, which tools were called, whether it succeeded, duration, and which prompt version was running. Called by the AI after completing (or failing) a prompt execution. STUB — not yet implemented.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "promptId": {
-                        "type": "number",
-                        "description": "Internal ID of the Atlas prompt that was executed."
-                    },
-                    "toolsCalled": {
-                        "type": "string",
-                        "description": "JSON array of tool names called during execution (e.g., '[\"getBarrelProfile\",\"getBarrelCostTrace\"]')."
-                    },
-                    "success": {
-                        "type": "boolean",
-                        "description": "Whether the execution completed successfully."
-                    },
-                    "duration": {
-                        "type": "number",
-                        "description": "Execution duration in seconds."
-                    },
-                    "error": {
-                        "type": "string",
-                        "description": "Error message if execution failed. Empty on success."
-                    },
-                    "agent": {
-                        "type": "string",
-                        "description": "AI agent name: 'claude' or 'chatgpt'."
-                    }
-                },
-                "required": ["promptId", "success"]
-            },
-            "outputSchema": {
-                "type": "object",
-                "properties": {
-                    "error": { "type": "string", "description": "Error message if tool is not yet implemented or if logging fails." },
-                    "version": { "type": "string", "description": "Script version." }
-                },
-                "required": ["version"]
-            },
-            "annotations": {
-                "readOnlyHint": false,
-                "destructiveHint": false,
-                "idempotentHint": false,
                 "openWorldHint": false
             }
         }
