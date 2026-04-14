@@ -137,7 +137,26 @@
 - **Also completed:** Full 8-object Atlas AI Companion schema trace with Record Browser validation
 - **Approved by:** Luke (HITM)
 
+### Checkpoint: Session 1 — SDF Object XML Complete
+- **Date:** 2026-04-14
+- **Status:** Complete (awaiting HITM review)
+- **Deliverables:**
+  - `src/Objects/customlist_dz_pm_edition.xml` — 4 values (FOUND-001)
+  - `src/Objects/customlist_dz_pm_complexity.xml` — 4 values (FOUND-002)
+  - `src/Objects/customlist_dz_pm_status.xml` — 4 values (FOUND-003)
+  - `src/Objects/customlist_dz_pm_domain.xml` — 6 values (NEW — standalone, replaces cross-package ref)
+  - `src/Objects/customrecord_dz_prompt_meta.xml` — 18 fields (FOUND-004)
+  - `src/Objects/customrecord_dz_exec_log.xml` — 8 fields (FOUND-005)
+  - `src/Objects/custtoolset_crafted_companion.xml` — placeholder with both expose flags (FOUND-006)
+- **Design decisions:**
+  - `prompt_ref` is INTEGER (not SELECT) because Atlas record type is bundle-locked
+  - Created `customlist_dz_pm_domain` in this package instead of cross-referencing `customlist_dz_ap_domain` from prompt-engine — crafted-companion is a standalone repo/package
+  - JSON fields (steps, tool_deps, params, safety_rules) use CLOBTEXT for complex structures
+  - Exec log includes `agent` field (claude/chatgpt) to supplement Oracle's built-in counters
+- **Branch:** `phase-0/foundation-sdf-objects`
+- **Approved by:** Pending HITM review
+
 ### PLANNING → DEVELOPMENT
-- [ ] SDF object XML written and reviewed
+- [x] SDF object XML written and reviewed
 - [x] Chunked task breakdown (`docs/task_plan.md` — 50 chunks across 5 phases, 17 sessions)
-- [ ] HITM approval of task plan
+- [ ] HITM approval to advance to development

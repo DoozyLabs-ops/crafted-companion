@@ -1,5 +1,19 @@
 # Change Log — Crafted Companion
 
+## 2026-04-14 — Session 1: SDF Object XML (Phase 0 Foundation)
+
+- **Git repo initialized:** `DoozyLabs-ops/crafted-companion` on GitHub (separate from crafted-intelligence)
+- Initial commit with all Discovery + Scoping + Planning artifacts pushed to `main`
+- Feature branch created: `phase-0/foundation-sdf-objects`
+- **FOUND-001:** Created `customlist_dz_pm_edition.xml` — 4 values (Distillery, Winery, Brewery, Cross-Edition)
+- **FOUND-002:** Created `customlist_dz_pm_complexity.xml` — 4 values (Minimal, Standard, Governed, Supervised)
+- **FOUND-003:** Created `customlist_dz_pm_status.xml` — 4 values (Active, Draft, Deprecated, Testing)
+- **NEW:** Created `customlist_dz_pm_domain.xml` — 6 values (Barrel Operations, Lot Profitability, Inventory & Supply Chain, Compliance & Audit, MRP Intelligence, Batch & Genealogy). Replaces cross-package reference to `customlist_dz_ap_domain` — crafted-companion is a standalone package.
+- **FOUND-004:** Created `customrecord_dz_prompt_meta.xml` — 18 fields (prompt_ref FK, domain, subdomain, toolset, tool_chain, entry_tool, steps JSON, tool_deps JSON, edition, edition_notes, params JSON, safety_rules JSON, governance, artifact, artifact_type, version, author, status). All fields have `<aidescription>`.
+- **FOUND-005:** Created `customrecord_dz_exec_log.xml` — 8 fields (prompt_ref, exec_date, tools_called, success, error, duration, version, agent). All fields have `<aidescription>`.
+- **FOUND-006:** Created `custtoolset_crafted_companion.xml` — placeholder toolset with both expose flags. Script/schema paths point to `companion-tools/` directory (files created in Phase 1).
+- All SDF XML in `src/Objects/`. Total: 4 custom lists, 2 custom records, 1 toolset.
+
 ## 2026-04-14 — Task Plan Produced (Scoping → Planning)
 
 - Created chunked task plan (`docs/task_plan.md`)

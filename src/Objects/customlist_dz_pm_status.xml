@@ -1,0 +1,22 @@
+<customlist scriptid="customlist_dz_pm_status">
+    <name>Companion Prompt Status</name>
+    <aidescription>Lifecycle status of a companion prompt extension record. Active prompts are visible in the Crafted Companion Library and available for AI execution. Draft and Testing prompts are hidden from end users.</aidescription>
+    <customvalues>
+        <customvalue scriptid="val_active">
+            <value>Active</value>
+            <aidescription>Prompt is live and visible in the Crafted Companion Library. Available for AI execution via getPromptMeta. Shown to all users with appropriate role access.</aidescription>
+        </customvalue>
+        <customvalue scriptid="val_draft">
+            <value>Draft</value>
+            <aidescription>Prompt is under development. Hidden from the Companion Library and not available for AI execution. Only visible to administrators in the extension record list.</aidescription>
+        </customvalue>
+        <customvalue scriptid="val_deprecated">
+            <value>Deprecated</value>
+            <aidescription>Prompt is retired and no longer recommended. Hidden from the Companion Library. Extension record preserved for audit trail. May be reactivated if needed.</aidescription>
+        </customvalue>
+        <customvalue scriptid="val_testing">
+            <value>Testing</value>
+            <aidescription>Prompt is in QA validation. Hidden from the Companion Library but available for AI execution via direct getPromptMeta call for testing purposes.</aidescription>
+        </customvalue>
+    </customvalues>
+</customlist>

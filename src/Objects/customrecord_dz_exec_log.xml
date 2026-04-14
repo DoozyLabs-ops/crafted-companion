@@ -1,0 +1,82 @@
+<customrecordtype scriptid="customrecord_dz_exec_log">
+    <recordname>Companion Execution Log</recordname>
+    <aidescription>Lightweight execution log for companion prompt runs. Records which prompt was executed, which tools were called, whether it succeeded, duration, and which version was running. Created by the logExecution companion tool after each prompt execution.</aidescription>
+    <includename>F</includename>
+    <showid>T</showid>
+    <shownotes>F</shownotes>
+    <enablenumbering>F</enablenumbering>
+    <allowinlineediting>F</allowinlineediting>
+    <allowquickadd>F</allowquickadd>
+    <accesstype>NONENEEDED</accesstype>
+    <customrecordcustomfields>
+        <customrecordcustomfield scriptid="custrecord_dz_el_prompt_ref">
+            <label>Companion Prompt Ref</label>
+            <fieldtype>INTEGER</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <ismandatory>T</ismandatory>
+            <description>Internal ID of the Atlas AI Companion prompt that was executed. Used to JOIN with customrecord_atlas_aicomp_prompts and customrecord_dz_prompt_meta for execution analytics. Stored as integer because the Atlas record type is bundle-locked.</description>
+            <help>Internal ID of the Atlas companion prompt that was executed.</help>
+            <aidescription>Internal ID of the executed Atlas companion prompt. Used to JOIN with prompt and extension records for execution analytics. Stored as integer (Atlas is bundle-locked).</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_el_exec_date">
+            <label>Execution Date</label>
+            <fieldtype>DATETIMETZ</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <ismandatory>T</ismandatory>
+            <description>Timestamp when the prompt execution started. Recorded by the logExecution tool. Used for execution frequency analysis and recency tracking.</description>
+            <help>Timestamp when this prompt execution started.</help>
+            <aidescription>Timestamp when prompt execution started. Recorded by logExecution tool. Used for execution frequency analysis and usage reporting.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_el_tools_called">
+            <label>Tools Called</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>JSON array of tool names that were actually called during this execution (e.g., ["getBarrelProfile","getBarrelCostTrace"]). May differ from the extension record's tool chain if conditions caused steps to be skipped.</description>
+            <help>JSON array of tools called during execution. Example: ["getBarrelProfile","getBarrelCostTrace"].</help>
+            <aidescription>JSON array of tool names actually called during this execution (e.g., ["getBarrelProfile","getBarrelCostTrace"]). May differ from tool chain if steps were skipped.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_el_success">
+            <label>Success</label>
+            <fieldtype>CHECKBOX</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <defaultvalue>F</defaultvalue>
+            <description>Whether the prompt execution completed successfully. False if any tool call failed, if the user cancelled, or if a safety rule was triggered that prevented completion.</description>
+            <help>Check if the prompt execution completed successfully.</help>
+            <aidescription>Whether prompt execution completed successfully. False if a tool call failed, user cancelled, or a safety rule prevented completion.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_el_error">
+            <label>Error Details</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>Error message or failure reason if the execution did not succeed. Includes the tool name that failed and the error details. Empty when success is true.</description>
+            <help>Error message if execution failed. Empty on success.</help>
+            <aidescription>Error message or failure reason if execution failed. Includes failing tool name and error details. Empty when success is true.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_el_duration">
+            <label>Duration (seconds)</label>
+            <fieldtype>INTEGER</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>Total execution duration in seconds from first tool call to final output. Used for performance monitoring and identifying slow prompts. Recorded by the AI at the end of execution.</description>
+            <help>Total execution time in seconds.</help>
+            <aidescription>Total execution duration in seconds from first tool call to final output. Used for performance monitoring and identifying slow-running prompts.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_el_version">
+            <label>Prompt Version</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>50</displaywidth>
+            <description>Semantic version of the extension record at the time of execution (e.g., "1.0.0"). Copied from custrecord_dz_pm_version at execution time. Enables version-specific execution analysis even after the prompt is updated in place.</description>
+            <help>Version of the prompt extension record when this execution occurred.</help>
+            <aidescription>Semantic version of the extension record at execution time (e.g., "1.0.0"). Enables version-specific analytics even after the prompt is updated in place.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_el_agent">
+            <label>AI Agent</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>100</displaywidth>
+            <description>Which AI agent executed this prompt (e.g., "claude", "chatgpt"). Supplements Oracle's built-in count_claude and count_chatgpt counters with per-execution granularity.</description>
+            <help>Name of the AI agent that executed this prompt (e.g., "claude", "chatgpt").</help>
+            <aidescription>AI agent that executed this prompt (e.g., "claude", "chatgpt"). Supplements Oracle's built-in usage counters with per-execution granularity.</aidescription>
+        </customrecordcustomfield>
+    </customrecordcustomfields>
+</customrecordtype>
