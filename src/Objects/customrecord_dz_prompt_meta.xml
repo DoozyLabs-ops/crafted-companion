@@ -1,6 +1,6 @@
 <customrecordtype scriptid="customrecord_dz_prompt_meta">
     <recordname>Companion Prompt Extension</recordname>
-    <aidescription>Extension record for Oracle AI Companion prompts. Links to an Atlas companion prompt by internal ID and stores Crafted Intelligence orchestration metadata: domain, toolset, tool chain, steps, edition, params, safety rules, governance level, and artifact hints. Retrieved by getPromptMeta tool.</aidescription>
+    <aidescription>Extension record for AI Companion prompts. Links to Atlas prompt by ID. Stores orchestration metadata: domain, toolset, tool chain, steps, edition, params, safety rules, governance, artifact hints. Retrieved by getPromptMeta.</aidescription>
     <includename>T</includename>
     <showid>T</showid>
     <shownotes>T</shownotes>
@@ -14,7 +14,6 @@
             <label>Companion Prompt Ref</label>
             <fieldtype>INTEGER</fieldtype>
             <displaytype>NORMAL</displaytype>
-            <isunique>T</isunique>
             <ismandatory>T</ismandatory>
             <description>Internal ID of the linked Atlas AI Companion prompt record (customrecord_atlas_aicomp_prompts). Used to JOIN extension metadata with the prompt record via SuiteQL. Stored as integer because the Atlas record type is bundle-locked and cannot be referenced as a SELECT field.</description>
             <help>Enter the internal ID of the Atlas AI Companion prompt this extension record links to. Each extension record maps to exactly one companion prompt.</help>
@@ -24,7 +23,7 @@
         <customrecordcustomfield scriptid="custrecord_dz_pm_domain">
             <label>Domain</label>
             <fieldtype>SELECT</fieldtype>
-            <selectrecordtype>-customlist_dz_pm_domain</selectrecordtype>
+            <selectrecordtype>[scriptid=customlist_dz_pm_domain]</selectrecordtype>
             <displaytype>NORMAL</displaytype>
             <ismandatory>T</ismandatory>
             <description>Crafted Intelligence domain this prompt belongs to. Maps to a toolset package (e.g., Barrel Operations = barrel-intelligence toolset). Used for domain tab filtering in the Crafted Companion Library SPA.</description>
@@ -89,7 +88,7 @@
         <customrecordcustomfield scriptid="custrecord_dz_pm_edition">
             <label>Edition</label>
             <fieldtype>SELECT</fieldtype>
-            <selectrecordtype>-customlist_dz_pm_edition</selectrecordtype>
+            <selectrecordtype>[scriptid=customlist_dz_pm_edition]</selectrecordtype>
             <displaytype>NORMAL</displaytype>
             <ismandatory>T</ismandatory>
             <description>Crafted ERP edition this prompt targets. Used by the SPA edition filter and by the AI for edition-aware logic. Cross-Edition prompts appear in all edition filters. Edition-specific prompts only appear when the account has that edition active (via detectAccountConfig).</description>
@@ -125,7 +124,7 @@
         <customrecordcustomfield scriptid="custrecord_dz_pm_governance">
             <label>Governance Level</label>
             <fieldtype>SELECT</fieldtype>
-            <selectrecordtype>-customlist_dz_pm_complexity</selectrecordtype>
+            <selectrecordtype>[scriptid=customlist_dz_pm_complexity]</selectrecordtype>
             <displaytype>NORMAL</displaytype>
             <ismandatory>T</ismandatory>
             <description>Governance tier controlling how the AI orchestrates this prompt. Minimal: single tool, execute directly. Standard: follow tool chain with edition logic. Governed: full orchestration with safety checks and anomaly flagging. Supervised: require user confirmation before writes.</description>
@@ -173,7 +172,7 @@
         <customrecordcustomfield scriptid="custrecord_dz_pm_status">
             <label>Status</label>
             <fieldtype>SELECT</fieldtype>
-            <selectrecordtype>-customlist_dz_pm_status</selectrecordtype>
+            <selectrecordtype>[scriptid=customlist_dz_pm_status]</selectrecordtype>
             <displaytype>NORMAL</displaytype>
             <ismandatory>T</ismandatory>
             <description>Lifecycle status of this extension record. Active: visible in Companion Library and available for AI execution. Draft: hidden, under development. Testing: hidden from users but available for QA via direct getPromptMeta call. Deprecated: retired, preserved for audit trail.</description>

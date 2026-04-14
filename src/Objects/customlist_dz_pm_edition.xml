@@ -1,22 +1,17 @@
 <customlist scriptid="customlist_dz_pm_edition">
     <name>Companion Prompt Edition</name>
-    <aidescription>Crafted ERP edition that a companion prompt targets. Used to filter prompts by edition: Distillery, Winery, Brewery, or Cross-Edition (applies to all editions). Stored on the prompt extension record (customrecord_dz_prompt_meta).</aidescription>
     <customvalues>
         <customvalue scriptid="val_distillery">
             <value>Distillery</value>
-            <aidescription>Prompt targets Distillery edition accounts. Uses distillery-specific tools and fields (proof gallons, barrel aging, angel's share, TTB compliance).</aidescription>
         </customvalue>
         <customvalue scriptid="val_winery">
             <value>Winery</value>
-            <aidescription>Prompt targets Winery edition accounts. Uses winery-specific tools and fields (vintage, varietal, appellation, batch genealogy, wine compliance).</aidescription>
         </customvalue>
         <customvalue scriptid="val_brewery">
             <value>Brewery</value>
-            <aidescription>Prompt targets Brewery edition accounts. Uses brewery-specific tools and fields (batch brewing, recipe management, keg tracking, TTB beer reporting).</aidescription>
         </customvalue>
         <customvalue scriptid="val_cross">
             <value>Cross-Edition</value>
-            <aidescription>Prompt applies to all Crafted ERP editions. Uses only cross-edition tools and fields (inventory, cost, supply chain) with no edition-specific logic.</aidescription>
         </customvalue>
     </customvalues>
 </customlist>

@@ -1,30 +1,23 @@
 <customlist scriptid="customlist_dz_pm_domain">
     <name>Companion Prompt Domain</name>
-    <aidescription>Crafted Intelligence domain that a companion prompt belongs to. Maps to a toolset package. Used for domain tab filtering in the Crafted Companion Library SPA and for grouping prompts by functional area.</aidescription>
     <customvalues>
         <customvalue scriptid="val_barrel_ops">
             <value>Barrel Operations</value>
-            <aidescription>Barrel aging, cooperage, inventory, cost tracing, valuation, and location tracking. Toolset: barrel-intelligence. Primary edition: Distillery (some cross-edition).</aidescription>
         </customvalue>
         <customvalue scriptid="val_lot_profit">
             <value>Lot Profitability</value>
-            <aidescription>Lot-level cost tracing, profitability analysis, yield analysis, GL detail, sales trail, and cost variance. Toolset: lot-profitability. Primary edition: Distillery.</aidescription>
         </customvalue>
         <customvalue scriptid="val_inv_supply">
             <value>Inventory &amp; Supply Chain</value>
-            <aidescription>Inventory snapshots, aging, trends, alerts, BOM costing, item intelligence, and supply chain analysis. Toolset: inventory-supply. Edition: Cross-edition.</aidescription>
         </customvalue>
         <customvalue scriptid="val_compliance">
             <value>Compliance &amp; Audit</value>
-            <aidescription>Regulatory compliance readiness, filing status, audit trails, field change audits, and data quality checks. Toolset: compliance-audit. Edition: Cross-edition.</aidescription>
         </customvalue>
         <customvalue scriptid="val_mrp">
             <value>MRP Intelligence</value>
-            <aidescription>MRP supply/demand analysis, action messages, setup audits, shelf life MRP, and supply plan analysis. Toolset: mrp-intelligence. Edition: Cross-edition.</aidescription>
         </customvalue>
         <customvalue scriptid="val_batch_gen">
             <value>Batch &amp; Genealogy</value>
-            <aidescription>Batch composition, lineage tracing, and genealogy analysis for blended products. Toolset: batch-genealogy. Primary edition: Winery.</aidescription>
         </customvalue>
     </customvalues>
 </customlist>

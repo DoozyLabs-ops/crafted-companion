@@ -1,0 +1,164 @@
+{
+    "tools": [
+        {
+            "name": "getPromptMeta",
+            "description": "Retrieves orchestration metadata for a Crafted Intelligence companion prompt. Returns the extension record data: domain, toolset, tool chain, steps, edition, params, safety rules, governance level, and artifact hints. The AI calls this as its FIRST step when executing any Crafted prompt — it provides the full orchestration context needed to invoke the correct tools in the correct order. Pass either the Atlas prompt internal ID or the Crafted external ID (aiprompt_crafted_*). STUB — not yet implemented.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "promptId": {
+                        "type": "number",
+                        "description": "Internal ID of the Atlas AI Companion prompt record (customrecord_atlas_aicomp_prompts)."
+                    },
+                    "externalId": {
+                        "type": "string",
+                        "description": "External ID of the Atlas prompt (e.g., 'aiprompt_crafted_barrel_001'). Used if promptId is not provided."
+                    }
+                },
+                "required": []
+            },
+            "outputSchema": {
+                "type": "object",
+                "properties": {
+                    "error": { "type": "string", "description": "Error message if tool is not yet implemented or if lookup fails." },
+                    "version": { "type": "string", "description": "Script version." }
+                },
+                "required": ["version"]
+            },
+            "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false,
+                "idempotentHint": true,
+                "openWorldHint": false
+            }
+        },
+        {
+            "name": "seedPrompt",
+            "description": "Creates an Atlas AI Companion prompt and its Crafted extension record in a single idempotent operation. If a prompt with the given externalId already exists, returns the existing record instead of creating a duplicate. Used to programmatically seed domain prompts (e.g., barrel intelligence, lot profitability) into the Companion Library. STUB — not yet implemented.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Prompt display name (e.g., 'Barrel Cost Trace')."
+                    },
+                    "externalId": {
+                        "type": "string",
+                        "description": "Unique external ID for idempotent creation (e.g., 'aiprompt_crafted_barrel_003')."
+                    },
+                    "promptText": {
+                        "type": "string",
+                        "description": "Clean, user-facing prompt text. No orchestration metadata — that goes in the extension record."
+                    },
+                    "domain": {
+                        "type": "string",
+                        "description": "Crafted domain: 'Barrel Operations', 'Lot Profitability', 'Inventory & Supply Chain', 'Compliance & Audit', 'MRP Intelligence', 'Batch & Genealogy'."
+                    },
+                    "toolset": {
+                        "type": "string",
+                        "description": "Primary toolset script ID (e.g., 'barrel-intelligence')."
+                    }
+                },
+                "required": ["name", "externalId", "promptText"]
+            },
+            "outputSchema": {
+                "type": "object",
+                "properties": {
+                    "error": { "type": "string", "description": "Error message if tool is not yet implemented or if creation fails." },
+                    "version": { "type": "string", "description": "Script version." }
+                },
+                "required": ["version"]
+            },
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": false,
+                "idempotentHint": true,
+                "openWorldHint": false
+            }
+        },
+        {
+            "name": "updatePrompt",
+            "description": "Updates an existing Atlas companion prompt text and/or its Crafted extension record fields. Bumps the version field on the extension record. Only provided fields are updated — omitted fields are left unchanged. STUB — not yet implemented.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "promptId": {
+                        "type": "number",
+                        "description": "Internal ID of the Atlas prompt to update."
+                    },
+                    "promptText": {
+                        "type": "string",
+                        "description": "New prompt text. If omitted, prompt text is not changed."
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "New semantic version (e.g., '1.1.0'). If omitted, version is auto-incremented."
+                    }
+                },
+                "required": ["promptId"]
+            },
+            "outputSchema": {
+                "type": "object",
+                "properties": {
+                    "error": { "type": "string", "description": "Error message if tool is not yet implemented or if update fails." },
+                    "version": { "type": "string", "description": "Script version." }
+                },
+                "required": ["version"]
+            },
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": false,
+                "idempotentHint": true,
+                "openWorldHint": false
+            }
+        },
+        {
+            "name": "logExecution",
+            "description": "Creates a lightweight execution log record for a companion prompt run. Records which prompt was executed, which tools were called, whether it succeeded, duration, and which prompt version was running. Called by the AI after completing (or failing) a prompt execution. STUB — not yet implemented.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "promptId": {
+                        "type": "number",
+                        "description": "Internal ID of the Atlas prompt that was executed."
+                    },
+                    "toolsCalled": {
+                        "type": "string",
+                        "description": "JSON array of tool names called during execution (e.g., '[\"getBarrelProfile\",\"getBarrelCostTrace\"]')."
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "description": "Whether the execution completed successfully."
+                    },
+                    "duration": {
+                        "type": "number",
+                        "description": "Execution duration in seconds."
+                    },
+                    "error": {
+                        "type": "string",
+                        "description": "Error message if execution failed. Empty on success."
+                    },
+                    "agent": {
+                        "type": "string",
+                        "description": "AI agent name: 'claude' or 'chatgpt'."
+                    }
+                },
+                "required": ["promptId", "success"]
+            },
+            "outputSchema": {
+                "type": "object",
+                "properties": {
+                    "error": { "type": "string", "description": "Error message if tool is not yet implemented or if logging fails." },
+                    "version": { "type": "string", "description": "Script version." }
+                },
+                "required": ["version"]
+            },
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": false,
+                "idempotentHint": false,
+                "openWorldHint": false
+            }
+        }
+    ]
+}

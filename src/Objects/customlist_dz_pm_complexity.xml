@@ -1,22 +1,17 @@
 <customlist scriptid="customlist_dz_pm_complexity">
-    <name>Companion Prompt Governance Level</name>
-    <aidescription>Governance tier for a companion prompt. Controls how the AI orchestrates tool execution: minimal (single tool), standard (2-3 tool chain), governed (complex with safety checks), supervised (requires user confirmation for writes).</aidescription>
+    <name>Companion Governance Level</name>
     <customvalues>
         <customvalue scriptid="val_minimal">
             <value>Minimal</value>
-            <aidescription>Single tool, read-only, low risk. AI executes directly and formats the result. Examples: barrel lookup, inventory count, single-record retrieval.</aidescription>
         </customvalue>
         <customvalue scriptid="val_standard">
             <value>Standard</value>
-            <aidescription>2-3 tool chain with moderate analysis. AI follows the tool chain, applies edition logic, and generates an artifact if flagged. Examples: cost trace, aging report, valuation.</aidescription>
         </customvalue>
         <customvalue scriptid="val_governed">
             <value>Governed</value>
-            <aidescription>Complex multi-tool investigation with safety checks. AI validates params, detects edition, executes steps, applies safety rules, flags anomalies. Examples: portfolio analysis, compliance audit.</aidescription>
         </customvalue>
         <customvalue scriptid="val_supervised">
             <value>Supervised</value>
-            <aidescription>High-impact operations that create or update records. AI requires user confirmation before each write operation and logs execution. Examples: prompt seeding, record updates, financial decisions.</aidescription>
         </customvalue>
     </customvalues>
 </customlist>

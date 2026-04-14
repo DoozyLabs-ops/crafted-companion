@@ -1,4 +1,4 @@
-<toolset scriptid="custtoolset_crafted_companion">
+<toolset scriptid="custtoolset_dz_companion">
     <name>Crafted ERP - Companion Intelligence</name>
     <scriptfile>[/SuiteScripts/DoozyTools/companion-tools/dz_ct_companion.js]</scriptfile>
     <rpcschema>[/SuiteScripts/DoozyTools/companion-tools/dz_ct_companion_schema.json]</rpcschema>
