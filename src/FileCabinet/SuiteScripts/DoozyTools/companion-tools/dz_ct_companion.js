@@ -178,16 +178,16 @@ define(['N/query', 'N/log', 'N/record'], function (query, log, record) {
         var success = params.success;
 
         if (!promptId) {
-            return Promise.resolve(JSON.stringify({
+            return Promise.resolve({
                 error: 'promptId is required.',
                 version: SCRIPT_VERSION
-            }));
+            });
         }
         if (success === undefined || success === null) {
-            return Promise.resolve(JSON.stringify({
+            return Promise.resolve({
                 error: 'success (true/false) is required.',
                 version: SCRIPT_VERSION
-            }));
+            });
         }
 
         try {
@@ -213,18 +213,18 @@ define(['N/query', 'N/log', 'N/record'], function (query, log, record) {
             }
 
             var logId = rec.save();
-            return Promise.resolve(JSON.stringify({
+            return Promise.resolve({
                 success: true,
                 logId: logId,
                 message: 'Execution logged for prompt ' + promptId,
                 version: SCRIPT_VERSION
-            }));
+            });
         } catch (e) {
             log.error({ title: 'logExecution', details: e.message });
-            return Promise.resolve(JSON.stringify({
+            return Promise.resolve({
                 error: 'Failed to create execution log: ' + e.message,
                 version: SCRIPT_VERSION
-            }));
+            });
         }
     }
 
