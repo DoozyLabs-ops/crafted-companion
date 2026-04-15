@@ -129,11 +129,14 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/ui/serverWidget'], functio
             html = '<p>companion-library.html not found in File Cabinet.</p>';
         }
 
-        // Strip the full HTML document wrapper — we only need the content
-        // since serverWidget wraps it in NetSuite's page chrome
+        // Extract style + body content for INLINEHTML
+        // Keep <style> blocks but strip document wrapper tags
         html = html.replace(/<!DOCTYPE[^>]*>/i, '')
                     .replace(/<\/?html[^>]*>/gi, '')
-                    .replace(/<head>[\s\S]*?<\/head>/i, '')
+                    .replace(/<head[^>]*>/gi, '')
+                    .replace(/<\/head>/gi, '')
+                    .replace(/<meta[^>]*>/gi, '')
+                    .replace(/<title>[\s\S]*?<\/title>/gi, '')
                     .replace(/<\/?body[^>]*>/gi, '');
 
         var form = serverWidget.createForm({ title: 'Crafted Companion Library' });
