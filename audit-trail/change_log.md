@@ -1,5 +1,49 @@
 # Change Log — Crafted Companion
 
+## 2026-04-14 — Full Build Session (Phase 0 + Phase 1 + Phase 3)
+
+### Phase 0: Foundation
+- Git repo initialized: `DoozyLabs-ops/crafted-companion`
+- 4 custom lists (edition, complexity, status, domain) deployed
+- 2 custom records (prompt_meta 18 fields, exec_log 8 fields) deployed
+- Toolset `custtoolset_dz_companion` deployed with stub tools
+- SDF deploy lessons: aidescription not on lists, selectrecordtype uses `[scriptid=]`, toolset scriptid max 27 chars
+
+### Phase 1: Companion Toolset
+- All 4 tools implemented: getPromptMeta, logExecution, seedPrompt, updatePrompt
+- getPromptMeta verified via MCP — returns full orchestration metadata
+- logExecution verified — creates exec log records (MCP response parsing issue is cosmetic)
+
+### Seed System
+- Seed data JSON v2.0: 37 prompts across 6 domains
+- Auto-setup in Library Suitelet: creates Atlas prompts + extension records + mirrors roles
+- Batched for governance limits (client retries up to 5 times)
+- SDF custimport approach attempted but custom records not supported — Suitelet approach used
+
+### UIF SPA Attempt (abandoned)
+- Converted to SuiteApp for custspa — hit ownership conflicts with Account Customization objects
+- custspa requires TypeScript build pipeline — hand-written AMD/ES modules fail
+- Reverted to Account Customization with Suitelet INLINEHTML approach
+
+### Phase 3: Companion Library Suitelet
+- Suitelet serves HTML from companion-library.html template file
+- Crafted Intelligence branding (teal/amber, Bebas Neue, Lato)
+- Modeled after Oracle AI Connector Service Companion (from actual source HTML)
+- Features: search, domain/edition/governance filters, card grid, detail modal, Copy/Claude/ChatGPT actions, admin banner, toast notifications
+- Hard tool validation: 34 of 37 prompts shown (3 winery batch prompts hidden in distillery account)
+- `type="button"` required on all buttons inside serverWidget INLINEHTML forms
+
+### Skill File
+- Created `skills/crafted-companion-instructions/SKILL.md`
+- Layers on Oracle's netsuite-ai-connector-instructions
+- Covers all 6 domains, tool chains, edition awareness, governance levels, safety rules
+- Linked from Library Suitelet, available on GitHub
+
+### Role Mirroring
+- Auto-setup queries active NS roles, creates matching Companion prompt roles
+- Creates role mappings with correct field names (discovered via SuiteQL inspection)
+- Field names: custrecord_atlas_aicomp_ns_role_id, custrecord_atlas_aicomp_prompt_role, custrecord_atlas_aicomp_map_confidence, custrecord_atlas_aicomp_mapping_method
+
 ## 2026-04-14 — Session 1: SDF Object XML (Phase 0 Foundation)
 
 - **Git repo initialized:** `DoozyLabs-ops/crafted-companion` on GitHub (separate from crafted-intelligence)
