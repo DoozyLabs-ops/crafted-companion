@@ -90,17 +90,25 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/ui/serverWidget'], functio
             jsonResponse(context.response, { prompts: prompts, count: prompts.length });
 
         } else if (action === 'get-tool-availability') {
-            var tRows = runSQL("SELECT scriptid FROM custtoolset WHERE isinactive = 'F'");
+            // Check tool availability by looking for script files in the File Cabinet
+            // custtoolset is not queryable via SuiteQL, so we check for deployed script files
             var avail = { 'barrel-intelligence': false, 'lot-profitability': false, 'inventory-supply': false, 'compliance-audit': false, 'mrp-intelligence': false, 'batch-genealogy': false };
-            tRows.forEach(function (r) {
-                var sid = (r.scriptid || '').toLowerCase();
-                if (sid.indexOf('brl') > -1 || sid.indexOf('barrel') > -1) avail['barrel-intelligence'] = true;
-                if (sid.indexOf('lot') > -1) avail['lot-profitability'] = true;
-                if (sid.indexOf('inv') > -1 || sid.indexOf('bom') > -1 || sid.indexOf('item') > -1) avail['inventory-supply'] = true;
-                if (sid.indexOf('compliance') > -1 || sid.indexOf('audit') > -1) avail['compliance-audit'] = true;
-                if (sid.indexOf('mrp') > -1) avail['mrp-intelligence'] = true;
-                if (sid.indexOf('genealogy') > -1 || sid.indexOf('batch') > -1 || sid.indexOf('lineage') > -1) avail['batch-genealogy'] = true;
-            });
+            try {
+                var scripts = runSQL("SELECT name FROM file WHERE folder IN (SELECT id FROM mediaitemfolder WHERE name = 'DoozyTools') AND name LIKE 'dz_ct_%' AND name LIKE '%.js'");
+                scripts.forEach(function (r) {
+                    var fn = (r.name || '').toLowerCase();
+                    if (fn.indexOf('barrel') > -1 || fn.indexOf('brl') > -1) avail['barrel-intelligence'] = true;
+                    if (fn.indexOf('lot') > -1) avail['lot-profitability'] = true;
+                    if (fn.indexOf('inv') > -1 || fn.indexOf('bom') > -1 || fn.indexOf('item') > -1) avail['inventory-supply'] = true;
+                    if (fn.indexOf('compliance') > -1 || fn.indexOf('audit') > -1) avail['compliance-audit'] = true;
+                    if (fn.indexOf('mrp') > -1) avail['mrp-intelligence'] = true;
+                    if (fn.indexOf('genealogy') > -1 || fn.indexOf('batch') > -1 || fn.indexOf('lineage') > -1) avail['batch-genealogy'] = true;
+                });
+            } catch (e) {
+                // If query fails, default all to true so prompts are visible
+                log.debug({ title: 'getToolAvailability', details: 'Fallback: defaulting all to true. ' + e.message });
+                Object.keys(avail).forEach(function (k) { avail[k] = true; });
+            }
             jsonResponse(context.response, avail);
 
         } else if (action === 'get-domains') {
