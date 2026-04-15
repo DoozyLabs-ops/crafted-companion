@@ -36,6 +36,16 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
         try { return JSON.parse(str); } catch (e) { return fallback; }
     }
 
+    // Generate the Crafted header that instructs the AI to call getPromptMeta first
+    function craftedHeader(promptId) {
+        return '[Crafted Prompt #' + promptId + ' — call getPromptMeta(' + promptId + ') first for orchestration context, safety rules, and tool chain]\n\n';
+    }
+
+    // Check if prompt text already has the Crafted header
+    function hasCraftedHeader(text) {
+        return text && text.indexOf('[Crafted Prompt #') === 0;
+    }
+
     function jsonResponse(response, data) {
         response.setHeader({ name: 'Content-Type', value: 'application/json' });
         response.write(JSON.stringify(data));
@@ -117,6 +127,9 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
         } else if (action === 'auto-setup') {
             jsonResponse(context.response, runAutoSetup());
 
+        } else if (action === 'backfill-headers') {
+            jsonResponse(context.response, runBackfillHeaders());
+
         } else {
             jsonResponse(context.response, { error: 'Unknown action: ' + action });
         }
@@ -166,6 +179,17 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
                             atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_sdf_seeded', value: false });
                             atlasId = atlas.save();
                             atlasByExtId[p.atlas_external_id] = atlasId;
+
+                            // Now that we have the ID, update the prompt_text with the header
+                            try {
+                                record.submitFields({
+                                    type: 'customrecord_atlas_aicomp_prompts',
+                                    id: atlasId,
+                                    values: { custrecord_atlas_aicomp_prompt_text: craftedHeader(atlasId) + p.prompt_text }
+                                });
+                            } catch (hdrErr) {
+                                log.debug({ title: 'auto-setup', details: 'Header update failed for ' + atlasId + ': ' + hdrErr.message });
+                            }
                         }
                         if (!atlasId) { results.errors.push({ name: p.name, error: 'No Atlas prompt and no prompt_text' }); return; }
 
@@ -250,6 +274,45 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
 
         results.summary = results.seeded.length + ' seeded, ' + results.roles_created.length + ' roles created, ' + results.roles_mapped.length + ' mapped, ' + results.errors.length + ' errors';
         log.audit({ title: 'auto-setup', details: results.summary });
+        return results;
+    }
+
+    // ========== BACKFILL HEADERS ==========
+
+    function runBackfillHeaders() {
+        var results = { updated: [], skipped: [], errors: [] };
+        try {
+            // Get all Crafted Atlas prompts and their text
+            var rows = runSQL(
+                "SELECT p.id, p.name, p.custrecord_atlas_aicomp_prompt_text AS prompt_text " +
+                "FROM customrecord_atlas_aicomp_prompts p " +
+                "JOIN customrecord_dz_prompt_meta pm ON pm.custrecord_dz_pm_prompt_ref = p.id"
+            );
+
+            rows.forEach(function (r) {
+                var rem = runtime.getCurrentScript().getRemainingUsage();
+                if (rem < 80) return; // governance check
+                try {
+                    if (hasCraftedHeader(r.prompt_text)) {
+                        results.skipped.push({ id: r.id, name: r.name });
+                        return;
+                    }
+                    var newText = craftedHeader(r.id) + (r.prompt_text || '');
+                    record.submitFields({
+                        type: 'customrecord_atlas_aicomp_prompts',
+                        id: r.id,
+                        values: { custrecord_atlas_aicomp_prompt_text: newText }
+                    });
+                    results.updated.push({ id: r.id, name: r.name });
+                } catch (e) {
+                    results.errors.push({ id: r.id, name: r.name, error: e.message });
+                }
+            });
+        } catch (e) {
+            results.errors.push({ action: 'backfill', error: e.message });
+        }
+        results.summary = results.updated.length + ' updated, ' + results.skipped.length + ' already had header, ' + results.errors.length + ' errors';
+        log.audit({ title: 'backfill-headers', details: results.summary });
         return results;
     }
 
