@@ -8,16 +8,27 @@ Use these instructions when the user's question involves barrel operations, lot 
 
 ## Companion Prompt System
 
-Crafted Intelligence uses a **companion prompt system** with orchestration metadata stored in extension records. Before executing any Crafted prompt:
+Crafted Intelligence uses a **companion prompt system** with orchestration metadata stored in extension records. Every Crafted prompt begins with a header like:
 
-1. **Call `getPromptMeta`** with the prompt ID or external ID
-2. Read the returned orchestration context: tool chain, steps, params, safety rules, governance level
-3. Follow the steps in order, respecting conditions and dependencies
-4. Apply safety rules throughout execution
-5. Generate an artifact if `artifact: true`
-6. Call `logExecution` when done
+```
+[Crafted Prompt #103 — call getPromptMeta(103) first for orchestration context, safety rules, and tool chain]
+```
 
-This is the standard first step for every Crafted prompt execution.
+When you see this header:
+
+1. **Call `getPromptMeta`** with the ID shown in the header (e.g., `getPromptMeta(promptId: 103)`)
+2. Read the returned orchestration context: tool chain, steps, params, safety rules, governance level, edition notes, artifact flag
+3. Follow the `steps` array in order, respecting `condition` and `depends_on` fields
+4. Apply the `safety_rules` throughout execution
+5. Request any missing `params` from the user before running tools
+6. Generate an artifact if `artifact: true`
+7. Call `logExecution` with the results when done
+
+**This is the mandatory first step for every Crafted prompt execution.** Do not skip it — the extension record contains orchestration details (conditional steps, tool dependencies, edition-specific behavior) that are not in the prompt text itself.
+
+### If the header is missing
+
+If a prompt doesn't have the `[Crafted Prompt #ID ...]` header but appears to be about Crafted ERP data (barrels, lots, batches, compliance, MRP), you can still call `getPromptMeta` with the external ID pattern `aiprompt_crafted_*` or search by name. Extension records are only available for prompts with IDs in the Crafted namespace.
 
 ## Crafted Tool Selection Order
 
@@ -179,14 +190,26 @@ Use Crafted Intelligence branding:
 
 ## Example Workflow
 
-User asks: "What is barrel 092425-02 worth?"
+User pastes the "Single Barrel Valuation" prompt into Claude:
 
-1. Recognize this is a Crafted barrel query → use barrel-intelligence tools
-2. Call `getPromptMeta` for the "Single Barrel Valuation" prompt (ID 201 or external ID `aiprompt_crafted_barrel_008`)
-3. Read the response: governance=Standard, steps=[getBarrelProfile, getBarrelValuation, getBarrelCostTrace], artifact=true
+```
+[Crafted Prompt #201 — call getPromptMeta(201) first for orchestration context, safety rules, and tool chain]
+
+What is barrel 092425-02 worth? Show me: current value, cost per unit, cost per proof gallon, fill date, current age, status, and location. Then trace how the value was built...
+```
+
+Steps:
+
+1. **See the header** → immediately call `getPromptMeta(promptId: 201)`
+2. Read the response:
+   - `governance: "Standard"` → follow tool chain with edition logic
+   - `steps: [getBarrelProfile, getBarrelValuation, getBarrelCostTrace]`
+   - `params: { BARREL NUMBER: { required: true, hint: "e.g. 092425-02" } }`
+   - `safety_rules: [...]`, `artifact: true`, `artifact_type: "cost-waterfall"`
+3. Extract "092425-02" from the user's message as the BARREL NUMBER param
 4. Call `getBarrelProfile` with serialNumber="092425-02"
-5. Call `getBarrelValuation` with serialNumber filter
-6. Call `getBarrelCostTrace` for the cost waterfall
-7. Generate a cost-waterfall artifact with Crafted branding
-8. Apply safety rules: verify all values came from tools, flag any zero-cost entries
-9. Call `logExecution` with promptId=201, success=true, toolsCalled, duration
+5. Call `getBarrelValuation` with serialNumber filter (depends_on getBarrelProfile)
+6. Call `getBarrelCostTrace` for the cost waterfall (depends_on getBarrelProfile)
+7. Apply safety rules: verify all values came from tools, flag zero-cost entries
+8. Generate a cost-waterfall artifact with Crafted branding
+9. Call `logExecution(promptId=201, success=true, toolsCalled=[...], duration=N, agent="claude")`
