@@ -1,0 +1,19 @@
+<suitelet scriptid="customscript_dz_sl_compseed">
+    <name>Crafted Companion - Seed Utility</name>
+    <scriptfile>[/SuiteScripts/DoozyTools/suitelet/dz_sl_companion_seed.js]</scriptfile>
+    <description>Seeds extension records from seed-data.json and mirrors account NS roles as AI Companion prompt roles. Run via URL after SDF deploy. Idempotent — safe to re-run. Actions: ?action=seed-meta, ?action=mirror-roles.</description>
+    <isinactive>F</isinactive>
+    <notifyadmins>F</notifyadmins>
+    <notifyowner>T</notifyowner>
+    <scriptdeployments>
+        <scriptdeployment scriptid="customdeploy_dz_sl_compseed">
+            <title>Companion Seed Utility</title>
+            <isdeployed>T</isdeployed>
+            <isonline>F</isonline>
+            <loglevel>AUDIT</loglevel>
+            <allroles>F</allroles>
+            <runasrole>ADMINISTRATOR</runasrole>
+            <status>RELEASED</status>
+        </scriptdeployment>
+    </scriptdeployments>
+</suitelet>

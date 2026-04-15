@@ -1,0 +1,206 @@
+{
+    "version": "1.0.0",
+    "description": "Barrel Intelligence domain — 12 extension records for companion prompts 101-109, 201-203",
+    "defaults": {
+        "domain": 1,
+        "toolset": "barrel-intelligence",
+        "edition": 4,
+        "edition_notes": "Distillery: includes proof gallons, angel's share, and TTB fields. Winery: includes varietal, vintage, and appellation fields.",
+        "tool_deps": "[\"barrel-intelligence\"]",
+        "version": "1.0.0",
+        "author": "Doozy Labs",
+        "status": 1
+    },
+    "prompts": [
+        {
+            "name": "Barrel Profile Lookup",
+            "prompt_ref": 101,
+            "external_id": "dz_pm_barrel_001",
+            "subdomain": "Barrel Identity & Status",
+            "tool_chain": "getBarrelProfile",
+            "entry_tool": "getBarrelProfile",
+            "steps": [{"call":"getBarrelProfile","purpose":"Resolve barrel identity, status, location, cooperage, and recent activity","params_from":["BARREL NUMBER"]}],
+            "params": {"BARREL NUMBER":{"type":"text","required":true,"hint":"e.g. 092425-02","resolves_to":"serialNumber filter on getBarrelProfile"}},
+            "safety_rules": ["Never fabricate barrel data — all values must come from getBarrelProfile","If barrel not found, suggest using searchItems to find the correct barrel name"],
+            "governance": 1,
+            "artifact": false
+        },
+        {
+            "name": "Barrel Activity Timeline",
+            "prompt_ref": 102,
+            "external_id": "dz_pm_barrel_002",
+            "subdomain": "Barrel Identity & Status",
+            "tool_chain": "getBarrelProfile -> getBarrelActivityHistory",
+            "entry_tool": "getBarrelProfile",
+            "steps": [
+                {"call":"getBarrelProfile","purpose":"Resolve barrel identity and context","params_from":["BARREL NUMBER"]},
+                {"call":"getBarrelActivityHistory","purpose":"Retrieve full event timeline","depends_on":"getBarrelProfile"}
+            ],
+            "params": {"BARREL NUMBER":{"type":"text","required":true,"hint":"e.g. 092425-02","resolves_to":"serialNumber filter on barrel tools"}},
+            "safety_rules": ["Never fabricate barrel events — all values from getBarrelActivityHistory","If barrel not found, suggest using searchItems first"],
+            "governance": 2,
+            "artifact": false
+        },
+        {
+            "name": "Barrel Cost Trace",
+            "prompt_ref": 103,
+            "external_id": "dz_pm_barrel_003",
+            "subdomain": "Barrel Valuation & Finance",
+            "tool_chain": "getBarrelProfile -> getBarrelCostTrace",
+            "entry_tool": "getBarrelProfile",
+            "steps": [
+                {"call":"getBarrelProfile","purpose":"Resolve barrel identity, status, location, cooperage","params_from":["BARREL NUMBER"]},
+                {"call":"getBarrelCostTrace","purpose":"Trace full cost history from acquisition through aging","condition":"profile.status != 'Empty'","depends_on":"getBarrelProfile"}
+            ],
+            "edition_notes": "Distillery: cost-per-PG, angel's share, proof gallons. Winery: cost-per-gallon, no PG fields.",
+            "params": {"BARREL NUMBER":{"type":"text","required":true,"hint":"e.g. 092425-02","resolves_to":"serialNumber filter on barrel tools"}},
+            "safety_rules": ["Never fabricate barrel costs — all values from getBarrelCostTrace","Flag barrels with zero cost as data quality issues","If barrel not found, suggest searchItems first"],
+            "governance": 2,
+            "artifact": true,
+            "artifact_type": "cost-waterfall"
+        },
+        {
+            "name": "Barrel Operations KPI Dashboard",
+            "prompt_ref": 104,
+            "external_id": "dz_pm_barrel_004",
+            "subdomain": "Barrel Portfolio & Dashboard",
+            "tool_chain": "getBarrelKPIs",
+            "entry_tool": "getBarrelKPIs",
+            "steps": [{"call":"getBarrelKPIs","purpose":"Generate portfolio-level KPIs: inventory metrics, period activity, aging distribution, angel's share","params_from":["DATE RANGE"]}],
+            "edition_notes": "Distillery: includes angel's share analysis, proof gallon metrics. Winery: volume-only metrics, no PG fields.",
+            "params": {"DATE RANGE":{"type":"text","required":false,"hint":"e.g. 01/01/2025 to 12/31/2025","resolves_to":"startDate and endDate on getBarrelKPIs"}},
+            "safety_rules": ["Never fabricate KPI values — all from getBarrelKPIs","Flag unusual angel's share percentages above 15% as potential data quality issues"],
+            "governance": 1,
+            "artifact": true,
+            "artifact_type": "kpi-dashboard"
+        },
+        {
+            "name": "Barrel Aging Distribution",
+            "prompt_ref": 105,
+            "external_id": "dz_pm_barrel_005",
+            "subdomain": "Barrel Portfolio & Dashboard",
+            "tool_chain": "getBarrelAging",
+            "entry_tool": "getBarrelAging",
+            "steps": [{"call":"getBarrelAging","purpose":"Analyze barrel aging across the portfolio grouped by user-selected dimension","params_from":["GROUP BY"]}],
+            "edition_notes": "Distillery: includes proof gallons per age bucket. Winery: volume-only metrics.",
+            "params": {"GROUP BY":{"type":"text","required":false,"hint":"item, location, cooper, or woodtype","resolves_to":"groupBy parameter on getBarrelAging"}},
+            "safety_rules": ["Never fabricate aging data — all values from getBarrelAging","Highlight groups with average age exceeding 4 years as harvest review candidates"],
+            "governance": 1,
+            "artifact": true,
+            "artifact_type": "aging-chart"
+        },
+        {
+            "name": "Barrel Inventory Snapshot",
+            "prompt_ref": 106,
+            "external_id": "dz_pm_barrel_006",
+            "subdomain": "Barrel Portfolio & Dashboard",
+            "tool_chain": "getBarrelInventory",
+            "entry_tool": "getBarrelInventory",
+            "steps": [{"call":"getBarrelInventory","purpose":"Get current barrel counts grouped by user-selected dimension","params_from":["GROUP BY"]}],
+            "edition_notes": "Distillery: includes proof gallons. Winery: volume-only.",
+            "params": {"GROUP BY":{"type":"text","required":false,"hint":"status, location, item, cooper, or batch","resolves_to":"groupBy parameter on getBarrelInventory"}},
+            "safety_rules": ["Never fabricate barrel counts — all values from getBarrelInventory"],
+            "governance": 1,
+            "artifact": false
+        },
+        {
+            "name": "Barrel Portfolio Valuation",
+            "prompt_ref": 107,
+            "external_id": "dz_pm_barrel_007",
+            "subdomain": "Barrel Valuation & Finance",
+            "tool_chain": "getBarrelValuation",
+            "entry_tool": "getBarrelValuation",
+            "steps": [{"call":"getBarrelValuation","purpose":"Calculate financial value of barrel inventory grouped by user-selected dimension","params_from":["GROUP BY"]}],
+            "edition_notes": "Distillery: value-per-PG metrics. Winery: value-per-gallon.",
+            "params": {"GROUP BY":{"type":"text","required":false,"hint":"serialnumber (individual), item, or location","resolves_to":"groupBy parameter on getBarrelValuation"}},
+            "safety_rules": ["Never fabricate valuation data — all values from getBarrelValuation","Flag barrels with zero value as potential data quality issues"],
+            "governance": 1,
+            "artifact": true,
+            "artifact_type": "valuation-table"
+        },
+        {
+            "name": "Angels Share Analysis",
+            "prompt_ref": 108,
+            "external_id": "dz_pm_barrel_008",
+            "subdomain": "Barrel Portfolio & Dashboard",
+            "tool_chain": "getBarrelKPIs",
+            "entry_tool": "getBarrelKPIs",
+            "edition": 1,
+            "edition_notes": "Distillery only — angel's share requires proof gallon tracking. Not applicable to winery edition.",
+            "steps": [{"call":"getBarrelKPIs","purpose":"Get angel's share data from harvested barrels for the specified period","params_from":["DATE RANGE"]}],
+            "params": {"DATE RANGE":{"type":"text","required":false,"hint":"e.g. 2025 or 01/01/2025 to 12/31/2025","resolves_to":"startDate and endDate on getBarrelKPIs"}},
+            "safety_rules": ["Never fabricate angel's share percentages","Flag barrels with angel's share above 15% as statistical outliers","Note: distillery edition only"],
+            "governance": 2,
+            "artifact": true,
+            "artifact_type": "aging-chart"
+        },
+        {
+            "name": "Cooperage Performance Comparison",
+            "prompt_ref": 109,
+            "external_id": "dz_pm_barrel_009",
+            "subdomain": "Barrel Cooperage & Materials",
+            "tool_chain": "getBarrelAging + getBarrelInventory",
+            "entry_tool": "getBarrelAging",
+            "steps": [
+                {"call":"getBarrelAging","purpose":"Get aging distribution grouped by cooper"},
+                {"call":"getBarrelInventory","purpose":"Get inventory counts grouped by cooper for supplemental metrics"}
+            ],
+            "edition_notes": "Distillery: includes proof gallons per cooper. Winery: volume-only.",
+            "safety_rules": ["Never fabricate cooperage data — all values from getBarrelAging and getBarrelInventory"],
+            "governance": 2,
+            "artifact": true,
+            "artifact_type": "comparison-table"
+        },
+        {
+            "name": "Single Barrel Valuation",
+            "prompt_ref": 201,
+            "external_id": "dz_pm_barrel_010",
+            "subdomain": "Barrel Valuation & Finance",
+            "tool_chain": "getBarrelProfile -> getBarrelValuation -> getBarrelCostTrace",
+            "entry_tool": "getBarrelProfile",
+            "steps": [
+                {"call":"getBarrelProfile","purpose":"Resolve barrel identity and context","params_from":["BARREL NUMBER"]},
+                {"call":"getBarrelValuation","purpose":"Get current financial value","depends_on":"getBarrelProfile"},
+                {"call":"getBarrelCostTrace","purpose":"Trace cost waterfall from acquisition to current","depends_on":"getBarrelProfile"}
+            ],
+            "edition_notes": "Distillery: cost-per-PG, proof gallons. Winery: cost-per-gallon.",
+            "params": {"BARREL NUMBER":{"type":"text","required":true,"hint":"e.g. 092425-02","resolves_to":"serialNumber filter on barrel tools"}},
+            "safety_rules": ["Never fabricate barrel costs or values","Flag zero-value barrels as data quality issues"],
+            "governance": 2,
+            "artifact": true,
+            "artifact_type": "cost-waterfall"
+        },
+        {
+            "name": "Barrel Location Map",
+            "prompt_ref": 202,
+            "external_id": "dz_pm_barrel_011",
+            "subdomain": "Barrel Warehouse & Location",
+            "tool_chain": "getBarrelLocationMap",
+            "entry_tool": "getBarrelLocationMap",
+            "steps": [{"call":"getBarrelLocationMap","purpose":"Analyze barrel distribution across warehouses, bins, and racks","params_from":["GROUP BY"]}],
+            "edition_notes": "Same across editions — location data is edition-independent.",
+            "params": {"GROUP BY":{"type":"text","required":false,"hint":"location, bin, or rack","resolves_to":"groupBy parameter on getBarrelLocationMap"}},
+            "safety_rules": ["Never fabricate location data — all values from getBarrelLocationMap"],
+            "governance": 1,
+            "artifact": true,
+            "artifact_type": "location-map"
+        },
+        {
+            "name": "Harvest-Ready Barrels",
+            "prompt_ref": 203,
+            "external_id": "dz_pm_barrel_012",
+            "subdomain": "Barrel Harvest Planning",
+            "tool_chain": "getBarrelInventory -> getBarrelValuation",
+            "entry_tool": "getBarrelInventory",
+            "steps": [
+                {"call":"getBarrelInventory","purpose":"Get barrels in Ready to Harvest status"},
+                {"call":"getBarrelValuation","purpose":"Get valuation for harvest-ready barrels","depends_on":"getBarrelInventory"}
+            ],
+            "edition_notes": "Distillery: includes proof gallons and cost-per-PG for harvest candidates. Winery: volume-only.",
+            "safety_rules": ["Never fabricate harvest readiness data","Highlight barrels over 8 years as longest-aged candidates"],
+            "governance": 2,
+            "artifact": true,
+            "artifact_type": "harvest-table"
+        }
+    ]
+}
