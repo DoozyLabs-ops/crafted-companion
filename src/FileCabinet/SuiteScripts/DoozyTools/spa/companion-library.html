@@ -3,21 +3,26 @@
 <head>
 <meta charset="utf-8">
 <title>Crafted Companion Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 :root {
-    --ns-color-primary: #2C5266;
-    --ns-color-secondary: #264759;
-    --ns-color-dark: #1A2F3F;
-    --ns-color-light: #81B2C3;
+    --ci-primary: #0785A8;
+    --ci-primary-dark: #006486;
+    --ci-secondary: #5CB8B2;
+    --ci-accent: #DB8A06;
+    --ci-accent-dark: #BD7A2A;
+    --ci-neutral: #373A36;
+    --ci-neutral-light: #939593;
+    --ci-success: #84B75C;
+    --ci-danger: #A83137;
     --ns-neutral-10: rgb(251,249,248);
     --ns-neutral-20: rgb(245,244,242);
     --ns-neutral-40: rgb(228,225,221);
-    --ns-text-primary: #161513;
-    --ns-text-secondary: rgba(22,21,19,0.65);
-    --ns-accent-red: #C74634;
-    --ns-success: #0D7C5C;
+    --ns-text-primary: #373A36;
+    --ns-text-secondary: rgba(55,58,54,0.65);
     --ns-bg-base: #f5f4f2;
-    --ns-font-family: "Oracle Sans", "Open Sans", Arial, sans-serif;
+    --ns-font-heading: "Bebas Neue", sans-serif;
+    --ns-font-family: "Lato", "Open Sans", Arial, sans-serif;
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
@@ -33,13 +38,14 @@ body.modal-open { overflow: hidden; }
 .container { max-width: 1400px; margin: 0 auto; padding: 0 24px 24px; }
 
 .header {
-    background: linear-gradient(135deg, #1a2f3f 0%, #2C5266 50%, #c74634 100%);
+    background: linear-gradient(135deg, var(--ci-primary) 0%, var(--ci-primary-dark) 100%);
     color: white; padding: 32px 28px; border-radius: var(--radius);
     margin-bottom: 24px; box-shadow: var(--shadow-lg); min-height: 180px;
     display: flex; flex-direction: column; justify-content: flex-end; position: relative;
+    border-bottom: 4px solid var(--ci-accent);
 }
-.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
-.header p { font-size: 13px; opacity: 0.85; max-width: 700px; }
+.header h1 { font-family: var(--ns-font-heading); font-size: 2.2rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.header p { font-size: 14px; opacity: 0.9; max-width: 700px; font-weight: 300; }
 
 .stats-bar {
     display: flex; gap: 20px; padding: 16px 20px; background: white;
@@ -47,7 +53,7 @@ body.modal-open { overflow: hidden; }
     flex-wrap: wrap; align-items: center; margin-top: -40px; position: relative; z-index: 5;
 }
 .stat-item { text-align: center; min-width: 80px; }
-.stat-value { font-size: 22px; font-weight: 700; color: var(--ns-accent-red); }
+.stat-value { font-size: 22px; font-weight: 700; color: var(--ci-primary); }
 .stat-label { font-size: 11px; color: var(--ns-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
 .stat-spacer { flex: 1; min-width: 20px; }
 .library-description { flex: 1 1 420px; max-width: 720px; font-size: 13px; line-height: 1.6; color: var(--ns-text-primary); margin-left: 24px; }
@@ -64,12 +70,12 @@ body.modal-open { overflow: hidden; }
     padding: 10px 12px; border: 1px solid var(--ns-neutral-40); border-radius: 6px;
     font-size: 13px; background: white; height: 40px; font-family: inherit;
 }
-.input:focus, .select:focus { outline: none; border-color: var(--ns-accent-red); box-shadow: 0 0 0 3px rgba(199,70,52,0.1); }
+.input:focus, .select:focus { outline: none; border-color: var(--ci-primary); box-shadow: 0 0 0 3px rgba(7,133,168,0.1); }
 .btn-clear {
     height: 40px; padding: 0 14px; border: 1px solid var(--ns-neutral-40); border-radius: 8px;
     background: white; font-size: 12px; font-weight: 600; color: var(--ns-text-secondary); cursor: pointer;
 }
-.btn-clear:hover { background: var(--ns-accent-red); border-color: var(--ns-accent-red); color: white; }
+.btn-clear:hover { background: var(--ci-primary); border-color: var(--ci-primary); color: white; }
 
 .prompt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; align-items: start; }
 .prompt-card {
@@ -87,13 +93,13 @@ body.modal-open { overflow: hidden; }
 .meta-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .meta-label { font-size: 11px; font-weight: 600; color: var(--ns-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; min-width: 85px; flex-shrink: 0; }
 .badge { font-size: 10px; padding: 4px 8px; border-radius: 6px; font-weight: 600; }
-.badge.domain { background: #264759; color: white; }
-.badge.governance { background: #B5D5E0; color: #1A2F3F; }
-.badge.governance.governed { background: #FDE7E4; color: #A33A2B; }
-.badge.governance.supervised { background: #C74634; color: white; }
-.badge.edition { background: #437C94; color: white; }
-.badge.artifact { background: #DFF4EA; color: #0D7C5C; }
-.badge.toolset { background: #B5D5E0; color: #1A2F3F; }
+.badge.domain { background: var(--ci-primary); color: white; }
+.badge.governance { background: #d4f0e8; color: #2d6b3f; }
+.badge.governance.governed { background: #fef3e0; color: var(--ci-accent-dark); }
+.badge.governance.supervised { background: var(--ci-danger); color: white; }
+.badge.edition { background: var(--ci-secondary); color: #1a3f3d; }
+.badge.artifact { background: #d4f0e8; color: #2d6b3f; }
+.badge.toolset { background: #e0f2f8; color: var(--ci-primary-dark); }
 
 .card-body { padding: 12px 16px 0; }
 .prompt-preview {
@@ -108,12 +114,12 @@ body.modal-open { overflow: hidden; }
     font-size: 12px; font-weight: 600; cursor: pointer; color: var(--ns-text-secondary);
     white-space: nowrap; font-family: inherit;
 }
-.btn.copy { background: #1A2F3F; border-color: #1A2F3F; color: white; }
-.btn.copy:hover { background: #152838; }
-.btn.use-prompt { background: var(--ns-color-primary); border-color: var(--ns-color-primary); color: white; }
-.btn.use-prompt:hover { background: var(--ns-color-dark); border-color: var(--ns-color-dark); }
-.btn.details { background: white; border-color: #1A2F3F; color: #1A2F3F; }
-.btn.details:hover { background: #1A2F3F; color: white; }
+.btn.copy { background: var(--ci-neutral); border-color: var(--ci-neutral); color: white; }
+.btn.copy:hover { background: #2a2d29; }
+.btn.use-prompt { background: var(--ci-primary); border-color: var(--ci-primary); color: white; }
+.btn.use-prompt:hover { background: var(--ci-primary-dark); border-color: var(--ci-primary-dark); }
+.btn.details { background: white; border-color: var(--ci-primary); color: var(--ci-primary); }
+.btn.details:hover { background: var(--ci-primary); color: white; }
 
 .action-group-menu { position: relative; z-index: 10; }
 .dropdown-menu {
@@ -153,7 +159,7 @@ body.modal-open { overflow: hidden; }
     padding: 14px; border-radius: 6px; color: var(--ns-text-primary);
 }
 .modal-section { margin-top: 16px; }
-.modal-section h3 { font-size: 13px; font-weight: 700; color: var(--ns-color-primary); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+.modal-section h3 { font-family: var(--ns-font-heading); font-size: 15px; font-weight: 700; color: var(--ci-primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
 .modal-section ul { padding-left: 20px; font-size: 13px; }
 .modal-section ul li { margin-bottom: 4px; }
 .modal-footer {
@@ -166,8 +172,8 @@ body.modal-open { overflow: hidden; }
     padding: 8px 14px; border-radius: 6px; border: 1px solid var(--ns-neutral-40);
     background: white; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: inherit;
 }
-.btn-modal.primary { background: #1A2F3F; border-color: #1A2F3F; color: white; }
-.btn-modal.primary:hover { background: #152838; }
+.btn-modal.primary { background: var(--ci-neutral); border-color: var(--ci-neutral); color: white; }
+.btn-modal.primary:hover { background: #2a2d29; }
 .btn-modal.claude { background: var(--provider-claude); border-color: var(--provider-claude); color: white; text-decoration: none; display: inline-flex; align-items: center; }
 .btn-modal.claude:hover { background: var(--provider-claude-hover); }
 .btn-modal.chatgpt { background: var(--provider-chatgpt); border-color: var(--provider-chatgpt); color: white; text-decoration: none; display: inline-flex; align-items: center; }
@@ -175,13 +181,13 @@ body.modal-open { overflow: hidden; }
 .modal-close { position: absolute; top: 12px; right: 16px; border: none; background: transparent; font-size: 20px; cursor: pointer; color: var(--ns-text-secondary); }
 
 .toast {
-    position: fixed; bottom: 24px; right: 24px; background: var(--ns-color-primary); color: white;
+    position: fixed; bottom: 24px; right: 24px; background: var(--ci-primary); color: white;
     padding: 12px 20px; border-radius: var(--radius); box-shadow: var(--shadow-lg);
     opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 3000; font-size: 13px;
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 .no-results { grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--ns-text-secondary); }
-.admin-banner { background: #e3f2fd; border: 1px solid #b3d4fc; border-radius: 6px; padding: 12px 20px; margin-bottom: 16px; color: #003764; font-size: 13px; }
+.admin-banner { background: #e0f2f8; border: 1px solid #a8d8ea; border-radius: 6px; padding: 12px 20px; margin-bottom: 16px; color: var(--ci-primary-dark); font-size: 13px; }
 @media (max-width: 980px) { .filters-bar { grid-template-columns: 1fr 1fr 1fr; } }
 @media (max-width: 680px) { .filters-bar { grid-template-columns: 1fr; } .library-description { margin-left: 0; margin-top: 12px; flex: 1 1 100%; } }
 </style>
@@ -200,7 +206,7 @@ body.modal-open { overflow: hidden; }
         <div class="stat-item"><div class="stat-value" id="stat-governance">0</div><div class="stat-label">Governance Levels</div></div>
         <div class="stat-item"><div class="stat-value" id="stat-showing">0</div><div class="stat-label">Showing</div></div>
         <div class="stat-spacer"></div>
-        <div class="library-description"><p>View <a href="https://github.com/oracle/netsuite-suitecloud-sdk/tree/master/packages/agent-skills" target="_blank" rel="noopener" style="color:var(--ns-color-primary);font-weight:600">Project Instructions</a> for AI agent setup. Prompts require the corresponding Crafted toolset to be deployed and connected via MCP.</p></div>
+        <div class="library-description"><p>View <a href="https://github.com/oracle/netsuite-suitecloud-sdk/tree/master/packages/agent-skills" target="_blank" rel="noopener" style="color:var(--ci-primary);font-weight:600">Project Instructions</a> for AI agent setup. Prompts require the corresponding Crafted toolset to be deployed and connected via MCP.</p></div>
     </div>
 
     <div class="filters-bar">
