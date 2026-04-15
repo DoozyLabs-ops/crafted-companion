@@ -44,7 +44,7 @@ define(['N/query', 'N/record', 'N/file', 'N/log', 'N/runtime'], function (query,
 
         // Load seed data from File Cabinet
         var seedFiles = runSQL(
-            "SELECT id FROM file WHERE name = 'seed-data.json' AND folder IN (SELECT id FROM mediaitemfolder WHERE name = 'tools')"
+            "SELECT id FROM file WHERE name = 'seed-data.json' AND folder IN (SELECT id FROM mediaitemfolder WHERE name = 'companion-tools')"
         );
 
         if (!seedFiles || seedFiles.length === 0) {
