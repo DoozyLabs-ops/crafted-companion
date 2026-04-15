@@ -1,0 +1,11 @@
+<singlepageapp scriptid="custspa_dz_companion">
+  <name>Crafted Companion Library</name>
+  <description>Domain-filtered, edition-aware prompt browser for Crafted Intelligence companion prompts. Browse by domain, search, filter by edition and governance level, view prompt details with tool chain and orchestration metadata.</description>
+  <url>companion</url>
+  <folder>[/SuiteApps/com.doozysolutions.companion/companion/spa/]</folder>
+  <clientscriptfile>[/SuiteApps/com.doozysolutions.companion/companion/spa/SpaClient.js]</clientscriptfile>
+  <serverscriptfile>[/SuiteApps/com.doozysolutions.companion/companion/spa/SpaServer.js]</serverscriptfile>
+  <assetsfolder>[/SuiteApps/com.doozysolutions.companion/companion/spa/assets/]</assetsfolder>
+  <loglevel>AUDIT</loglevel>
+  <audienceallroles>T</audienceallroles>
+</singlepageapp>

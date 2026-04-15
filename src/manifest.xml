@@ -1,5 +1,8 @@
-<manifest projecttype="ACCOUNTCUSTOMIZATION">
+<manifest projecttype="SUITEAPP">
+  <publisherid>com.doozysolutions</publisherid>
+  <projectid>companion</projectid>
   <projectname>Crafted ERP - Companion Intelligence</projectname>
+  <projectversion>1.0.0</projectversion>
   <frameworkversion>1.0</frameworkversion>
   <dependencies>
     <features>
