@@ -313,13 +313,13 @@ body.modal-open { overflow: hidden; }
         html += '</div></div>';
         html += '<div class="card-body"><div class="prompt-preview">' + esc(p.prompt_text) + '</div></div>';
         html += '<div class="prompt-actions">';
-        html += '<button class="btn copy" onclick="event.stopPropagation();window.__copyPrompt(' + idx + ')">Copy</button>';
-        html += '<div class="action-group-menu"><button class="btn use-prompt" onclick="event.stopPropagation();window.__toggleMenu(this)">Use Prompt &#9662;</button>';
+        html += '<button type="button" class="btn copy" onclick="event.stopPropagation();window.__copyPrompt(' + idx + ')">Copy</button>';
+        html += '<div class="action-group-menu"><button type="button" class="btn use-prompt" onclick="event.stopPropagation();window.__toggleMenu(this)">Use Prompt &#9662;</button>';
         html += '<div class="dropdown-menu">';
         html += '<a class="dropdown-item claude" href="#" onclick="event.stopPropagation();window.__sendClaude(' + idx + ');return false">Send to Claude</a>';
         html += '<a class="dropdown-item chatgpt" href="#" onclick="event.stopPropagation();window.__sendChatGPT(' + idx + ');return false">Copy/Open ChatGPT</a>';
         html += '</div></div>';
-        html += '<button class="btn details" onclick="event.stopPropagation();window.__openModal(' + idx + ')">Details...</button>';
+        html += '<button type="button" class="btn details" onclick="event.stopPropagation();window.__openModal(' + idx + ')">Details...</button>';
         html += '</div></div>';
         return html;
     }
@@ -351,7 +351,7 @@ body.modal-open { overflow: hidden; }
 
     window.__openModal = function(idx) {
         var p = window.__filteredPrompts[idx];
-        var h = '<button class="modal-close" onclick="window.__closeModal()">X</button>';
+        var h = '<button type="button" class="modal-close" onclick="window.__closeModal()">X</button>';
         h += '<div class="modal-header"><div class="modal-title">' + esc(p.prompt_name) + '</div>';
         h += '<div class="modal-meta">';
         h += '<div class="meta-group"><span class="meta-label">DOMAIN:</span><div class="meta-badges"><span class="badge domain">' + esc(p.domain) + '</span></div></div>';
@@ -381,9 +381,9 @@ body.modal-open { overflow: hidden; }
         h += '</div>';
         h += '<div class="modal-footer"><div class="footer-left">v' + esc(p.version || "1.0.0") + ' &middot; ' + esc(p.author || "") + ' &middot; Toolset: ' + esc(p.toolset || "") + ' &middot; ID: ' + p.prompt_id + '</div>';
         h += '<div class="footer-right">';
-        h += '<button class="btn-modal primary" onclick="navigator.clipboard.writeText(window.__filteredPrompts[' + idx + '].prompt_text);window.__showToast(\'Copied!\')">Copy Prompt</button>';
+        h += '<button type="button" class="btn-modal primary" onclick="navigator.clipboard.writeText(window.__filteredPrompts[' + idx + '].prompt_text);window.__showToast(\'Copied!\')">Copy Prompt</button>';
         h += '<a class="btn-modal claude" href="https://claude.ai/new?q=' + encodeURIComponent(p.prompt_text) + '" target="_blank" rel="noopener">Send to Claude</a>';
-        h += '<button class="btn-modal" onclick="window.__closeModal()">Close</button>';
+        h += '<button type="button" class="btn-modal" onclick="window.__closeModal()">Close</button>';
         h += '</div></div>';
         document.getElementById("modalContent").innerHTML = h;
         document.getElementById("modalOverlay").classList.add("active");
