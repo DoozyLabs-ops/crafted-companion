@@ -247,16 +247,30 @@ body.modal-open { overflow: hidden; }
     function closeAllDropdowns() { document.querySelectorAll(".dropdown-menu.active").forEach(function(m) { m.classList.remove("active"); }); }
     document.addEventListener("click", function() { closeAllDropdowns(); });
 
-    function init() {
-        Promise.all([post("get-prompts"), post("get-tool-availability"), post("get-domains")])
+    function loadData() {
+        return Promise.all([post("get-prompts"), post("get-tool-availability"), post("get-domains")])
             .then(function(res) {
                 allPrompts = res[0].prompts || [];
                 toolAvail = res[1] || {};
                 domains = res[2] || [];
                 var sel = document.getElementById("domainSelect");
+                sel.innerHTML = '<option value="">All Domains</option>';
                 domains.forEach(function(d) { var o = document.createElement("option"); o.value = d.name; o.textContent = d.name; sel.appendChild(o); });
                 renderBanner();
                 applyFilters();
+            });
+    }
+
+    function init() {
+        loadData()
+            .then(function() {
+                if (allPrompts.length === 0) {
+                    document.getElementById("promptGrid").innerHTML = '<div class="no-results">Running first-time setup...</div>';
+                    return post("auto-setup").then(function(setup) {
+                        showToast("Setup complete: " + (setup.summary || "done"));
+                        return loadData();
+                    });
+                }
             })
             .catch(function(e) { document.getElementById("promptGrid").innerHTML = '<div class="no-results">Error: ' + esc(e.message) + '</div>'; });
     }

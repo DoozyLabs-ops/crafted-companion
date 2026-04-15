@@ -10,7 +10,7 @@
  * @NApiVersion 2.1
  * @NScriptType Suitelet
  */
-define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/ui/serverWidget'], function (query, log, runtime, file, serverWidget) {
+define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidget'], function (query, log, runtime, file, record, serverWidget) {
 
     var SCRIPT_VERSION = '1.0.0';
 
@@ -114,9 +114,113 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/ui/serverWidget'], functio
         } else if (action === 'get-domains') {
             jsonResponse(context.response, runSQL('SELECT id, name FROM customlist_dz_pm_domain ORDER BY id'));
 
+        } else if (action === 'auto-setup') {
+            jsonResponse(context.response, runAutoSetup());
+
         } else {
             jsonResponse(context.response, { error: 'Unknown action: ' + action });
         }
+    }
+
+    // ========== AUTO-SETUP: SEED + MIRROR ROLES ==========
+
+    function runAutoSetup() {
+        var results = { seeded: [], roles_created: [], roles_mapped: [], errors: [] };
+
+        // --- SEED EXTENSION RECORDS ---
+        try {
+            var seedFiles = runSQL("SELECT id FROM file WHERE name = 'seed-data.json'");
+            if (seedFiles && seedFiles.length > 0) {
+                var seedFile = file.load({ id: seedFiles[0].id });
+                var seedData = JSON.parse(seedFile.getContents());
+                var defaults = seedData.defaults || {};
+                var prompts = seedData.prompts || [];
+
+                var existingRows = runSQL('SELECT custrecord_dz_pm_prompt_ref AS prompt_ref FROM customrecord_dz_prompt_meta');
+                var existingRefs = {};
+                existingRows.forEach(function (r) { existingRefs[r.prompt_ref] = true; });
+
+                prompts.forEach(function (p) {
+                    if (existingRefs[p.prompt_ref]) return; // skip existing
+                    try {
+                        var rec = record.create({ type: 'customrecord_dz_prompt_meta' });
+                        rec.setValue({ fieldId: 'name', value: p.name });
+                        rec.setValue({ fieldId: 'externalid', value: p.external_id });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_prompt_ref', value: p.prompt_ref });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_domain', value: p.domain || defaults.domain });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_subdomain', value: p.subdomain || '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_toolset', value: p.toolset || defaults.toolset });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_tool_chain', value: p.tool_chain || '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_entry_tool', value: p.entry_tool || '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_steps', value: p.steps ? JSON.stringify(p.steps) : '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_tool_deps', value: p.tool_deps || defaults.tool_deps || '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_edition', value: p.edition || defaults.edition });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_edition_notes', value: p.edition_notes || defaults.edition_notes || '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_params', value: p.params ? JSON.stringify(p.params) : '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_safety_rules', value: p.safety_rules ? JSON.stringify(p.safety_rules) : '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_governance', value: p.governance || defaults.governance || 1 });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_artifact', value: p.artifact === true });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_artifact_type', value: p.artifact_type || '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_version', value: p.version || defaults.version || '1.0.0' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_author', value: p.author || defaults.author || 'Doozy Labs' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_status', value: p.status || defaults.status || 1 });
+                        var id = rec.save();
+                        results.seeded.push({ id: id, name: p.name, prompt_ref: p.prompt_ref });
+                    } catch (e) {
+                        results.errors.push({ name: p.name, error: e.message });
+                    }
+                });
+            }
+        } catch (e) {
+            results.errors.push({ action: 'seed', error: e.message });
+        }
+
+        // --- MIRROR ROLES ---
+        try {
+            var nsRoles = runSQL("SELECT id, name FROM role WHERE isinactive = 'F' ORDER BY name");
+            var companionRoles = runSQL('SELECT id, name FROM customrecord_atlas_aicomp_prompt_roles ORDER BY name');
+            var companionByName = {};
+            companionRoles.forEach(function (r) { companionByName[(r.name || '').toLowerCase().trim()] = r; });
+
+            var mappings = runSQL('SELECT custrecord_atlas_aicomp_rm_ns_role AS ns_role FROM customrecord_atlas_aicomp_role_mapping');
+            var mappedNsRoles = {};
+            mappings.forEach(function (m) { mappedNsRoles[m.ns_role] = true; });
+
+            nsRoles.forEach(function (nsRole) {
+                try {
+                    var key = (nsRole.name || '').toLowerCase().trim();
+                    var companionRole = companionByName[key];
+
+                    if (!companionRole) {
+                        var newRole = record.create({ type: 'customrecord_atlas_aicomp_prompt_roles' });
+                        newRole.setValue({ fieldId: 'name', value: nsRole.name.trim() });
+                        newRole.setValue({ fieldId: 'externalid', value: 'aipromptrole_crafted_' + nsRole.id });
+                        var newId = newRole.save();
+                        companionRole = { id: newId, name: nsRole.name.trim() };
+                        companionByName[key] = companionRole;
+                        results.roles_created.push({ id: newId, name: nsRole.name, ns_role_id: nsRole.id });
+                    }
+
+                    if (!mappedNsRoles[nsRole.id]) {
+                        var mapping = record.create({ type: 'customrecord_atlas_aicomp_role_mapping' });
+                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_ns_role', value: nsRole.id });
+                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_comp_role', value: companionRole.id });
+                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_confidence', value: 100 });
+                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_method', value: 3 });
+                        var mapId = mapping.save();
+                        results.roles_mapped.push({ id: mapId, ns_role: nsRole.name, companion_role: companionRole.name });
+                    }
+                } catch (e) {
+                    results.errors.push({ role: nsRole.name, error: e.message });
+                }
+            });
+        } catch (e) {
+            results.errors.push({ action: 'mirror-roles', error: e.message });
+        }
+
+        results.summary = results.seeded.length + ' seeded, ' + results.roles_created.length + ' roles created, ' + results.roles_mapped.length + ' mapped, ' + results.errors.length + ' errors';
+        log.audit({ title: 'auto-setup', details: results.summary });
+        return results;
     }
 
     // ========== GET: SERVE HTML ==========
