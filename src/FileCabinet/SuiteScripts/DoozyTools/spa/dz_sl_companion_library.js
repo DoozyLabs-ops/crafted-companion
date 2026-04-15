@@ -10,7 +10,7 @@
  * @NApiVersion 2.1
  * @NScriptType Suitelet
  */
-define(['N/query', 'N/log', 'N/runtime', 'N/file'], function (query, log, runtime, file) {
+define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/ui/serverWidget'], function (query, log, runtime, file, serverWidget) {
 
     var SCRIPT_VERSION = '1.0.0';
 
@@ -126,11 +126,24 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file'], function (query, log, runtim
             html = htmlFile.getContents();
             html = html.replace('{{API_URL}}', scriptUrl);
         } else {
-            html = '<html><body><h1>Error</h1><p>companion-library.html not found in File Cabinet.</p></body></html>';
+            html = '<p>companion-library.html not found in File Cabinet.</p>';
         }
 
-        context.response.setHeader({ name: 'Content-Type', value: 'text/html; charset=utf-8' });
-        context.response.write(html);
+        // Strip the full HTML document wrapper — we only need the content
+        // since serverWidget wraps it in NetSuite's page chrome
+        html = html.replace(/<!DOCTYPE[^>]*>/i, '')
+                    .replace(/<\/?html[^>]*>/gi, '')
+                    .replace(/<head>[\s\S]*?<\/head>/i, '')
+                    .replace(/<\/?body[^>]*>/gi, '');
+
+        var form = serverWidget.createForm({ title: 'Crafted Companion Library' });
+        form.addField({
+            id: 'custpage_companion_html',
+            type: serverWidget.FieldType.INLINEHTML,
+            label: ' '
+        }).defaultValue = html;
+
+        context.response.writePage(form);
     }
 
     // ========== ENTRY POINT ==========
