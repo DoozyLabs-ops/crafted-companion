@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Crafted Companion Library</title>
+<style>
+:root {
+    --ns-color-primary: #2C5266;
+    --ns-color-secondary: #264759;
+    --ns-color-dark: #1A2F3F;
+    --ns-color-light: #81B2C3;
+    --ns-neutral-10: rgb(251,249,248);
+    --ns-neutral-20: rgb(245,244,242);
+    --ns-neutral-40: rgb(228,225,221);
+    --ns-text-primary: #161513;
+    --ns-text-secondary: rgba(22,21,19,0.65);
+    --ns-accent-red: #C74634;
+    --ns-success: #0D7C5C;
+    --ns-bg-base: #f5f4f2;
+    --ns-font-family: "Oracle Sans", "Open Sans", Arial, sans-serif;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    --radius: 8px;
+    --provider-claude: #D97757;
+    --provider-claude-hover: #B85F42;
+    --provider-chatgpt: #10A37F;
+    --provider-chatgpt-hover: #0D8A6A;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--ns-font-family); background: var(--ns-bg-base); color: var(--ns-text-primary); line-height: 1.5; }
+body.modal-open { overflow: hidden; }
+.container { max-width: 1400px; margin: 0 auto; padding: 0 24px 24px; }
+
+.header {
+    background: linear-gradient(135deg, #1a2f3f 0%, #2C5266 50%, #c74634 100%);
+    color: white; padding: 32px 28px; border-radius: var(--radius);
+    margin-bottom: 24px; box-shadow: var(--shadow-lg); min-height: 180px;
+    display: flex; flex-direction: column; justify-content: flex-end; position: relative;
+}
+.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.header p { font-size: 13px; opacity: 0.85; max-width: 700px; }
+
+.stats-bar {
+    display: flex; gap: 20px; padding: 16px 20px; background: white;
+    border-radius: var(--radius); margin-bottom: 16px; box-shadow: var(--shadow-sm);
+    flex-wrap: wrap; align-items: center; margin-top: -40px; position: relative; z-index: 5;
+}
+.stat-item { text-align: center; min-width: 80px; }
+.stat-value { font-size: 22px; font-weight: 700; color: var(--ns-accent-red); }
+.stat-label { font-size: 11px; color: var(--ns-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-spacer { flex: 1; min-width: 20px; }
+.library-description { flex: 1 1 420px; max-width: 720px; font-size: 13px; line-height: 1.6; color: var(--ns-text-primary); margin-left: 24px; }
+
+.filters-bar {
+    position: sticky; top: 0; z-index: 20; background: var(--ns-bg-base);
+    padding: 12px 12px 16px; display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr auto; gap: 12px; align-items: end;
+    border-bottom: 1px solid var(--ns-neutral-40); margin-bottom: 12px;
+}
+.filter-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.filter-label { font-size: 12px; font-weight: 600; color: var(--ns-text-primary); }
+.input, .select {
+    padding: 10px 12px; border: 1px solid var(--ns-neutral-40); border-radius: 6px;
+    font-size: 13px; background: white; height: 40px; font-family: inherit;
+}
+.input:focus, .select:focus { outline: none; border-color: var(--ns-accent-red); box-shadow: 0 0 0 3px rgba(199,70,52,0.1); }
+.btn-clear {
+    height: 40px; padding: 0 14px; border: 1px solid var(--ns-neutral-40); border-radius: 8px;
+    background: white; font-size: 12px; font-weight: 600; color: var(--ns-text-secondary); cursor: pointer;
+}
+.btn-clear:hover { background: var(--ns-accent-red); border-color: var(--ns-accent-red); color: white; }
+
+.prompt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; align-items: start; }
+.prompt-card {
+    background: white; border: 1px solid var(--ns-neutral-40); border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); overflow: visible; transition: box-shadow 0.2s, transform 0.2s;
+}
+.prompt-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.card-header {
+    padding: 14px 16px 8px; background: linear-gradient(to bottom, #fafafa, white);
+    border-radius: var(--radius) var(--radius) 0 0; cursor: pointer;
+}
+.prompt-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.meta-row { display: flex; flex-direction: column; gap: 6px; }
+.meta-group { display: flex; align-items: center; gap: 8px; }
+.meta-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.meta-label { font-size: 11px; font-weight: 600; color: var(--ns-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; min-width: 85px; flex-shrink: 0; }
+.badge { font-size: 10px; padding: 4px 8px; border-radius: 6px; font-weight: 600; }
+.badge.domain { background: #264759; color: white; }
+.badge.governance { background: #B5D5E0; color: #1A2F3F; }
+.badge.governance.governed { background: #FDE7E4; color: #A33A2B; }
+.badge.governance.supervised { background: #C74634; color: white; }
+.badge.edition { background: #437C94; color: white; }
+.badge.artifact { background: #DFF4EA; color: #0D7C5C; }
+.badge.toolset { background: #B5D5E0; color: #1A2F3F; }
+
+.card-body { padding: 12px 16px 0; }
+.prompt-preview {
+    font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word; background: var(--ns-neutral-20);
+    color: var(--ns-text-secondary); padding: 12px; border-radius: 6px; max-height: 110px; overflow-y: auto;
+}
+.prompt-actions { display: flex; align-items: center; gap: 6px; margin: 12px 16px 14px; }
+.btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px;
+    border: 1px solid var(--ns-neutral-40); border-radius: 6px; background: white;
+    font-size: 12px; font-weight: 600; cursor: pointer; color: var(--ns-text-secondary);
+    white-space: nowrap; font-family: inherit;
+}
+.btn.copy { background: #1A2F3F; border-color: #1A2F3F; color: white; }
+.btn.copy:hover { background: #152838; }
+.btn.use-prompt { background: var(--ns-color-primary); border-color: var(--ns-color-primary); color: white; }
+.btn.use-prompt:hover { background: var(--ns-color-dark); border-color: var(--ns-color-dark); }
+.btn.details { background: white; border-color: #1A2F3F; color: #1A2F3F; }
+.btn.details:hover { background: #1A2F3F; color: white; }
+
+.action-group-menu { position: relative; z-index: 10; }
+.dropdown-menu {
+    position: absolute; bottom: 100%; left: 0; background: white; border: 1px solid var(--ns-neutral-40);
+    border-radius: 6px; box-shadow: var(--shadow-md); min-width: 170px; margin-bottom: 4px;
+    z-index: 200; display: none; flex-direction: column;
+}
+.dropdown-menu.active { display: flex; }
+.dropdown-item {
+    padding: 10px 14px; font-size: 13px; font-weight: 600; border: none; background: transparent;
+    cursor: pointer; color: var(--ns-text-secondary); text-decoration: none;
+}
+.dropdown-item:first-child { border-radius: 6px 6px 0 0; }
+.dropdown-item:last-child { border-radius: 0 0 6px 6px; }
+.dropdown-item:hover { background: var(--ns-neutral-20); }
+.dropdown-item.claude { color: var(--provider-claude); }
+.dropdown-item.claude:hover { background: rgba(217,119,87,0.1); }
+.dropdown-item.chatgpt { color: var(--provider-chatgpt); }
+.dropdown-item.chatgpt:hover { background: rgba(16,163,127,0.1); }
+
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none;
+    align-items: center; justify-content: center; padding: 24px; z-index: 2000;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+    position: relative; background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg);
+    max-width: 880px; width: 100%; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-header { padding: 18px 22px; border-bottom: 1px solid var(--ns-neutral-40); background: linear-gradient(to bottom, #fafafa, white); }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.modal-meta { display: flex; flex-direction: column; gap: 6px; }
+.modal-body { padding: 18px 22px; overflow: auto; }
+.modal-prompt {
+    font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.7;
+    white-space: pre-wrap; word-break: break-word; background: var(--ns-neutral-20);
+    padding: 14px; border-radius: 6px; color: var(--ns-text-primary);
+}
+.modal-section { margin-top: 16px; }
+.modal-section h3 { font-size: 13px; font-weight: 700; color: var(--ns-color-primary); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+.modal-section ul { padding-left: 20px; font-size: 13px; }
+.modal-section ul li { margin-bottom: 4px; }
+.modal-footer {
+    border-top: 1px solid var(--ns-neutral-40); padding: 14px 22px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px; background: #fafafa;
+}
+.footer-left { flex: 1; font-size: 12px; color: var(--ns-text-secondary); }
+.footer-right { display: flex; gap: 10px; align-items: center; }
+.btn-modal {
+    padding: 8px 14px; border-radius: 6px; border: 1px solid var(--ns-neutral-40);
+    background: white; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: inherit;
+}
+.btn-modal.primary { background: #1A2F3F; border-color: #1A2F3F; color: white; }
+.btn-modal.primary:hover { background: #152838; }
+.btn-modal.claude { background: var(--provider-claude); border-color: var(--provider-claude); color: white; text-decoration: none; display: inline-flex; align-items: center; }
+.btn-modal.claude:hover { background: var(--provider-claude-hover); }
+.btn-modal.chatgpt { background: var(--provider-chatgpt); border-color: var(--provider-chatgpt); color: white; text-decoration: none; display: inline-flex; align-items: center; }
+.btn-modal.chatgpt:hover { background: var(--provider-chatgpt-hover); }
+.modal-close { position: absolute; top: 12px; right: 16px; border: none; background: transparent; font-size: 20px; cursor: pointer; color: var(--ns-text-secondary); }
+
+.toast {
+    position: fixed; bottom: 24px; right: 24px; background: var(--ns-color-primary); color: white;
+    padding: 12px 20px; border-radius: var(--radius); box-shadow: var(--shadow-lg);
+    opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 3000; font-size: 13px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.no-results { grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--ns-text-secondary); }
+.admin-banner { background: #e3f2fd; border: 1px solid #b3d4fc; border-radius: 6px; padding: 12px 20px; margin-bottom: 16px; color: #003764; font-size: 13px; }
+@media (max-width: 980px) { .filters-bar { grid-template-columns: 1fr 1fr 1fr; } }
+@media (max-width: 680px) { .filters-bar { grid-template-columns: 1fr; } .library-description { margin-left: 0; margin-top: 12px; flex: 1 1 100%; } }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Crafted Companion Library</h1>
+        <p>Ready-to-go prompts for Crafted ERP intelligence. Browse by domain, filter by edition and governance level, and use with your favorite AI clients connected to NetSuite.</p>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total Prompts</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-domains">0</div><div class="stat-label">Domains</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-editions">0</div><div class="stat-label">Editions</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-governance">0</div><div class="stat-label">Governance Levels</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-showing">0</div><div class="stat-label">Showing</div></div>
+        <div class="stat-spacer"></div>
+        <div class="library-description"><p>View <a href="https://github.com/oracle/netsuite-suitecloud-sdk/tree/master/packages/agent-skills" target="_blank" rel="noopener" style="color:var(--ns-color-primary);font-weight:600">Project Instructions</a> for AI agent setup. Prompts require the corresponding Crafted toolset to be deployed and connected via MCP.</p></div>
+    </div>
+
+    <div class="filters-bar">
+        <div class="filter-group"><label class="filter-label" for="searchInput">Search</label><input class="input" id="searchInput" type="text" placeholder="Search title, tools, or prompt text"></div>
+        <div class="filter-group"><label class="filter-label" for="domainSelect">Domain</label><select class="select" id="domainSelect"><option value="">All Domains</option></select></div>
+        <div class="filter-group"><label class="filter-label" for="editionSelect">Edition</label><select class="select" id="editionSelect"><option value="">All Editions</option><option>Distillery</option><option>Winery</option><option>Brewery</option><option>Cross-Edition</option></select></div>
+        <div class="filter-group"><label class="filter-label" for="govSelect">Governance</label><select class="select" id="govSelect"><option value="">All Levels</option><option>Minimal</option><option>Standard</option><option>Governed</option><option>Supervised</option></select></div>
+        <div class="filter-group"><label class="filter-label">&nbsp;</label><button class="btn-clear" type="button" id="clearFilters">Clear</button></div>
+    </div>
+
+    <div id="adminBanner"></div>
+    <div class="prompt-grid" id="promptGrid"><div class="no-results">Loading prompts...</div></div>
+</div>
+
+<div class="toast" id="toast">Prompt copied to clipboard!</div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content" id="modalContent"></div>
+</div>
+
+<script>
+(function() {
+    var API = "{{API_URL}}";
+    var allPrompts = [], toolAvail = {}, domains = [];
+
+    function post(action) {
+        return fetch(API, { method: "POST", headers: {"Content-Type":"application/x-www-form-urlencoded"}, body: "action=" + action })
+            .then(function(r) { return r.json(); });
+    }
+
+    function esc(s) { var d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
+
+    function showToast(msg) {
+        var t = document.getElementById("toast"); t.textContent = msg;
+        t.classList.add("show"); setTimeout(function() { t.classList.remove("show"); }, 2500);
+    }
+
+    function closeAllDropdowns() { document.querySelectorAll(".dropdown-menu.active").forEach(function(m) { m.classList.remove("active"); }); }
+    document.addEventListener("click", function() { closeAllDropdowns(); });
+
+    function init() {
+        Promise.all([post("get-prompts"), post("get-tool-availability"), post("get-domains")])
+            .then(function(res) {
+                allPrompts = res[0].prompts || [];
+                toolAvail = res[1] || {};
+                domains = res[2] || [];
+                var sel = document.getElementById("domainSelect");
+                domains.forEach(function(d) { var o = document.createElement("option"); o.value = d.name; o.textContent = d.name; sel.appendChild(o); });
+                renderBanner();
+                applyFilters();
+            })
+            .catch(function(e) { document.getElementById("promptGrid").innerHTML = '<div class="no-results">Error: ' + esc(e.message) + '</div>'; });
+    }
+
+    function renderBanner() {
+        var missing = [], names = {"barrel-intelligence":"Barrel Intelligence","lot-profitability":"Lot Profitability","inventory-supply":"Inventory & Supply Chain","compliance-audit":"Compliance & Audit","mrp-intelligence":"MRP Intelligence","batch-genealogy":"Batch & Genealogy"};
+        Object.keys(toolAvail).forEach(function(k) { if (!toolAvail[k]) missing.push(names[k] || k); });
+        if (missing.length > 0) {
+            document.getElementById("adminBanner").innerHTML = '<div class="admin-banner">Deploy these toolsets to unlock more prompts: <strong>' + missing.join(", ") + '</strong></div>';
+        }
+    }
+
+    function getFiltered() {
+        var q = document.getElementById("searchInput").value.toLowerCase();
+        var dom = document.getElementById("domainSelect").value;
+        var ed = document.getElementById("editionSelect").value;
+        var gov = document.getElementById("govSelect").value;
+        return allPrompts.filter(function(p) {
+            var deps = p.tool_deps || [];
+            for (var i = 0; i < deps.length; i++) { if (!toolAvail[deps[i]]) return false; }
+            if (dom && p.domain !== dom) return false;
+            if (ed && p.edition !== ed && p.edition !== "Cross-Edition") return false;
+            if (gov && p.governance !== gov) return false;
+            if (q && (p.prompt_name + " " + p.subdomain + " " + p.tool_chain + " " + p.prompt_text).toLowerCase().indexOf(q) === -1) return false;
+            return true;
+        });
+    }
+
+    function updateStats(filtered) {
+        var doms = {}, eds = {}, govs = {};
+        allPrompts.forEach(function(p) { doms[p.domain] = 1; eds[p.edition] = 1; govs[p.governance] = 1; });
+        document.getElementById("stat-total").textContent = allPrompts.length;
+        document.getElementById("stat-domains").textContent = Object.keys(doms).length;
+        document.getElementById("stat-editions").textContent = Object.keys(eds).length;
+        document.getElementById("stat-governance").textContent = Object.keys(govs).length;
+        document.getElementById("stat-showing").textContent = filtered.length;
+    }
+
+    function govClass(g) { if (g === "Governed") return " governed"; if (g === "Supervised") return " supervised"; return ""; }
+
+    function buildCard(p, idx) {
+        var html = '<div class="prompt-card" data-idx="' + idx + '">';
+        html += '<div class="card-header" onclick="window.__openModal(' + idx + ')">';
+        html += '<div class="prompt-title">' + esc(p.prompt_name) + '</div>';
+        html += '<div class="meta-row">';
+        html += '<div class="meta-group"><span class="meta-label">DOMAIN:</span><div class="meta-badges"><span class="badge domain">' + esc(p.domain) + '</span></div></div>';
+        html += '<div class="meta-group"><span class="meta-label">GOVERNANCE:</span><div class="meta-badges"><span class="badge governance' + govClass(p.governance) + '">' + esc(p.governance) + '</span></div></div>';
+        if (p.edition && p.edition !== "Cross-Edition") {
+            html += '<div class="meta-group"><span class="meta-label">EDITION:</span><div class="meta-badges"><span class="badge edition">' + esc(p.edition) + '</span></div></div>';
+        }
+        if (p.tool_chain) {
+            html += '<div class="meta-group"><span class="meta-label">TOOLS:</span><div class="meta-badges"><span class="badge toolset">' + esc(p.tool_chain) + '</span></div></div>';
+        }
+        html += '</div></div>';
+        html += '<div class="card-body"><div class="prompt-preview">' + esc(p.prompt_text) + '</div></div>';
+        html += '<div class="prompt-actions">';
+        html += '<button class="btn copy" onclick="event.stopPropagation();window.__copyPrompt(' + idx + ')">Copy</button>';
+        html += '<div class="action-group-menu"><button class="btn use-prompt" onclick="event.stopPropagation();window.__toggleMenu(this)">Use Prompt &#9662;</button>';
+        html += '<div class="dropdown-menu">';
+        html += '<a class="dropdown-item claude" href="#" onclick="event.stopPropagation();window.__sendClaude(' + idx + ');return false">Send to Claude</a>';
+        html += '<a class="dropdown-item chatgpt" href="#" onclick="event.stopPropagation();window.__sendChatGPT(' + idx + ');return false">Copy/Open ChatGPT</a>';
+        html += '</div></div>';
+        html += '<button class="btn details" onclick="event.stopPropagation();window.__openModal(' + idx + ')">Details...</button>';
+        html += '</div></div>';
+        return html;
+    }
+
+    function applyFilters() {
+        var filtered = getFiltered();
+        updateStats(filtered);
+        var grid = document.getElementById("promptGrid");
+        if (filtered.length === 0) { grid.innerHTML = '<div class="no-results"><h2 style="font-size:18px;margin-bottom:8px">No prompts match your filters</h2><p>Try adjusting your search, domain, or edition filter.</p></div>'; return; }
+        var html = "";
+        filtered.forEach(function(p, i) { html += buildCard(p, i); });
+        grid.innerHTML = html;
+        window.__filteredPrompts = filtered;
+    }
+
+    window.__filteredPrompts = [];
+    window.__copyPrompt = function(idx) { var p = window.__filteredPrompts[idx]; navigator.clipboard.writeText(p.prompt_text).then(function() { showToast("Prompt copied to clipboard!"); }); };
+    window.__toggleMenu = function(btn) { closeAllDropdowns(); var menu = btn.nextElementSibling; menu.classList.toggle("active"); event.stopPropagation(); };
+    window.__sendClaude = function(idx) {
+        var p = window.__filteredPrompts[idx]; closeAllDropdowns();
+        var url = "https://claude.ai/new?q=" + encodeURIComponent(p.prompt_text);
+        window.open(url, "_blank");
+    };
+    window.__sendChatGPT = function(idx) {
+        var p = window.__filteredPrompts[idx]; closeAllDropdowns();
+        navigator.clipboard.writeText(p.prompt_text).then(function() { showToast("Prompt copied — paste it into ChatGPT."); });
+        window.open("https://chat.openai.com/", "_blank");
+    };
+
+    window.__openModal = function(idx) {
+        var p = window.__filteredPrompts[idx];
+        var h = '<button class="modal-close" onclick="window.__closeModal()">X</button>';
+        h += '<div class="modal-header"><div class="modal-title">' + esc(p.prompt_name) + '</div>';
+        h += '<div class="modal-meta">';
+        h += '<div class="meta-group"><span class="meta-label">DOMAIN:</span><div class="meta-badges"><span class="badge domain">' + esc(p.domain) + '</span></div></div>';
+        h += '<div class="meta-group"><span class="meta-label">GOVERNANCE:</span><div class="meta-badges"><span class="badge governance' + govClass(p.governance) + '">' + esc(p.governance) + '</span></div></div>';
+        if (p.edition) h += '<div class="meta-group"><span class="meta-label">EDITION:</span><div class="meta-badges"><span class="badge edition">' + esc(p.edition) + '</span></div></div>';
+        if (p.artifact) h += '<div class="meta-group"><span class="meta-label">ARTIFACT:</span><div class="meta-badges"><span class="badge artifact">' + esc(p.artifact_type || "Visual") + '</span></div></div>';
+        h += '</div></div>';
+        h += '<div class="modal-body"><pre class="modal-prompt">' + esc(p.prompt_text) + '</pre>';
+        if (p.tool_chain) { h += '<div class="modal-section"><h3>Tool Chain</h3><p>' + esc(p.tool_chain) + '</p></div>'; }
+        if (p.steps && p.steps.length) {
+            h += '<div class="modal-section"><h3>Orchestration Steps</h3><ul>';
+            p.steps.forEach(function(s, i) { h += "<li><strong>" + (i+1) + ". " + esc(s.call) + "</strong> &mdash; " + esc(s.purpose || ""); if (s.condition) h += " <em>(if: " + esc(s.condition) + ")</em>"; h += "</li>"; });
+            h += '</ul></div>';
+        }
+        var pk = Object.keys(p.params || {});
+        if (pk.length) {
+            h += '<div class="modal-section"><h3>Parameters</h3><ul>';
+            pk.forEach(function(k) { var v = p.params[k]; h += "<li><strong>" + esc(k) + "</strong> (" + esc(v.type) + (v.required ? ", required" : "") + ")"; if (v.hint) h += " &mdash; " + esc(v.hint); h += "</li>"; });
+            h += '</ul></div>';
+        }
+        if (p.safety_rules && p.safety_rules.length) {
+            h += '<div class="modal-section"><h3>Safety Rules</h3><ul>';
+            p.safety_rules.forEach(function(r) { h += "<li>" + esc(r) + "</li>"; });
+            h += '</ul></div>';
+        }
+        if (p.edition_notes) { h += '<div class="modal-section"><h3>Edition Notes</h3><p style="font-size:13px">' + esc(p.edition_notes) + '</p></div>'; }
+        h += '</div>';
+        h += '<div class="modal-footer"><div class="footer-left">v' + esc(p.version || "1.0.0") + ' &middot; ' + esc(p.author || "") + ' &middot; Toolset: ' + esc(p.toolset || "") + ' &middot; ID: ' + p.prompt_id + '</div>';
+        h += '<div class="footer-right">';
+        h += '<button class="btn-modal primary" onclick="navigator.clipboard.writeText(window.__filteredPrompts[' + idx + '].prompt_text);window.__showToast(\'Copied!\')">Copy Prompt</button>';
+        h += '<a class="btn-modal claude" href="https://claude.ai/new?q=' + encodeURIComponent(p.prompt_text) + '" target="_blank" rel="noopener">Send to Claude</a>';
+        h += '<button class="btn-modal" onclick="window.__closeModal()">Close</button>';
+        h += '</div></div>';
+        document.getElementById("modalContent").innerHTML = h;
+        document.getElementById("modalOverlay").classList.add("active");
+        document.body.classList.add("modal-open");
+    };
+
+    window.__closeModal = function() { document.getElementById("modalOverlay").classList.remove("active"); document.body.classList.remove("modal-open"); };
+    window.__showToast = showToast;
+    document.getElementById("modalOverlay").addEventListener("click", function(e) { if (e.target === this) window.__closeModal(); });
+
+    document.getElementById("searchInput").addEventListener("input", applyFilters);
+    document.getElementById("domainSelect").addEventListener("change", applyFilters);
+    document.getElementById("editionSelect").addEventListener("change", applyFilters);
+    document.getElementById("govSelect").addEventListener("change", applyFilters);
+    document.getElementById("clearFilters").addEventListener("click", function() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("domainSelect").value = "";
+        document.getElementById("editionSelect").value = "";
+        document.getElementById("govSelect").value = "";
+        applyFilters();
+    });
+
+    init();
+})();
+</script>
+</body>
+</html>
