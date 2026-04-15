@@ -1,0 +1,18 @@
+<suitelet scriptid="customscript_dz_sl_complib">
+    <name>Crafted Companion Library</name>
+    <scriptfile>[/SuiteScripts/DoozyTools/spa/dz_sl_companion_library.js]</scriptfile>
+    <description>Crafted Companion Library — browse, search, and filter Crafted Intelligence companion prompts by domain, edition, and governance level. Modeled after Oracle AI Connector Service Companion.</description>
+    <isinactive>F</isinactive>
+    <notifyadmins>F</notifyadmins>
+    <notifyowner>T</notifyowner>
+    <scriptdeployments>
+        <scriptdeployment scriptid="customdeploy_dz_sl_complib">
+            <title>Crafted Companion Library</title>
+            <isdeployed>T</isdeployed>
+            <isonline>T</isonline>
+            <loglevel>AUDIT</loglevel>
+            <allroles>T</allroles>
+            <status>RELEASED</status>
+        </scriptdeployment>
+    </scriptdeployments>
+</suitelet>
