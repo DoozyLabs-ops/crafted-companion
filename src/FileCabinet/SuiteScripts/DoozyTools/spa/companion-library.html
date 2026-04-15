@@ -261,15 +261,28 @@ body.modal-open { overflow: hidden; }
             });
     }
 
+    var EXPECTED_PROMPTS = 37;
+    var setupAttempts = 0;
+    var MAX_SETUP_ATTEMPTS = 5;
+
+    function runSetupLoop() {
+        setupAttempts++;
+        document.getElementById("promptGrid").innerHTML = '<div class="no-results">Running setup (batch ' + setupAttempts + ')...</div>';
+        return post("auto-setup").then(function(setup) {
+            showToast("Batch " + setupAttempts + ": " + (setup.summary || "done"));
+            return loadData().then(function() {
+                if (allPrompts.length < EXPECTED_PROMPTS && setupAttempts < MAX_SETUP_ATTEMPTS && (setup.seeded || []).length > 0) {
+                    return runSetupLoop();
+                }
+            });
+        });
+    }
+
     function init() {
         loadData()
             .then(function() {
-                if (allPrompts.length === 0) {
-                    document.getElementById("promptGrid").innerHTML = '<div class="no-results">Running first-time setup...</div>';
-                    return post("auto-setup").then(function(setup) {
-                        showToast("Setup complete: " + (setup.summary || "done"));
-                        return loadData();
-                    });
+                if (allPrompts.length < EXPECTED_PROMPTS && setupAttempts < MAX_SETUP_ATTEMPTS) {
+                    return runSetupLoop();
                 }
             })
             .catch(function(e) { document.getElementById("promptGrid").innerHTML = '<div class="no-results">Error: ' + esc(e.message) + '</div>'; });

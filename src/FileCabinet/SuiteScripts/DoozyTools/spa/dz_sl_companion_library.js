@@ -127,45 +127,72 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
     function runAutoSetup() {
         var results = { seeded: [], roles_created: [], roles_mapped: [], errors: [] };
 
-        // --- SEED EXTENSION RECORDS ---
+        // --- SEED ATLAS PROMPTS + EXTENSION RECORDS ---
         try {
             var seedFiles = runSQL("SELECT id FROM file WHERE name = 'seed-data.json'");
             if (seedFiles && seedFiles.length > 0) {
                 var seedFile = file.load({ id: seedFiles[0].id });
                 var seedData = JSON.parse(seedFile.getContents());
-                var defaults = seedData.defaults || {};
                 var prompts = seedData.prompts || [];
 
-                var existingRows = runSQL('SELECT custrecord_dz_pm_prompt_ref AS prompt_ref FROM customrecord_dz_prompt_meta');
-                var existingRefs = {};
-                existingRows.forEach(function (r) { existingRefs[r.prompt_ref] = true; });
+                // Get existing Atlas prompts by externalid
+                var atlasRows = runSQL("SELECT id, externalid FROM customrecord_atlas_aicomp_prompts WHERE externalid LIKE 'aiprompt_crafted_%'");
+                var atlasByExtId = {};
+                atlasRows.forEach(function (r) { atlasByExtId[r.externalid] = r.id; });
+
+                // Get existing extension records by externalid
+                var metaRows = runSQL('SELECT id, externalid FROM customrecord_dz_prompt_meta');
+                var metaByExtId = {};
+                metaRows.forEach(function (r) { metaByExtId[r.externalid] = r.id; });
 
                 prompts.forEach(function (p) {
-                    if (existingRefs[p.prompt_ref]) return; // skip existing
+                    if (metaByExtId[p.external_id]) return; // extension record exists, skip
+                    // Check governance before each record creation
+                    var remaining = runtime.getCurrentScript().getRemainingUsage();
+                    if (remaining < 100) { log.audit({ title: 'auto-setup', details: 'Governance low (' + remaining + '), stopping seed batch' }); return; }
                     try {
+                        // Step 1: Ensure Atlas prompt exists
+                        var atlasId = atlasByExtId[p.atlas_external_id];
+                        if (!atlasId && p.prompt_text) {
+                            var atlas = record.create({ type: 'customrecord_atlas_aicomp_prompts' });
+                            atlas.setValue({ fieldId: 'name', value: p.name });
+                            atlas.setValue({ fieldId: 'externalid', value: p.atlas_external_id });
+                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_text', value: p.prompt_text });
+                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_category', value: 6 }); // Manufacturing
+                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_subcat', value: p.subdomain || '' });
+                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_roles', value: [5] }); // Administrator
+                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_inds', value: [17] }); // Food & Beverage
+                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_public', value: true });
+                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_sdf_seeded', value: false });
+                            atlasId = atlas.save();
+                            atlasByExtId[p.atlas_external_id] = atlasId;
+                        }
+                        if (!atlasId) { results.errors.push({ name: p.name, error: 'No Atlas prompt and no prompt_text' }); return; }
+
+                        // Step 2: Create extension record
                         var rec = record.create({ type: 'customrecord_dz_prompt_meta' });
                         rec.setValue({ fieldId: 'name', value: p.name });
                         rec.setValue({ fieldId: 'externalid', value: p.external_id });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_prompt_ref', value: p.prompt_ref });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_domain', value: p.domain || defaults.domain });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_prompt_ref', value: atlasId });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_domain', value: p.domain || 1 });
                         rec.setValue({ fieldId: 'custrecord_dz_pm_subdomain', value: p.subdomain || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_toolset', value: p.toolset || defaults.toolset });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_toolset', value: p.toolset || '' });
                         rec.setValue({ fieldId: 'custrecord_dz_pm_tool_chain', value: p.tool_chain || '' });
                         rec.setValue({ fieldId: 'custrecord_dz_pm_entry_tool', value: p.entry_tool || '' });
                         rec.setValue({ fieldId: 'custrecord_dz_pm_steps', value: p.steps ? JSON.stringify(p.steps) : '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_tool_deps', value: p.tool_deps || defaults.tool_deps || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_edition', value: p.edition || defaults.edition });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_edition_notes', value: p.edition_notes || defaults.edition_notes || '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_tool_deps', value: p.tool_deps || '' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_edition', value: p.edition || 4 });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_edition_notes', value: p.edition_notes || '' });
                         rec.setValue({ fieldId: 'custrecord_dz_pm_params', value: p.params ? JSON.stringify(p.params) : '' });
                         rec.setValue({ fieldId: 'custrecord_dz_pm_safety_rules', value: p.safety_rules ? JSON.stringify(p.safety_rules) : '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_governance', value: p.governance || defaults.governance || 1 });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_governance', value: p.governance || 1 });
                         rec.setValue({ fieldId: 'custrecord_dz_pm_artifact', value: p.artifact === true });
                         rec.setValue({ fieldId: 'custrecord_dz_pm_artifact_type', value: p.artifact_type || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_version', value: p.version || defaults.version || '1.0.0' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_author', value: p.author || defaults.author || 'Doozy Labs' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_status', value: p.status || defaults.status || 1 });
-                        var id = rec.save();
-                        results.seeded.push({ id: id, name: p.name, prompt_ref: p.prompt_ref });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_version', value: p.version || '1.0.0' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_author', value: p.author || 'Doozy Labs' });
+                        rec.setValue({ fieldId: 'custrecord_dz_pm_status', value: p.status || 1 });
+                        var metaId = rec.save();
+                        results.seeded.push({ metaId: metaId, atlasId: atlasId, name: p.name });
                     } catch (e) {
                         results.errors.push({ name: p.name, error: e.message });
                     }
@@ -182,11 +209,13 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
             var companionByName = {};
             companionRoles.forEach(function (r) { companionByName[(r.name || '').toLowerCase().trim()] = r; });
 
-            var mappings = runSQL('SELECT custrecord_atlas_aicomp_rm_ns_role AS ns_role FROM customrecord_atlas_aicomp_role_mapping');
+            var mappings = runSQL('SELECT custrecord_atlas_aicomp_ns_role_id AS ns_role FROM customrecord_atlas_aicomp_role_mapping');
             var mappedNsRoles = {};
             mappings.forEach(function (m) { mappedNsRoles[m.ns_role] = true; });
 
             nsRoles.forEach(function (nsRole) {
+                var rem = runtime.getCurrentScript().getRemainingUsage();
+                if (rem < 80) return; // governance check
                 try {
                     var key = (nsRole.name || '').toLowerCase().trim();
                     var companionRole = companionByName[key];
@@ -203,10 +232,11 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
 
                     if (!mappedNsRoles[nsRole.id]) {
                         var mapping = record.create({ type: 'customrecord_atlas_aicomp_role_mapping' });
-                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_ns_role', value: nsRole.id });
-                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_comp_role', value: companionRole.id });
-                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_confidence', value: 100 });
-                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_method', value: 3 });
+                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_ns_role_id', value: nsRole.id });
+                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_ns_role_name', value: nsRole.name });
+                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_role', value: companionRole.id });
+                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_map_confidence', value: 100 });
+                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_mapping_method', value: 3 }); // Manual Override
                         var mapId = mapping.save();
                         results.roles_mapped.push({ id: mapId, ns_role: nsRole.name, companion_role: companionRole.name });
                     }
