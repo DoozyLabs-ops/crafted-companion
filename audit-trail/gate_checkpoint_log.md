@@ -172,7 +172,90 @@
 - [x] HITM approval to advance to development (M-0 gate passed 2026-04-14)
 
 ### DEVELOPMENT → QA (Phase 1: Companion Toolset)
-- [ ] Extension record deployed and queryable (DONE — Phase 0)
-- [ ] All 4 companion tools implemented and tested
-- [ ] All barrel prompts have extension records
-- [ ] HITM approval recorded
+- [x] Extension record deployed and queryable (DONE — Phase 0)
+- [x] All 4 companion tools implemented and tested (superseded by v3)
+- [x] All barrel prompts have extension records (superseded by v3 — 37 prompts across 6 categories)
+- [x] HITM approval recorded (rolled into v3 Independence pivot)
+
+---
+
+## v3 Independence Pivot (2026-04-17)
+
+### Checkpoint: v3 Architecture Pivot — Atlas Decoupling
+- **Date:** 2026-04-17
+- **Status:** Complete — plan approved and fully shipped
+- **Decision:** Abandon v2's "native-to-Oracle" architecture. Replace the extension-record + bundle-locked Atlas FK design with a single independent record (`customrecord_dz_companion_prompt`, 29 fields) that owns prompt text, category, roles, and orchestration metadata. No Oracle AI Companion dependency for prompt storage.
+- **Rationale:** Oracle's Atlas SuiteApp is bundle-locked. Can't add fields, can't extend the 7 fixed categories, fragile FK JOINs threaten every Oracle update. Going independent eliminates the highest-severity risk and positions Crafted Intelligence as its own product rather than an add-on. Zero customers were deployed — cleanest possible moment to decouple.
+- **Dual-view decision:** Library Suitelet ships with two tabs — primary "Crafted Intelligence" (independent record) and optional "Oracle AI Companion" (conditional on Atlas bundle presence, read-only view). Atlas tab gracefully hidden when SuiteApp isn't installed. Product identity preserved: we own the enriched/governed Crafted lane, surface Oracle's lane as a convenience.
+- **Migration decision:** Clean replace — inactivate old extension records, leave Atlas-side orphans inactive, seed fresh under the new independent record.
+- **Artifact:** `/Users/lukehood/.claude/plans/users-lukehood-documents-claude-project-distributed-sphinx.md` — approved plan
+- **Approved by:** Luke (HITM) — plan approved with "Conditional read-only Atlas tab" and "Clean replace" recommendations
+
+### Checkpoint: v3 SDF Objects Deployed (Phase A)
+- **Date:** 2026-04-17
+- **Status:** Complete — deployed to TSTDRV1912378
+- **New objects:**
+  - `customrecord_dz_companion_prompt` (29 fields) — independent prompt record with USEPERMISSIONLIST accesstype
+  - `customlist_dz_cp_category` (7 values) — our own categories (replaces Oracle's 7 locked ones)
+  - `customlist_dz_cp_complexity` (3 values) — user-facing Quick/Standard/Deep Analysis
+  - `customrole_dz_ci_admin` / `customrole_dz_ci_user` — bidirectional permissions with the two record types
+  - `customscript_dz_mr_promptseed` — Map/Reduce seed script deployment
+- **Retired objects:** `customrecord_dz_prompt_meta`, `customlist_dz_pm_domain` (XML removed from package)
+- **SDF lesson captured:** Custom record ↔ role permissions are bidirectional and require `[scriptid=...]` bracket notation on BOTH sides. Record's `<permissions>` uses `<permittedrole>[scriptid=...]</permittedrole>`; role's `<permissions>` uses `<permkey>[scriptid=...]</permkey>`; levels must match.
+- **Validation:** `suitecloud project:validate --server` clean after resolving `.DS_Store` cruft and role fields `employeeviewingallowed` / `iswebserviceonlyrole` / `restrictip` (removed — not supported without features declared)
+- **Approved by:** Luke (HITM) — HITM gate cleared after successful deploy
+
+### Checkpoint: v3 Code + Data Shipped (Phases B–F)
+- **Date:** 2026-04-17
+- **Status:** Complete
+- **Deliverables:**
+  - Map/Reduce seed `dz_mr_prompt_seed.js` (synchronous `query.runSuiteQL`, role-pattern fuzzy matching against account roles, version-aware create/update/skip)
+  - Companion tools v2.0.0 rewrite (`dz_ct_companion.js` + schema JSON) — single-table queries, `logExecution` wrapped in `Promise.resolve(JSON.stringify({...}))` on all code paths, usage-analytics writeback (exec_count, last_executed, avg_duration)
+  - Seed data v3.0.0 — 37 prompts across 6 categories, new fields (description, complexity, collection, related, role_patterns), `dz_cp_*` external IDs
+  - Library SPA `dz_sl_companion_library.js` — single-table queries, role-based filtering (with whitespace-tolerant `visible_roles` lookup), removed `auto-setup` loop, added `get-atlas-prompts` / `get-atlas-availability` / `get-atlas-filters` / `save-custom`
+  - Admin deployment dashboard `dz_sl_companion_seed.js` — diff view (create/update/skip/orphan), trigger M/R via `N/task`, preview roles, export backup
+  - `companion-library.html` — dual-tab layout, full filter parity with Oracle's AI Companion Library on the Atlas tab (Category + Industry + Role), popout icon, Customize mode with editable textarea, Save as User Prompt, Open Record link
+  - Supporting updates: `SKILL.md` (Atlas references → Crafted Intelligence), `customrecord_dz_exec_log.xml` FK description, parent CLAUDE.md v3 banner
+- **Key architecture win:** `url.resolveRecord` used server-side for record URLs so "Open Record →" works on both Crafted and Atlas cards without needing manual rectype lookups.
+- **Filter list discovery:** Atlas custom lists exposed via `customlist_atlas_aicomp_prompt_cat` (7 categories) and `customlist_atlas_aicomp_prompt_ind` (39 industries) — found via `SELECT scriptid, name FROM customlist WHERE internalid IN (1099,1100)`.
+- **Approved by:** Luke (HITM) — verified via Library SPA loading all 37 prompts, role filter correctly scoped to user's role, Atlas tab filters matching Oracle native UI
+
+### Checkpoint: v3 Demo Data Migration (Phase G)
+- **Date:** 2026-04-17
+- **Status:** Complete
+- **Actions:**
+  - 37 old `customrecord_dz_prompt_meta` records (IDs 501-537) set `isinactive=true` via `ns_updateRecord`
+  - Old record type `customrecord_dz_prompt_meta` subsequently deleted (cascade-deleted all 37 instances)
+  - 37 new `customrecord_dz_companion_prompt` records seeded via Map/Reduce with working role resolution (e.g., `dz_cp_barrel_001` visible to 27 matched role IDs)
+  - Testing probe record (ID 1, `_retired_probe_001`) deleted
+  - 37 orphan Atlas prompts with `aiprompt_crafted_*` externalid (IDs 101-109, 201-203, 303-327) inactivated — left in place since Atlas bundle-locked
+- **Verification:**
+  - Category counts match seed data exactly: Barrel 12, Lot 6, Inventory 6, Compliance 6, MRP 4, Batch 3
+  - `getPromptMeta` call returns v2.0.0 shape with all new fields (description, complexity, collection, related, exec_count, `_version: "2.0.0"`)
+  - Library SPA Crafted tab shows 34 prompts active (37 minus 3 batch-genealogy prompts correctly hidden by tool-availability filter — batch-genealogy toolset not deployed in TSTDRV1912378)
+- **Approved by:** Luke (HITM)
+
+### Checkpoint: Feature Parity with Oracle AI Companion Library
+- **Date:** 2026-04-17
+- **Status:** Complete
+- **Additions:**
+  - Popout (↗) icon button on each card (Crafted + Atlas) — opens detail modal
+  - Open Record → link in modal footer-left (uses `N/url.resolveRecord`)
+  - Customize button → inline editable `<textarea>` mode with in-session edits; Copy/Send buttons use edited text when in customize mode; Revert button restores original
+  - Save as User Prompt — backend POST action `save-custom` creates a new `customrecord_dz_companion_prompt` record with collection="My Prompts", visible_roles=[currentRole], author=user name, copies orchestration fields from source. Confirmation banner in modal with open-record link.
+  - Atlas filter bar mirrors Oracle native Library: Search + Category (customlist_atlas_aicomp_prompt_cat, 7 values) + Industry (customlist_atlas_aicomp_prompt_ind, 39 values) + Role (customrecord_atlas_aicomp_prompt_roles, 74 active) + Clear
+- **Approved by:** Luke (HITM) — "looks good for now"
+
+---
+
+## v3 Final State (2026-04-17)
+
+- ✅ SDF package in sync with deployed state — `customrecord_dz_prompt_meta` / `customlist_dz_pm_domain` removed
+- ✅ TSTDRV1912378 cleaned up — old record type deleted (cascaded 37 records), probe deleted, Atlas orphans inactivated
+- ✅ Companion tools v2.0.0 live, MCP connector reconnected and verified
+- ✅ Parent CLAUDE.md updated with v3 Independence banner
+- ✅ Plan approved and executed; all checkpoints cleared
+
+### Known deferrals (low priority)
+- Cross-edition deploy to TSTDRV1915090 (Winery demo) — confirm Atlas tab hides gracefully when SuiteApp absent and SDF deploys cleanly against a non-Distillery account
+- End-user KB article for the Library (to be drafted via `kb-writer` skill)

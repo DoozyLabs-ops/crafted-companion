@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Crafted Companion Library</title>
+<title>Crafted Intelligence Library</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -31,6 +31,7 @@
     --provider-claude-hover: #B85F42;
     --provider-chatgpt: #10A37F;
     --provider-chatgpt-hover: #0D8A6A;
+    --atlas-accent: #5f6368;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--ns-font-family); background: var(--ns-bg-base); color: var(--ns-text-primary); line-height: 1.5; }
@@ -58,10 +59,18 @@ body.modal-open { overflow: hidden; }
 .stat-spacer { flex: 1; min-width: 20px; }
 .library-description { flex: 1 1 420px; max-width: 720px; font-size: 13px; line-height: 1.6; color: var(--ns-text-primary); margin-left: 24px; }
 
+.tabs { display: flex; gap: 2px; margin-bottom: 0; border-bottom: 2px solid var(--ns-neutral-40); padding-left: 12px; }
+.tab { padding: 10px 18px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--ns-text-secondary); border: 0; background: transparent; border-bottom: 3px solid transparent; margin-bottom: -2px; font-family: inherit; }
+.tab.active { color: var(--ci-primary); border-bottom-color: var(--ci-primary); }
+.tab.atlas.active { color: var(--atlas-accent); border-bottom-color: var(--atlas-accent); }
+.tab:hover:not(.active) { color: var(--ns-text-primary); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
 .filters-bar {
     position: sticky; top: 0; z-index: 20; background: var(--ns-bg-base);
     padding: 12px 12px 16px; display: grid;
-    grid-template-columns: 1.6fr 1fr 1fr 1fr auto; gap: 12px; align-items: end;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr auto; gap: 12px; align-items: end;
     border-bottom: 1px solid var(--ns-neutral-40); margin-bottom: 12px;
 }
 .filter-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -88,18 +97,23 @@ body.modal-open { overflow: hidden; }
     border-radius: var(--radius) var(--radius) 0 0; cursor: pointer;
 }
 .prompt-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.card-description { font-size: 12px; color: var(--ns-text-secondary); margin-bottom: 8px; line-height: 1.4; }
 .meta-row { display: flex; flex-direction: column; gap: 6px; }
 .meta-group { display: flex; align-items: center; gap: 8px; }
 .meta-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .meta-label { font-size: 11px; font-weight: 600; color: var(--ns-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; min-width: 85px; flex-shrink: 0; }
 .badge { font-size: 10px; padding: 4px 8px; border-radius: 6px; font-weight: 600; }
-.badge.domain { background: var(--ci-primary); color: white; }
+.badge.category { background: var(--ci-primary); color: white; }
 .badge.governance { background: #d4f0e8; color: #2d6b3f; }
 .badge.governance.governed { background: #fef3e0; color: var(--ci-accent-dark); }
 .badge.governance.supervised { background: var(--ci-danger); color: white; }
 .badge.edition { background: var(--ci-secondary); color: #1a3f3d; }
 .badge.artifact { background: #d4f0e8; color: #2d6b3f; }
 .badge.toolset { background: #e0f2f8; color: var(--ci-primary-dark); }
+.badge.complexity { background: #f0e7fa; color: #5b2e91; }
+.badge.collection { background: #fff1e6; color: #8a4a13; }
+.badge.atlas-native { background: var(--atlas-accent); color: white; }
+.badge.atlas-category { background: #e8eaed; color: #3c4043; }
 
 .card-body { padding: 12px 16px 0; }
 .prompt-preview {
@@ -120,6 +134,22 @@ body.modal-open { overflow: hidden; }
 .btn.use-prompt:hover { background: var(--ci-primary-dark); border-color: var(--ci-primary-dark); }
 .btn.details { background: white; border-color: var(--ci-primary); color: var(--ci-primary); }
 .btn.details:hover { background: var(--ci-primary); color: white; }
+.btn.customize { background: white; border-color: var(--ns-neutral-40); color: var(--ns-text-primary); }
+.btn.customize:hover { background: var(--ns-neutral-20); }
+.btn.popout { padding: 6px 8px; background: white; border-color: var(--ns-neutral-40); color: var(--ns-text-secondary); font-size: 14px; line-height: 1; }
+.btn.popout:hover { background: var(--ci-primary); border-color: var(--ci-primary); color: white; }
+.footer-left { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.footer-left a.open-record { color: var(--ci-primary); font-weight: 600; text-decoration: none; border: 1px solid var(--ci-primary); padding: 6px 10px; border-radius: 6px; font-size: 12px; white-space: nowrap; }
+.footer-left a.open-record:hover { background: var(--ci-primary); color: white; }
+.footer-left .meta-line { font-size: 11px; color: var(--ns-text-secondary); line-height: 1.4; }
+.modal-content .modal-prompt-edit { display: none; width: 100%; min-height: 220px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; line-height: 1.7; padding: 14px; border: 1px solid var(--ci-primary); border-radius: 6px; background: white; color: var(--ns-text-primary); resize: vertical; box-sizing: border-box; }
+.modal-content.customize-mode .modal-prompt { display: none; }
+.modal-content.customize-mode .modal-prompt-edit { display: block; }
+.modal-content .customize-banner { display: none; background: #fef7e0; border-left: 3px solid var(--ci-accent); padding: 10px 14px; margin-bottom: 12px; font-size: 12px; color: #5f4a1a; border-radius: 4px; }
+.modal-content.customize-mode .customize-banner { display: block; }
+.modal-content .btn-modal.customize-only { display: none; }
+.modal-content.customize-mode .btn-modal.customize-only { display: inline-flex; }
+.modal-content.customize-mode .btn-modal.read-only { display: none; }
 
 .action-group-menu { position: relative; z-index: 10; }
 .dropdown-menu {
@@ -188,6 +218,8 @@ body.modal-open { overflow: hidden; }
 .toast.show { opacity: 1; transform: translateY(0); }
 .no-results { grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--ns-text-secondary); }
 .admin-banner { background: #e0f2f8; border: 1px solid #a8d8ea; border-radius: 6px; padding: 12px 20px; margin-bottom: 16px; color: var(--ci-primary-dark); font-size: 13px; }
+.atlas-note { background: #f5f7fa; border-left: 3px solid var(--atlas-accent); border-radius: 4px; padding: 10px 14px; margin: 12px 0; font-size: 12px; color: #3c4043; }
+.atlas-note b { color: #202124; }
 @media (max-width: 980px) { .filters-bar { grid-template-columns: 1fr 1fr 1fr; } }
 @media (max-width: 680px) { .filters-bar { grid-template-columns: 1fr; } .library-description { margin-left: 0; margin-top: 12px; flex: 1 1 100%; } }
 </style>
@@ -195,30 +227,49 @@ body.modal-open { overflow: hidden; }
 <body>
 <div class="container">
     <div class="header">
-        <h1>Crafted Companion Library</h1>
-        <p>Ready-to-go prompts for Crafted ERP intelligence. Browse by domain, filter by edition and governance level, and use with your favorite AI clients connected to NetSuite.</p>
+        <h1>Crafted Intelligence Library</h1>
+        <p>Ready-to-go prompts for Crafted ERP intelligence. Browse by category, filter by edition and governance level, and use with your favorite AI clients connected to NetSuite.</p>
     </div>
 
     <div class="stats-bar">
         <div class="stat-item"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total Prompts</div></div>
-        <div class="stat-item"><div class="stat-value" id="stat-domains">0</div><div class="stat-label">Domains</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-categories">0</div><div class="stat-label">Categories</div></div>
         <div class="stat-item"><div class="stat-value" id="stat-editions">0</div><div class="stat-label">Editions</div></div>
         <div class="stat-item"><div class="stat-value" id="stat-governance">0</div><div class="stat-label">Governance Levels</div></div>
         <div class="stat-item"><div class="stat-value" id="stat-showing">0</div><div class="stat-label">Showing</div></div>
         <div class="stat-spacer"></div>
-        <div class="library-description"><p>Download <a href="https://github.com/DoozyLabs-ops/crafted-companion/tree/main/skills/crafted-companion-instructions" target="_blank" rel="noopener" style="color:var(--ci-primary);font-weight:600">Crafted Companion Instructions</a> — upload as project instructions or a skill in your AI client. Also compatible with Oracle's <a href="https://github.com/oracle/netsuite-suitecloud-sdk/tree/master/packages/agent-skills" target="_blank" rel="noopener" style="color:var(--ci-primary);font-weight:600">NetSuite AI Connector Instructions</a>.</p></div>
+        <div class="library-description"><p>Download <a href="https://github.com/DoozyLabs-ops/crafted-companion/tree/main/skills/crafted-companion-instructions" target="_blank" rel="noopener" style="color:var(--ci-primary);font-weight:600">Crafted Intelligence Instructions</a> — upload as project instructions or a skill in your AI client. Also compatible with Oracle's <a href="https://github.com/oracle/netsuite-suitecloud-sdk/tree/master/packages/agent-skills" target="_blank" rel="noopener" style="color:var(--ci-primary);font-weight:600">NetSuite AI Connector Instructions</a>.</p></div>
     </div>
 
-    <div class="filters-bar">
-        <div class="filter-group"><label class="filter-label" for="searchInput">Search</label><input class="input" id="searchInput" type="text" placeholder="Search title, tools, or prompt text"></div>
-        <div class="filter-group"><label class="filter-label" for="domainSelect">Domain</label><select class="select" id="domainSelect"><option value="">All Domains</option></select></div>
-        <div class="filter-group"><label class="filter-label" for="editionSelect">Edition</label><select class="select" id="editionSelect"><option value="">All Editions</option><option>Distillery</option><option>Winery</option><option>Brewery</option><option>Cross-Edition</option></select></div>
-        <div class="filter-group"><label class="filter-label" for="govSelect">Governance</label><select class="select" id="govSelect"><option value="">All Levels</option><option>Minimal</option><option>Standard</option><option>Governed</option><option>Supervised</option></select></div>
-        <div class="filter-group"><label class="filter-label">&nbsp;</label><button class="btn-clear" type="button" id="clearFilters">Clear</button></div>
+    <div class="tabs" id="tabs">
+        <button type="button" class="tab active" data-tab="crafted">Crafted Intelligence</button>
+        <button type="button" class="tab atlas" data-tab="atlas" id="atlasTabBtn" style="display:none">Oracle AI Companion</button>
     </div>
 
-    <div id="adminBanner"></div>
-    <div class="prompt-grid" id="promptGrid"><div class="no-results">Loading prompts...</div></div>
+    <div id="craftedPanel" class="tab-panel active">
+        <div class="filters-bar">
+            <div class="filter-group"><label class="filter-label" for="searchInput">Search</label><input class="input" id="searchInput" type="text" placeholder="Search title, tools, or prompt text"></div>
+            <div class="filter-group"><label class="filter-label" for="categorySelect">Category</label><select class="select" id="categorySelect"><option value="">All Categories</option></select></div>
+            <div class="filter-group"><label class="filter-label" for="editionSelect">Edition</label><select class="select" id="editionSelect"><option value="">All Editions</option><option>Distillery</option><option>Winery</option><option>Brewery</option><option>Cross-Edition</option></select></div>
+            <div class="filter-group"><label class="filter-label" for="complexitySelect">Complexity</label><select class="select" id="complexitySelect"><option value="">All</option><option>Quick</option><option>Standard</option><option>Deep Analysis</option></select></div>
+            <div class="filter-group"><label class="filter-label" for="govSelect">Governance</label><select class="select" id="govSelect"><option value="">All Levels</option><option>Minimal</option><option>Standard</option><option>Governed</option><option>Supervised</option></select></div>
+            <div class="filter-group"><label class="filter-label">&nbsp;</label><button class="btn-clear" type="button" id="clearFilters">Clear</button></div>
+        </div>
+        <div id="adminBanner"></div>
+        <div class="prompt-grid" id="promptGrid"><div class="no-results">Loading prompts...</div></div>
+    </div>
+
+    <div id="atlasPanel" class="tab-panel">
+        <div class="atlas-note"><b>Oracle AI Companion prompts.</b> Native to the Atlas AI Companion SuiteApp — read-only here. These prompts run without Crafted orchestration (no tool chain, safety rules, or edition awareness). For full execution, use Oracle's Companion Library.</div>
+        <div class="filters-bar" style="grid-template-columns: 1.5fr 1fr 1fr 1fr auto;">
+            <div class="filter-group"><label class="filter-label" for="atlasSearchInput">Search</label><input class="input" id="atlasSearchInput" type="text" placeholder="Search title, role, or prompt text"></div>
+            <div class="filter-group"><label class="filter-label" for="atlasCategorySelect">Category</label><select class="select" id="atlasCategorySelect"><option value="">All Categories</option></select></div>
+            <div class="filter-group"><label class="filter-label" for="atlasIndustrySelect">Industry</label><select class="select" id="atlasIndustrySelect"><option value="">All Industries</option></select></div>
+            <div class="filter-group"><label class="filter-label" for="atlasRoleSelect">Role</label><select class="select" id="atlasRoleSelect"><option value="">All Roles</option></select></div>
+            <div class="filter-group"><label class="filter-label">&nbsp;</label><button class="btn-clear" type="button" id="atlasClearFilters">Clear</button></div>
+        </div>
+        <div class="prompt-grid" id="atlasGrid"><div class="no-results">Loading Oracle AI Companion prompts...</div></div>
+    </div>
 </div>
 
 <div class="toast" id="toast">Prompt copied to clipboard!</div>
@@ -230,65 +281,97 @@ body.modal-open { overflow: hidden; }
 <script>
 (function() {
     var API = "{{API_URL}}";
-    var allPrompts = [], toolAvail = {}, domains = [];
+    var craftedPrompts = [], atlasPrompts = [], toolAvail = {}, categories = [], atlasCategories = [], atlasIndustries = [], atlasRoles = [];
+    var activeTab = 'crafted';
 
-    function post(action) {
-        return fetch(API, { method: "POST", headers: {"Content-Type":"application/x-www-form-urlencoded"}, body: "action=" + action })
-            .then(function(r) { return r.json(); });
+    function post(action, params) {
+        var body = "action=" + action;
+        if (params) Object.keys(params).forEach(function(k) { body += "&" + encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); });
+        return fetch(API, { method: "POST", headers: {"Content-Type":"application/x-www-form-urlencoded"}, body: body }).then(function(r) { return r.json(); });
     }
 
     function esc(s) { var d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
-
-    function showToast(msg) {
-        var t = document.getElementById("toast"); t.textContent = msg;
-        t.classList.add("show"); setTimeout(function() { t.classList.remove("show"); }, 2500);
-    }
-
+    function showToast(msg) { var t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(function() { t.classList.remove("show"); }, 2500); }
     function closeAllDropdowns() { document.querySelectorAll(".dropdown-menu.active").forEach(function(m) { m.classList.remove("active"); }); }
     document.addEventListener("click", function() { closeAllDropdowns(); });
 
-    function loadData() {
-        return Promise.all([post("get-prompts"), post("get-tool-availability"), post("get-domains")])
-            .then(function(res) {
-                allPrompts = res[0].prompts || [];
-                toolAvail = res[1] || {};
-                domains = res[2] || [];
-                var sel = document.getElementById("domainSelect");
-                sel.innerHTML = '<option value="">All Domains</option>';
-                domains.forEach(function(d) { var o = document.createElement("option"); o.value = d.name; o.textContent = d.name; sel.appendChild(o); });
-                renderBanner();
-                applyFilters();
-            });
-    }
-
-    var EXPECTED_PROMPTS = 37;
-    var setupAttempts = 0;
-    var MAX_SETUP_ATTEMPTS = 5;
-
-    function runSetupLoop() {
-        setupAttempts++;
-        document.getElementById("promptGrid").innerHTML = '<div class="no-results">Running setup (batch ' + setupAttempts + ')...</div>';
-        return post("auto-setup").then(function(setup) {
-            showToast("Batch " + setupAttempts + ": " + (setup.summary || "done"));
-            return loadData().then(function() {
-                if (allPrompts.length < EXPECTED_PROMPTS && setupAttempts < MAX_SETUP_ATTEMPTS && (setup.seeded || []).length > 0) {
-                    return runSetupLoop();
-                }
-            });
-        });
-    }
+    // ========== INIT ==========
 
     function init() {
-        loadData()
-            .then(function() {
-                if (allPrompts.length < EXPECTED_PROMPTS && setupAttempts < MAX_SETUP_ATTEMPTS) {
-                    return runSetupLoop();
-                }
-            })
+        loadCrafted()
+            .then(function() { return probeAtlas(); })
             .catch(function(e) { document.getElementById("promptGrid").innerHTML = '<div class="no-results">Error: ' + esc(e.message) + '</div>'; });
     }
 
-    function renderBanner() {
+    function loadCrafted() {
+        return Promise.all([post("get-prompts"), post("get-tool-availability"), post("get-categories")])
+            .then(function(res) {
+                craftedPrompts = res[0].prompts || [];
+                toolAvail = res[1] || {};
+                categories = res[2] || [];
+                var sel = document.getElementById("categorySelect");
+                sel.innerHTML = '<option value="">All Categories</option>';
+                categories.forEach(function(c) { var o = document.createElement("option"); o.value = c.name; o.textContent = c.name; sel.appendChild(o); });
+                renderToolBanner();
+                applyCraftedFilters();
+                if (craftedPrompts.length === 0) {
+                    document.getElementById("promptGrid").innerHTML = '<div class="no-results"><h2 style="font-size:18px;margin-bottom:8px">No prompts deployed yet</h2><p>Run the <a href="/app/common/scripting/customscript_dz_sl_compseed.nl">Prompt Deployment Dashboard</a> to seed Crafted Intelligence prompts into this account.</p></div>';
+                }
+            });
+    }
+
+    function probeAtlas() {
+        return post("get-atlas-availability").then(function(r) {
+            if (r && r.available) {
+                document.getElementById("atlasTabBtn").style.display = "inline-block";
+                return loadAtlas();
+            }
+        }).catch(function() { /* Atlas probe failed — silently skip */ });
+    }
+
+    function loadAtlas() {
+        return Promise.all([post("get-atlas-prompts"), post("get-atlas-filters")])
+            .then(function(res) {
+                atlasPrompts = res[0].prompts || [];
+                atlasCategories = (res[1] && res[1].categories) || [];
+                atlasIndustries = (res[1] && res[1].industries) || [];
+                atlasRoles = (res[1] && res[1].roles) || [];
+                // Category dropdown matches by display name since SuiteQL already resolves
+                // the category via BUILTIN.DF. Industry and role dropdowns match by ID.
+                populateSelect("atlasCategorySelect", "All Categories", atlasCategories, "name", "name");
+                populateSelect("atlasIndustrySelect", "All Industries", atlasIndustries, "id", "name");
+                populateSelect("atlasRoleSelect", "All Roles", atlasRoles, "id", "name");
+                applyAtlasFilters();
+            });
+    }
+
+    function populateSelect(id, placeholder, list, valueField, labelField) {
+        var sel = document.getElementById(id);
+        if (!sel) return;
+        sel.innerHTML = '<option value="">' + placeholder + '</option>';
+        list.forEach(function(item) {
+            var o = document.createElement("option");
+            o.value = item[valueField];
+            o.textContent = item[labelField];
+            sel.appendChild(o);
+        });
+    }
+
+    // ========== TAB SWITCHING ==========
+
+    document.querySelectorAll(".tab").forEach(function(t) {
+        t.addEventListener("click", function() {
+            activeTab = t.dataset.tab;
+            document.querySelectorAll(".tab").forEach(function(x) { x.classList.remove("active"); });
+            t.classList.add("active");
+            document.querySelectorAll(".tab-panel").forEach(function(p) { p.classList.remove("active"); });
+            document.getElementById(activeTab + "Panel").classList.add("active");
+        });
+    });
+
+    // ========== CRAFTED TAB ==========
+
+    function renderToolBanner() {
         var missing = [], names = {"barrel-intelligence":"Barrel Intelligence","lot-profitability":"Lot Profitability","inventory-supply":"Inventory & Supply Chain","compliance-audit":"Compliance & Audit","mrp-intelligence":"MRP Intelligence","batch-genealogy":"Batch & Genealogy"};
         Object.keys(toolAvail).forEach(function(k) { if (!toolAvail[k]) missing.push(names[k] || k); });
         if (missing.length > 0) {
@@ -296,27 +379,29 @@ body.modal-open { overflow: hidden; }
         }
     }
 
-    function getFiltered() {
+    function getCraftedFiltered() {
         var q = document.getElementById("searchInput").value.toLowerCase();
-        var dom = document.getElementById("domainSelect").value;
+        var cat = document.getElementById("categorySelect").value;
         var ed = document.getElementById("editionSelect").value;
+        var comp = document.getElementById("complexitySelect").value;
         var gov = document.getElementById("govSelect").value;
-        return allPrompts.filter(function(p) {
+        return craftedPrompts.filter(function(p) {
             var deps = p.tool_deps || [];
             for (var i = 0; i < deps.length; i++) { if (!toolAvail[deps[i]]) return false; }
-            if (dom && p.domain !== dom) return false;
+            if (cat && p.category !== cat) return false;
             if (ed && p.edition !== ed && p.edition !== "Cross-Edition") return false;
+            if (comp && p.complexity !== comp) return false;
             if (gov && p.governance !== gov) return false;
-            if (q && (p.prompt_name + " " + p.subdomain + " " + p.tool_chain + " " + p.prompt_text).toLowerCase().indexOf(q) === -1) return false;
+            if (q && (p.prompt_name + " " + (p.subcategory || "") + " " + (p.description || "") + " " + (p.tool_chain || "") + " " + (p.prompt_text || "")).toLowerCase().indexOf(q) === -1) return false;
             return true;
         });
     }
 
-    function updateStats(filtered) {
-        var doms = {}, eds = {}, govs = {};
-        allPrompts.forEach(function(p) { doms[p.domain] = 1; eds[p.edition] = 1; govs[p.governance] = 1; });
-        document.getElementById("stat-total").textContent = allPrompts.length;
-        document.getElementById("stat-domains").textContent = Object.keys(doms).length;
+    function updateCraftedStats(filtered) {
+        var cats = {}, eds = {}, govs = {};
+        craftedPrompts.forEach(function(p) { cats[p.category] = 1; eds[p.edition] = 1; govs[p.governance] = 1; });
+        document.getElementById("stat-total").textContent = craftedPrompts.length;
+        document.getElementById("stat-categories").textContent = Object.keys(cats).length;
         document.getElementById("stat-editions").textContent = Object.keys(eds).length;
         document.getElementById("stat-governance").textContent = Object.keys(govs).length;
         document.getElementById("stat-showing").textContent = filtered.length;
@@ -324,12 +409,16 @@ body.modal-open { overflow: hidden; }
 
     function govClass(g) { if (g === "Governed") return " governed"; if (g === "Supervised") return " supervised"; return ""; }
 
-    function buildCard(p, idx) {
+    function buildCraftedCard(p, idx) {
         var html = '<div class="prompt-card" data-idx="' + idx + '">';
-        html += '<div class="card-header" onclick="window.__openModal(' + idx + ')">';
+        html += '<div class="card-header" onclick="window.__openCraftedModal(' + idx + ')">';
         html += '<div class="prompt-title">' + esc(p.prompt_name) + '</div>';
+        if (p.description) html += '<div class="card-description">' + esc(p.description) + '</div>';
         html += '<div class="meta-row">';
-        html += '<div class="meta-group"><span class="meta-label">DOMAIN:</span><div class="meta-badges"><span class="badge domain">' + esc(p.domain) + '</span></div></div>';
+        html += '<div class="meta-group"><span class="meta-label">CATEGORY:</span><div class="meta-badges"><span class="badge category">' + esc(p.category) + '</span>';
+        if (p.complexity) html += '<span class="badge complexity">' + esc(p.complexity) + '</span>';
+        if (p.collection) html += '<span class="badge collection">' + esc(p.collection) + '</span>';
+        html += '</div></div>';
         html += '<div class="meta-group"><span class="meta-label">GOVERNANCE:</span><div class="meta-badges"><span class="badge governance' + govClass(p.governance) + '">' + esc(p.governance) + '</span></div></div>';
         if (p.edition && p.edition !== "Cross-Edition") {
             html += '<div class="meta-group"><span class="meta-label">EDITION:</span><div class="meta-badges"><span class="badge edition">' + esc(p.edition) + '</span></div></div>';
@@ -340,53 +429,133 @@ body.modal-open { overflow: hidden; }
         html += '</div></div>';
         html += '<div class="card-body"><div class="prompt-preview">' + esc(p.prompt_text) + '</div></div>';
         html += '<div class="prompt-actions">';
-        html += '<button type="button" class="btn copy" onclick="event.stopPropagation();window.__copyPrompt(' + idx + ')">Copy</button>';
+        html += '<button type="button" class="btn copy" onclick="event.stopPropagation();window.__copyCrafted(' + idx + ')">Copy</button>';
         html += '<div class="action-group-menu"><button type="button" class="btn use-prompt" onclick="event.stopPropagation();window.__toggleMenu(this)">Use Prompt &#9662;</button>';
         html += '<div class="dropdown-menu">';
         html += '<a class="dropdown-item claude" href="#" onclick="event.stopPropagation();window.__sendClaude(' + idx + ');return false">Send to Claude</a>';
         html += '<a class="dropdown-item chatgpt" href="#" onclick="event.stopPropagation();window.__sendChatGPT(' + idx + ');return false">Copy/Open ChatGPT</a>';
         html += '</div></div>';
-        html += '<button type="button" class="btn details" onclick="event.stopPropagation();window.__openModal(' + idx + ')">Details...</button>';
+        html += '<button type="button" class="btn customize" onclick="event.stopPropagation();window.__openCraftedModal(' + idx + ', true)">Customize</button>';
+        html += '<button type="button" class="btn popout" title="Open detail view" onclick="event.stopPropagation();window.__openCraftedModal(' + idx + ')">&#x2197;</button>';
         html += '</div></div>';
         return html;
     }
 
-    function applyFilters() {
-        var filtered = getFiltered();
-        updateStats(filtered);
+    function applyCraftedFilters() {
+        var filtered = getCraftedFiltered();
+        updateCraftedStats(filtered);
         var grid = document.getElementById("promptGrid");
-        if (filtered.length === 0) { grid.innerHTML = '<div class="no-results"><h2 style="font-size:18px;margin-bottom:8px">No prompts match your filters</h2><p>Try adjusting your search, domain, or edition filter.</p></div>'; return; }
+        if (filtered.length === 0 && craftedPrompts.length > 0) { grid.innerHTML = '<div class="no-results"><h2 style="font-size:18px;margin-bottom:8px">No prompts match your filters</h2><p>Try adjusting your search, category, or edition filter.</p></div>'; return; }
+        if (craftedPrompts.length === 0) return;
         var html = "";
-        filtered.forEach(function(p, i) { html += buildCard(p, i); });
+        filtered.forEach(function(p, i) { html += buildCraftedCard(p, i); });
         grid.innerHTML = html;
-        window.__filteredPrompts = filtered;
+        window.__filteredCrafted = filtered;
     }
 
-    window.__filteredPrompts = [];
-    window.__copyPrompt = function(idx) { var p = window.__filteredPrompts[idx]; navigator.clipboard.writeText(p.prompt_text).then(function() { showToast("Prompt copied to clipboard!"); }); };
+    // ========== ATLAS TAB ==========
+
+    function getAtlasFiltered() {
+        var q = document.getElementById("atlasSearchInput").value.toLowerCase();
+        var cat = document.getElementById("atlasCategorySelect").value;
+        var ind = document.getElementById("atlasIndustrySelect").value;
+        var role = document.getElementById("atlasRoleSelect").value;
+        return atlasPrompts.filter(function(p) {
+            if (cat && p.category !== cat) return false;
+            if (ind && (p.industry_ids || []).indexOf(String(ind)) === -1) return false;
+            if (role && (p.role_ids || []).indexOf(String(role)) === -1) return false;
+            if (q) {
+                var hay = (p.prompt_name + " " + (p.subcategory || "") + " " + (p.prompt_text || "") + " " + ((p.role_names || []).join(" "))).toLowerCase();
+                if (hay.indexOf(q) === -1) return false;
+            }
+            return true;
+        });
+    }
+
+    function buildAtlasCard(p, idx) {
+        var html = '<div class="prompt-card" data-idx="' + idx + '">';
+        html += '<div class="card-header" onclick="window.__openAtlasModal(' + idx + ')">';
+        html += '<div class="prompt-title">' + esc(p.prompt_name) + '</div>';
+        html += '<div class="meta-row">';
+        html += '<div class="meta-group"><span class="meta-label">SOURCE:</span><div class="meta-badges"><span class="badge atlas-native" title="Native Oracle AI Companion prompt">Oracle AI Companion</span>';
+        if (p.sdf_seeded) html += '<span class="badge atlas-category" title="SDF-seeded by Oracle">Seeded</span>';
+        html += '</div></div>';
+        if (p.category) html += '<div class="meta-group"><span class="meta-label">CATEGORY:</span><div class="meta-badges"><span class="badge atlas-category">' + esc(p.category) + '</span></div></div>';
+        if (p.subcategory) html += '<div class="meta-group"><span class="meta-label">SUBCATEGORY:</span><div class="meta-badges"><span class="badge atlas-category">' + esc(p.subcategory) + '</span></div></div>';
+        html += '</div></div>';
+        html += '<div class="card-body"><div class="prompt-preview">' + esc((p.prompt_text || '').substring(0, 400)) + ((p.prompt_text || '').length > 400 ? '...' : '') + '</div></div>';
+        html += '<div class="prompt-actions">';
+        html += '<button type="button" class="btn copy" onclick="event.stopPropagation();window.__copyAtlas(' + idx + ')">Copy</button>';
+        html += '<div class="action-group-menu"><button type="button" class="btn use-prompt" onclick="event.stopPropagation();window.__toggleMenu(this)">Use Prompt &#9662;</button>';
+        html += '<div class="dropdown-menu">';
+        html += '<a class="dropdown-item claude" href="#" onclick="event.stopPropagation();window.__sendClaudeAtlas(' + idx + ');return false">Send to Claude</a>';
+        html += '<a class="dropdown-item chatgpt" href="#" onclick="event.stopPropagation();window.__sendChatGPTAtlas(' + idx + ');return false">Copy/Open ChatGPT</a>';
+        html += '</div></div>';
+        html += '<button type="button" class="btn customize" onclick="event.stopPropagation();window.__openAtlasModal(' + idx + ', true)">Customize</button>';
+        html += '<button type="button" class="btn popout" title="Open detail view" onclick="event.stopPropagation();window.__openAtlasModal(' + idx + ')">&#x2197;</button>';
+        html += '</div></div>';
+        return html;
+    }
+
+    function applyAtlasFilters() {
+        var filtered = getAtlasFiltered();
+        var grid = document.getElementById("atlasGrid");
+        if (filtered.length === 0) { grid.innerHTML = '<div class="no-results">No Atlas prompts match your filters.</div>'; return; }
+        var html = "";
+        filtered.forEach(function(p, i) { html += buildAtlasCard(p, i); });
+        grid.innerHTML = html;
+        window.__filteredAtlas = filtered;
+    }
+
+    // ========== SHARED ACTIONS ==========
+
+    window.__filteredCrafted = [];
+    window.__filteredAtlas = [];
+    window.__copyCrafted = function(idx) { var p = window.__filteredCrafted[idx]; navigator.clipboard.writeText(p.prompt_text).then(function() { showToast("Prompt copied to clipboard!"); }); };
+    window.__copyAtlas = function(idx) { var p = window.__filteredAtlas[idx]; navigator.clipboard.writeText(p.prompt_text).then(function() { showToast("Atlas prompt copied to clipboard!"); }); };
     window.__toggleMenu = function(btn) { closeAllDropdowns(); var menu = btn.nextElementSibling; menu.classList.toggle("active"); event.stopPropagation(); };
     window.__sendClaude = function(idx) {
-        var p = window.__filteredPrompts[idx]; closeAllDropdowns();
+        var p = window.__filteredCrafted[idx]; closeAllDropdowns();
         var url = "https://claude.ai/new?q=" + encodeURIComponent(p.prompt_text);
         window.open(url, "_blank");
     };
     window.__sendChatGPT = function(idx) {
-        var p = window.__filteredPrompts[idx]; closeAllDropdowns();
+        var p = window.__filteredCrafted[idx]; closeAllDropdowns();
+        navigator.clipboard.writeText(p.prompt_text).then(function() { showToast("Prompt copied — paste it into ChatGPT."); });
+        window.open("https://chat.openai.com/", "_blank");
+    };
+    window.__sendClaudeAtlas = function(idx) {
+        var p = window.__filteredAtlas[idx]; closeAllDropdowns();
+        var url = "https://claude.ai/new?q=" + encodeURIComponent(p.prompt_text);
+        window.open(url, "_blank");
+    };
+    window.__sendChatGPTAtlas = function(idx) {
+        var p = window.__filteredAtlas[idx]; closeAllDropdowns();
         navigator.clipboard.writeText(p.prompt_text).then(function() { showToast("Prompt copied — paste it into ChatGPT."); });
         window.open("https://chat.openai.com/", "_blank");
     };
 
-    window.__openModal = function(idx) {
-        var p = window.__filteredPrompts[idx];
+    // ========== MODALS ==========
+
+    window.__openCraftedModal = function(idx, customize) {
+        var p = window.__filteredCrafted[idx];
+        window.__activePrompt = { source: 'crafted', idx: idx, data: p };
         var h = '<button type="button" class="modal-close" onclick="window.__closeModal()">X</button>';
         h += '<div class="modal-header"><div class="modal-title">' + esc(p.prompt_name) + '</div>';
+        if (p.description) h += '<p style="font-size:13px;color:var(--ns-text-secondary);margin-bottom:8px">' + esc(p.description) + '</p>';
         h += '<div class="modal-meta">';
-        h += '<div class="meta-group"><span class="meta-label">DOMAIN:</span><div class="meta-badges"><span class="badge domain">' + esc(p.domain) + '</span></div></div>';
+        h += '<div class="meta-group"><span class="meta-label">CATEGORY:</span><div class="meta-badges"><span class="badge category">' + esc(p.category) + '</span>';
+        if (p.complexity) h += '<span class="badge complexity">' + esc(p.complexity) + '</span>';
+        if (p.collection) h += '<span class="badge collection">' + esc(p.collection) + '</span>';
+        h += '</div></div>';
         h += '<div class="meta-group"><span class="meta-label">GOVERNANCE:</span><div class="meta-badges"><span class="badge governance' + govClass(p.governance) + '">' + esc(p.governance) + '</span></div></div>';
         if (p.edition) h += '<div class="meta-group"><span class="meta-label">EDITION:</span><div class="meta-badges"><span class="badge edition">' + esc(p.edition) + '</span></div></div>';
         if (p.artifact) h += '<div class="meta-group"><span class="meta-label">ARTIFACT:</span><div class="meta-badges"><span class="badge artifact">' + esc(p.artifact_type || "Visual") + '</span></div></div>';
         h += '</div></div>';
-        h += '<div class="modal-body"><pre class="modal-prompt">' + esc(p.prompt_text) + '</pre>';
+        h += '<div class="modal-body">';
+        h += '<div class="customize-banner"><b>Customizing this prompt.</b> Edits stay in this session — they\'re not saved to NetSuite. Use the footer buttons to copy or send your customized version.</div>';
+        h += '<pre class="modal-prompt">' + esc(p.prompt_text) + '</pre>';
+        h += '<textarea class="modal-prompt-edit" id="modalPromptEdit" spellcheck="false">' + esc(p.prompt_text) + '</textarea>';
         if (p.tool_chain) { h += '<div class="modal-section"><h3>Tool Chain</h3><p>' + esc(p.tool_chain) + '</p></div>'; }
         if (p.steps && p.steps.length) {
             h += '<div class="modal-section"><h3>Orchestration Steps</h3><ul>';
@@ -405,32 +574,184 @@ body.modal-open { overflow: hidden; }
             h += '</ul></div>';
         }
         if (p.edition_notes) { h += '<div class="modal-section"><h3>Edition Notes</h3><p style="font-size:13px">' + esc(p.edition_notes) + '</p></div>'; }
+        if (p.related && p.related.length) {
+            h += '<div class="modal-section"><h3>Related Prompts</h3><ul>';
+            p.related.forEach(function(r) { h += "<li>" + esc(r) + "</li>"; });
+            h += '</ul></div>';
+        }
+        if (p.exec_count > 0) {
+            h += '<div class="modal-section"><h3>Usage</h3><p style="font-size:13px">' + p.exec_count + ' execution' + (p.exec_count === 1 ? '' : 's') + (p.avg_duration ? ' &middot; avg ' + p.avg_duration + 's' : '') + (p.last_executed ? ' &middot; last: ' + esc(p.last_executed) : '') + '</p></div>';
+        }
+        if (p.changelog) { h += '<div class="modal-section"><h3>Changelog</h3><pre style="font-size:11px;white-space:pre-wrap">' + esc(p.changelog) + '</pre></div>'; }
         h += '</div>';
-        h += '<div class="modal-footer"><div class="footer-left">v' + esc(p.version || "1.0.0") + ' &middot; ' + esc(p.author || "") + ' &middot; Toolset: ' + esc(p.toolset || "") + ' &middot; ID: ' + p.prompt_id + '</div>';
+        h += '<div class="modal-footer">';
+        h += '<div class="footer-left">';
+        if (p.record_url) h += '<a class="open-record" href="' + esc(p.record_url) + '" target="_blank" rel="noopener">Open Record &rarr;</a>';
+        h += '<div class="meta-line">v' + esc(p.version || "1.0.0") + ' &middot; ' + esc(p.author || "") + ' &middot; ID: ' + p.prompt_id + '</div>';
+        h += '</div>';
         h += '<div class="footer-right">';
-        h += '<button type="button" class="btn-modal primary" onclick="navigator.clipboard.writeText(window.__filteredPrompts[' + idx + '].prompt_text);window.__showToast(\'Copied!\')">Copy Prompt</button>';
-        h += '<a class="btn-modal claude" href="https://claude.ai/new?q=' + encodeURIComponent(p.prompt_text) + '" target="_blank" rel="noopener">Send to Claude</a>';
+        h += '<button type="button" class="btn-modal read-only" onclick="window.__enterCustomize()">Customize</button>';
+        h += '<button type="button" class="btn-modal customize-only" onclick="window.__revertCustomize()">Revert</button>';
+        h += '<button type="button" class="btn-modal customize-only primary" onclick="window.__saveCustom()">Save as User Prompt</button>';
+        h += '<button type="button" class="btn-modal primary" onclick="window.__copyActive()">Copy Prompt</button>';
+        h += '<button type="button" class="btn-modal claude" onclick="window.__sendClaudeActive()">Send to Claude</button>';
+        h += '<button type="button" class="btn-modal chatgpt" onclick="window.__sendChatGPTActive()">Copy/Open ChatGPT</button>';
         h += '<button type="button" class="btn-modal" onclick="window.__closeModal()">Close</button>';
         h += '</div></div>';
         document.getElementById("modalContent").innerHTML = h;
+        if (customize) document.getElementById("modalContent").classList.add("customize-mode");
+        else document.getElementById("modalContent").classList.remove("customize-mode");
         document.getElementById("modalOverlay").classList.add("active");
         document.body.classList.add("modal-open");
     };
 
-    window.__closeModal = function() { document.getElementById("modalOverlay").classList.remove("active"); document.body.classList.remove("modal-open"); };
+    window.__openAtlasModal = function(idx, customize) {
+        var p = window.__filteredAtlas[idx];
+        window.__activePrompt = { source: 'atlas', idx: idx, data: p };
+        var h = '<button type="button" class="modal-close" onclick="window.__closeModal()">X</button>';
+        h += '<div class="modal-header"><div class="modal-title">' + esc(p.prompt_name) + '</div>';
+        h += '<div class="modal-meta">';
+        h += '<div class="meta-group"><span class="meta-label">SOURCE:</span><div class="meta-badges"><span class="badge atlas-native">Oracle AI Companion</span></div></div>';
+        if (p.category) h += '<div class="meta-group"><span class="meta-label">CATEGORY:</span><div class="meta-badges"><span class="badge atlas-category">' + esc(p.category) + '</span></div></div>';
+        if (p.subcategory) h += '<div class="meta-group"><span class="meta-label">SUBCATEGORY:</span><div class="meta-badges"><span class="badge atlas-category">' + esc(p.subcategory) + '</span></div></div>';
+        h += '</div></div>';
+        h += '<div class="modal-body">';
+        h += '<div class="customize-banner"><b>Customizing this prompt.</b> Edits stay in this session — they\'re not saved to NetSuite. Use the footer buttons to copy or send your customized version.</div>';
+        h += '<div class="atlas-note" style="margin-top:0"><b>This prompt runs in Oracle\'s native AI Companion framework.</b> Crafted Intelligence orchestration (tool chains, safety rules, edition logic) does not apply to Atlas prompts.</div>';
+        h += '<pre class="modal-prompt">' + esc(p.prompt_text) + '</pre>';
+        h += '<textarea class="modal-prompt-edit" id="modalPromptEdit" spellcheck="false">' + esc(p.prompt_text) + '</textarea>';
+        h += '</div>';
+        h += '<div class="modal-footer">';
+        h += '<div class="footer-left">';
+        if (p.record_url) h += '<a class="open-record" href="' + esc(p.record_url) + '" target="_blank" rel="noopener">Open Record &rarr;</a>';
+        h += '<div class="meta-line">Atlas ID: ' + p.prompt_id + ' &middot; externalid: ' + esc(p.external_id || '—') + '</div>';
+        h += '</div>';
+        h += '<div class="footer-right">';
+        h += '<button type="button" class="btn-modal read-only" onclick="window.__enterCustomize()">Customize</button>';
+        h += '<button type="button" class="btn-modal customize-only" onclick="window.__revertCustomize()">Revert</button>';
+        h += '<button type="button" class="btn-modal customize-only primary" onclick="window.__saveCustom()">Save as User Prompt</button>';
+        h += '<button type="button" class="btn-modal primary" onclick="window.__copyActive()">Copy Prompt</button>';
+        h += '<button type="button" class="btn-modal claude" onclick="window.__sendClaudeActive()">Send to Claude</button>';
+        h += '<button type="button" class="btn-modal chatgpt" onclick="window.__sendChatGPTActive()">Copy/Open ChatGPT</button>';
+        h += '<button type="button" class="btn-modal" onclick="window.__closeModal()">Close</button>';
+        h += '</div></div>';
+        document.getElementById("modalContent").innerHTML = h;
+        if (customize) document.getElementById("modalContent").classList.add("customize-mode");
+        else document.getElementById("modalContent").classList.remove("customize-mode");
+        document.getElementById("modalOverlay").classList.add("active");
+        document.body.classList.add("modal-open");
+    };
+
+    window.__closeModal = function() {
+        var mc = document.getElementById("modalContent");
+        mc.classList.remove("customize-mode");
+        document.getElementById("modalOverlay").classList.remove("active");
+        document.body.classList.remove("modal-open");
+        window.__activePrompt = null;
+    };
+
+    // Customize mode helpers — use edited textarea when in customize-mode,
+    // fall back to the original prompt text otherwise.
+    function activeText() {
+        var mc = document.getElementById("modalContent");
+        if (mc && mc.classList.contains("customize-mode")) {
+            var ta = document.getElementById("modalPromptEdit");
+            if (ta) return ta.value;
+        }
+        return window.__activePrompt ? window.__activePrompt.data.prompt_text : "";
+    }
+    window.__enterCustomize = function() {
+        var mc = document.getElementById("modalContent");
+        if (mc) mc.classList.add("customize-mode");
+        var ta = document.getElementById("modalPromptEdit");
+        if (ta) { ta.focus(); }
+    };
+    window.__revertCustomize = function() {
+        var mc = document.getElementById("modalContent");
+        if (mc) mc.classList.remove("customize-mode");
+        var ta = document.getElementById("modalPromptEdit");
+        if (ta && window.__activePrompt) ta.value = window.__activePrompt.data.prompt_text;
+    };
+    window.__copyActive = function() {
+        navigator.clipboard.writeText(activeText()).then(function() { showToast("Prompt copied to clipboard!"); });
+    };
+    window.__sendClaudeActive = function() {
+        var url = "https://claude.ai/new?q=" + encodeURIComponent(activeText());
+        window.open(url, "_blank");
+    };
+    window.__sendChatGPTActive = function() {
+        navigator.clipboard.writeText(activeText()).then(function() { showToast("Prompt copied — paste into ChatGPT."); });
+        window.open("https://chat.openai.com/", "_blank");
+    };
+    window.__saveCustom = function() {
+        var ap = window.__activePrompt;
+        if (!ap) return;
+        var p = ap.data;
+        var text = activeText();
+        if (!text || text === p.prompt_text) {
+            if (!confirm("You haven't edited the prompt. Save anyway?")) return;
+        }
+        var body = {
+            promptText: text,
+            sourceName: p.prompt_name || "Untitled",
+            sourceSource: ap.source,
+            sourceId: String(p.prompt_id || ""),
+            sourceCategory: p.source === 'crafted' ? "" : "7",
+            sourceSubcategory: p.subcategory || "",
+            sourceToolset: p.toolset || "",
+            sourceToolChain: p.tool_chain || "",
+            sourceEntryTool: p.entry_tool || "",
+            sourceSteps: p.steps && p.steps.length ? JSON.stringify(p.steps) : "",
+            sourceToolDeps: p.tool_deps && p.tool_deps.length ? JSON.stringify(p.tool_deps) : "",
+            sourceEdition: "",
+            sourceGovernance: ""
+        };
+        showToast("Saving...");
+        fetch(API, {
+            method: "POST",
+            headers: {"Content-Type":"application/x-www-form-urlencoded"},
+            body: "action=save-custom&" + Object.keys(body).map(function(k){ return encodeURIComponent(k) + "=" + encodeURIComponent(body[k]); }).join("&")
+        }).then(function(r){ return r.json(); }).then(function(res) {
+            if (res.success) {
+                showToast("Saved as user prompt #" + res.recordId + ". Reload to see it in the Library.");
+                var body2 = document.querySelector("#modalContent .modal-body");
+                if (body2) {
+                    var msg = document.createElement("div");
+                    msg.style.cssText = "background:#e6f4ea;border-left:3px solid #137333;padding:10px 14px;margin-top:12px;font-size:13px;border-radius:4px";
+                    msg.innerHTML = '<b>Saved.</b> Your customized prompt is record <b>#' + res.recordId + '</b>. ' +
+                        (res.recordUrl ? '<a href="' + res.recordUrl + '" target="_blank" rel="noopener" style="color:#137333;font-weight:600">Open record &rarr;</a>' : '');
+                    body2.appendChild(msg);
+                }
+            } else {
+                showToast("Save failed: " + (res.error || "unknown error"));
+            }
+        }).catch(function(e) { showToast("Save failed: " + e.message); });
+    };
     window.__showToast = showToast;
     document.getElementById("modalOverlay").addEventListener("click", function(e) { if (e.target === this) window.__closeModal(); });
 
-    document.getElementById("searchInput").addEventListener("input", applyFilters);
-    document.getElementById("domainSelect").addEventListener("change", applyFilters);
-    document.getElementById("editionSelect").addEventListener("change", applyFilters);
-    document.getElementById("govSelect").addEventListener("change", applyFilters);
+    // ========== FILTER WIRING ==========
+
+    document.getElementById("searchInput").addEventListener("input", applyCraftedFilters);
+    document.getElementById("categorySelect").addEventListener("change", applyCraftedFilters);
+    document.getElementById("editionSelect").addEventListener("change", applyCraftedFilters);
+    document.getElementById("complexitySelect").addEventListener("change", applyCraftedFilters);
+    document.getElementById("govSelect").addEventListener("change", applyCraftedFilters);
     document.getElementById("clearFilters").addEventListener("click", function() {
-        document.getElementById("searchInput").value = "";
-        document.getElementById("domainSelect").value = "";
-        document.getElementById("editionSelect").value = "";
-        document.getElementById("govSelect").value = "";
-        applyFilters();
+        ["searchInput","categorySelect","editionSelect","complexitySelect","govSelect"].forEach(function(id) {
+            document.getElementById(id).value = "";
+        });
+        applyCraftedFilters();
+    });
+    document.getElementById("atlasSearchInput").addEventListener("input", applyAtlasFilters);
+    document.getElementById("atlasCategorySelect").addEventListener("change", applyAtlasFilters);
+    document.getElementById("atlasIndustrySelect").addEventListener("change", applyAtlasFilters);
+    document.getElementById("atlasRoleSelect").addEventListener("change", applyAtlasFilters);
+    document.getElementById("atlasClearFilters").addEventListener("click", function() {
+        ["atlasSearchInput","atlasCategorySelect","atlasIndustrySelect","atlasRoleSelect"].forEach(function(id) {
+            document.getElementById(id).value = "";
+        });
+        applyAtlasFilters();
     });
 
     init();

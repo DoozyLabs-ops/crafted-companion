@@ -1,19 +1,27 @@
 /**
  * dz_sl_companion_seed.js
- * Crafted Companion — Seed Utility Suitelet
+ * Crafted Intelligence - Prompt Deployment Dashboard Suitelet
  *
- * Two actions:
- *   ?action=seed-meta   — Seeds/updates extension records from seed-data.json
- *   ?action=mirror-roles — Mirrors account NS roles as AI Companion prompt roles
+ * GET: Serves a dashboard showing seed data version, deployed version,
+ *      prompts to create/update/skip, and a Deploy button.
+ * POST: JSON API
+ *   action=deploy   - Triggers the prompt seed Map/Reduce script
+ *   action=status   - Checks M/R job status for polling
+ *   action=preview  - Previews role resolution without creating records
+ *   action=export   - Returns current prompt records as JSON (backup)
  *
- * Run via URL after SDF deploy. Idempotent — safe to re-run.
+ * Replaces the v1 seed + mirror-roles inline logic. Delegates bulk seeding
+ * to customscript_dz_mr_promptseed for governance and retry safety.
  *
  * @NApiVersion 2.1
  * @NScriptType Suitelet
  */
-define(['N/query', 'N/record', 'N/file', 'N/log', 'N/runtime'], function (query, record, file, log, runtime) {
+define(['N/query', 'N/file', 'N/task', 'N/log', 'N/runtime', 'N/ui/serverWidget'], function (query, file, task, log, runtime, serverWidget) {
 
-    var SCRIPT_VERSION = '1.0.0';
+    var SCRIPT_VERSION = '2.0.0';
+    var MR_SCRIPT_ID = 'customscript_dz_mr_promptseed';
+    var MR_DEPLOY_ID = 'customdeploy_dz_mr_promptseed';
+    var SEED_FILE_PATH = 'SuiteScripts/DoozyTools/companion-tools/seed-data.json';
 
     // ========== HELPERS ==========
 
@@ -37,189 +45,261 @@ define(['N/query', 'N/record', 'N/file', 'N/log', 'N/runtime'], function (query,
         response.write(JSON.stringify(data, null, 2));
     }
 
-    // ========== SEED EXTENSION RECORDS ==========
-
-    function seedMeta(response) {
-        var results = { action: 'seed-meta', created: [], updated: [], skipped: [], errors: [], version: SCRIPT_VERSION };
-
-        // Load seed data from File Cabinet
-        var seedFiles = runSQL(
+    function loadSeedData() {
+        var files = runSQL(
             "SELECT id FROM file WHERE name = 'seed-data.json' AND folder IN (SELECT id FROM mediaitemfolder WHERE name = 'companion-tools')"
         );
-
-        if (!seedFiles || seedFiles.length === 0) {
-            // Try broader search
-            seedFiles = runSQL("SELECT id FROM file WHERE name = 'seed-data.json'");
-        }
-
-        if (!seedFiles || seedFiles.length === 0) {
-            results.errors.push('seed-data.json not found in File Cabinet. Upload it to SuiteScripts/DoozyTools/companion-tools/ or any folder.');
-            jsonResponse(response, results);
-            return;
-        }
-
-        var seedFile = file.load({ id: seedFiles[0].id });
-        var seedData = JSON.parse(seedFile.getContents());
-        var defaults = seedData.defaults || {};
-        var prompts = seedData.prompts || [];
-
-        log.audit({ title: 'seedMeta', details: 'Loaded ' + prompts.length + ' prompts from seed-data.json' });
-
-        // Get existing extension records by prompt_ref
-        var existingRows = runSQL('SELECT id, custrecord_dz_pm_prompt_ref AS prompt_ref, externalid FROM customrecord_dz_prompt_meta');
-        var existingByRef = {};
-        existingRows.forEach(function (row) {
-            existingByRef[row.prompt_ref] = row;
-        });
-
-        prompts.forEach(function (p) {
-            try {
-                var existing = existingByRef[p.prompt_ref];
-                var rec;
-                var isUpdate = false;
-
-                if (existing) {
-                    rec = record.load({ type: 'customrecord_dz_prompt_meta', id: existing.id });
-                    isUpdate = true;
-                } else {
-                    rec = record.create({ type: 'customrecord_dz_prompt_meta' });
-                }
-
-                rec.setValue({ fieldId: 'name', value: p.name });
-                rec.setValue({ fieldId: 'externalid', value: p.external_id });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_prompt_ref', value: p.prompt_ref });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_domain', value: p.domain || defaults.domain });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_subdomain', value: p.subdomain || '' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_toolset', value: p.toolset || defaults.toolset });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_tool_chain', value: p.tool_chain || '' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_entry_tool', value: p.entry_tool || '' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_steps', value: p.steps ? JSON.stringify(p.steps) : '' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_tool_deps', value: p.tool_deps || defaults.tool_deps || '' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_edition', value: p.edition || defaults.edition });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_edition_notes', value: p.edition_notes || defaults.edition_notes || '' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_params', value: p.params ? JSON.stringify(p.params) : '' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_safety_rules', value: p.safety_rules ? JSON.stringify(p.safety_rules) : '' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_governance', value: p.governance || defaults.governance || 1 });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_artifact', value: p.artifact === true });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_artifact_type', value: p.artifact_type || '' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_version', value: p.version || defaults.version || '1.0.0' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_author', value: p.author || defaults.author || 'Doozy Labs' });
-                rec.setValue({ fieldId: 'custrecord_dz_pm_status', value: p.status || defaults.status || 1 });
-
-                var savedId = rec.save();
-
-                if (isUpdate) {
-                    results.updated.push({ id: savedId, name: p.name, prompt_ref: p.prompt_ref });
-                } else {
-                    results.created.push({ id: savedId, name: p.name, prompt_ref: p.prompt_ref });
-                }
-            } catch (e) {
-                log.error({ title: 'seedMeta', details: p.name + ': ' + e.message });
-                results.errors.push({ name: p.name, prompt_ref: p.prompt_ref, error: e.message });
-            }
-        });
-
-        results.summary = results.created.length + ' created, ' + results.updated.length + ' updated, ' + results.errors.length + ' errors';
-        log.audit({ title: 'seedMeta', details: results.summary });
-        jsonResponse(response, results);
+        if (!files || files.length === 0) files = runSQL("SELECT id FROM file WHERE name = 'seed-data.json'");
+        if (!files || files.length === 0) return null;
+        var f = file.load({ id: files[0].id });
+        try { return JSON.parse(f.getContents()); } catch (e) { return null; }
     }
 
-    // ========== MIRROR ROLES ==========
+    function isNewer(seedVer, deployedVer) {
+        var s = (seedVer || '0.0.0').split('.').map(function (n) { return parseInt(n, 10) || 0; });
+        var d = (deployedVer || '0.0.0').split('.').map(function (n) { return parseInt(n, 10) || 0; });
+        for (var i = 0; i < 3; i++) {
+            if ((s[i] || 0) > (d[i] || 0)) return true;
+            if ((s[i] || 0) < (d[i] || 0)) return false;
+        }
+        return false;
+    }
 
-    function mirrorRoles(response) {
-        var results = { action: 'mirror-roles', created: [], existing: [], mapped: [], errors: [], version: SCRIPT_VERSION };
+    // ========== DIFF: seed vs deployed ==========
 
-        // Step 1: Get all active NS roles in this account
-        var nsRoles = runSQL(
-            "SELECT id, name FROM role WHERE isinactive = 'F' ORDER BY name"
+    function computeDiff() {
+        var diff = { create: [], update: [], skip: [], orphan: [], seed_version: '', prompt_count: 0 };
+
+        var seed = loadSeedData();
+        if (!seed) { diff.error = 'seed-data.json not found or invalid JSON'; return diff; }
+        diff.seed_version = seed.version || 'unknown';
+        diff.prompt_count = (seed.prompts || []).length;
+
+        var deployedRows = runSQL(
+            'SELECT id, externalid, name, custrecord_dz_cp_version AS version ' +
+            'FROM customrecord_dz_companion_prompt'
         );
-        log.audit({ title: 'mirrorRoles', details: 'Found ' + nsRoles.length + ' active NS roles' });
+        var deployedByExtId = {};
+        deployedRows.forEach(function (r) { if (r.externalid) deployedByExtId[r.externalid] = r; });
 
-        // Step 2: Get existing AI Companion prompt roles
-        var companionRoles = runSQL(
-            'SELECT id, name, externalid FROM customrecord_atlas_aicomp_prompt_roles ORDER BY name'
-        );
-        var companionByName = {};
-        companionRoles.forEach(function (r) {
-            companionByName[r.name.toLowerCase().trim()] = r;
-        });
-        log.audit({ title: 'mirrorRoles', details: 'Found ' + companionRoles.length + ' existing Companion roles' });
-
-        // Step 3: Get existing role mappings
-        var mappings = runSQL(
-            'SELECT id, custrecord_atlas_aicomp_rm_ns_role AS ns_role, custrecord_atlas_aicomp_rm_comp_role AS comp_role FROM customrecord_atlas_aicomp_role_mapping'
-        );
-        var mappedNsRoles = {};
-        mappings.forEach(function (m) {
-            mappedNsRoles[m.ns_role] = m;
-        });
-
-        // Step 4: For each NS role, ensure a Companion role exists and is mapped
-        nsRoles.forEach(function (nsRole) {
-            try {
-                var roleName = nsRole.name.trim();
-                var key = roleName.toLowerCase();
-                var companionRole = companionByName[key];
-
-                if (!companionRole) {
-                    // Create new Companion role
-                    var extId = 'aipromptrole_crafted_' + nsRole.id;
-                    var newRole = record.create({ type: 'customrecord_atlas_aicomp_prompt_roles' });
-                    newRole.setValue({ fieldId: 'name', value: roleName });
-                    newRole.setValue({ fieldId: 'externalid', value: extId });
-                    var newId = newRole.save();
-
-                    companionRole = { id: newId, name: roleName, externalid: extId };
-                    companionByName[key] = companionRole;
-                    results.created.push({ companion_id: newId, name: roleName, ns_role_id: nsRole.id });
-                } else {
-                    results.existing.push({ companion_id: companionRole.id, name: roleName, ns_role_id: nsRole.id });
-                }
-
-                // Ensure role mapping exists
-                if (!mappedNsRoles[nsRole.id]) {
-                    var mapping = record.create({ type: 'customrecord_atlas_aicomp_role_mapping' });
-                    mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_ns_role', value: nsRole.id });
-                    mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_comp_role', value: companionRole.id });
-                    mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_confidence', value: 100 });
-                    mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_rm_method', value: 3 }); // Manual Override
-                    var mapId = mapping.save();
-                    results.mapped.push({ mapping_id: mapId, ns_role: roleName, companion_role: companionRole.name });
-                }
-            } catch (e) {
-                log.error({ title: 'mirrorRoles', details: nsRole.name + ': ' + e.message });
-                results.errors.push({ ns_role: nsRole.name, ns_role_id: nsRole.id, error: e.message });
+        var seedExtIds = {};
+        (seed.prompts || []).forEach(function (p) {
+            seedExtIds[p.external_id] = true;
+            var deployed = deployedByExtId[p.external_id];
+            if (!deployed) {
+                diff.create.push({ external_id: p.external_id, name: p.name, seed_version: p.version || '1.0.0' });
+            } else if (isNewer(p.version || '1.0.0', deployed.version || '0.0.0')) {
+                diff.update.push({
+                    external_id: p.external_id, name: p.name,
+                    deployed_version: deployed.version, seed_version: p.version || '1.0.0', id: deployed.id
+                });
+            } else {
+                diff.skip.push({ external_id: p.external_id, name: p.name, version: deployed.version });
             }
         });
 
-        results.summary = results.created.length + ' roles created, ' +
-            results.existing.length + ' already existed, ' +
-            results.mapped.length + ' new mappings, ' +
-            results.errors.length + ' errors';
-        log.audit({ title: 'mirrorRoles', details: results.summary });
-        jsonResponse(response, results);
+        // Orphans: deployed but not in seed (customer-created or deprecated)
+        Object.keys(deployedByExtId).forEach(function (extId) {
+            if (!seedExtIds[extId]) {
+                var r = deployedByExtId[extId];
+                diff.orphan.push({ external_id: extId, name: r.name, version: r.version, id: r.id });
+            }
+        });
+
+        return diff;
+    }
+
+    // ========== POST ACTIONS ==========
+
+    function triggerDeploy() {
+        try {
+            var mrTask = task.create({
+                taskType: task.TaskType.MAP_REDUCE,
+                scriptId: MR_SCRIPT_ID,
+                deploymentId: MR_DEPLOY_ID
+            });
+            var taskId = mrTask.submit();
+            log.audit({ title: 'deploy triggered', details: 'MR task ID: ' + taskId });
+            return { success: true, taskId: taskId, message: 'Map/Reduce seed triggered. Poll status for completion.' };
+        } catch (e) {
+            log.error({ title: 'deploy failed', details: e.message });
+            return { success: false, error: e.message };
+        }
+    }
+
+    function checkStatus(taskId) {
+        if (!taskId) return { error: 'taskId is required' };
+        try {
+            var status = task.checkStatus({ taskId: taskId });
+            return { taskId: taskId, status: status.status || 'unknown' };
+        } catch (e) {
+            return { taskId: taskId, error: e.message };
+        }
+    }
+
+    function previewRoles() {
+        // Simulate role resolution against account roles without creating records.
+        // Returns the pattern-to-role map so admin can verify before deploy.
+        var seed = loadSeedData();
+        if (!seed) return { error: 'seed-data.json not found' };
+
+        var allRoles = runSQL("SELECT id, name FROM role WHERE isinactive = 'F' ORDER BY name");
+        var patternMap = {};
+
+        (seed.prompts || []).forEach(function (p) {
+            (p.role_patterns || []).forEach(function (pattern) {
+                if (!patternMap[pattern]) patternMap[pattern] = [];
+            });
+        });
+
+        Object.keys(patternMap).forEach(function (pattern) {
+            var lower = pattern.toLowerCase();
+            allRoles.forEach(function (role) {
+                var roleName = (role.name || '').toLowerCase();
+                if (roleName.indexOf(lower) !== -1) {
+                    patternMap[pattern].push({ id: parseInt(role.id, 10), name: role.name });
+                }
+            });
+        });
+
+        return {
+            total_patterns: Object.keys(patternMap).length,
+            total_active_roles: allRoles.length,
+            pattern_matches: patternMap
+        };
+    }
+
+    function exportPrompts() {
+        var rows = runSQL(
+            'SELECT id, name, externalid, ' +
+            'custrecord_dz_cp_version AS version, ' +
+            'BUILTIN.DF(custrecord_dz_cp_category) AS category, ' +
+            'BUILTIN.DF(custrecord_dz_cp_status) AS status ' +
+            'FROM customrecord_dz_companion_prompt ORDER BY externalid'
+        );
+        return { count: rows.length, exported_at: new Date().toISOString(), prompts: rows };
+    }
+
+    function handlePost(context) {
+        var action = context.request.parameters.action;
+        if (action === 'deploy') {
+            jsonResponse(context.response, triggerDeploy());
+        } else if (action === 'status') {
+            jsonResponse(context.response, checkStatus(context.request.parameters.taskId));
+        } else if (action === 'preview') {
+            jsonResponse(context.response, previewRoles());
+        } else if (action === 'export') {
+            jsonResponse(context.response, exportPrompts());
+        } else if (action === 'diff') {
+            jsonResponse(context.response, computeDiff());
+        } else {
+            jsonResponse(context.response, { error: 'Unknown action: ' + action });
+        }
+    }
+
+    // ========== GET: HTML DASHBOARD ==========
+
+    function renderDashboard() {
+        var diff = computeDiff();
+        var parts = [];
+        parts.push('<style>');
+        parts.push('body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;padding:20px;color:#333}');
+        parts.push('.hdr{display:flex;gap:40px;margin-bottom:24px;padding:16px;background:#f5f7fa;border-radius:6px}');
+        parts.push('.hdr div{font-size:14px}');
+        parts.push('.hdr b{display:block;font-size:20px;color:#1a1a1a}');
+        parts.push('.sec{margin-bottom:24px}');
+        parts.push('.sec h3{margin:0 0 8px 0;font-size:15px;color:#333}');
+        parts.push('table{width:100%;border-collapse:collapse;font-size:13px}');
+        parts.push('th,td{text-align:left;padding:6px 10px;border-bottom:1px solid #eee}');
+        parts.push('th{background:#f5f7fa;font-weight:600}');
+        parts.push('.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}');
+        parts.push('.pill.create{background:#e6f4ea;color:#137333}');
+        parts.push('.pill.update{background:#fef7e0;color:#b06000}');
+        parts.push('.pill.skip{background:#e8eaed;color:#5f6368}');
+        parts.push('.pill.orphan{background:#fce8e6;color:#c5221f}');
+        parts.push('button{background:#1a73e8;color:#fff;border:0;padding:10px 20px;border-radius:4px;font-size:14px;cursor:pointer;margin-right:8px}');
+        parts.push('button:disabled{opacity:0.5;cursor:not-allowed}');
+        parts.push('button.sec-btn{background:#fff;color:#1a73e8;border:1px solid #dadce0}');
+        parts.push('#status{margin-top:16px;padding:12px;background:#f5f7fa;border-radius:4px;display:none}');
+        parts.push('</style>');
+
+        parts.push('<h2>Crafted Intelligence Prompt Deployment</h2>');
+        parts.push('<div class="hdr">');
+        parts.push('<div>Seed Version<b>' + (diff.seed_version || '—') + '</b></div>');
+        parts.push('<div>Total in Seed<b>' + diff.prompt_count + '</b></div>');
+        parts.push('<div>To Create<b>' + diff.create.length + '</b></div>');
+        parts.push('<div>To Update<b>' + diff.update.length + '</b></div>');
+        parts.push('<div>Up to Date<b>' + diff.skip.length + '</b></div>');
+        parts.push('<div>Orphans<b>' + diff.orphan.length + '</b></div>');
+        parts.push('</div>');
+
+        if (diff.error) {
+            parts.push('<p style="color:#c5221f"><b>Error:</b> ' + diff.error + '</p>');
+        }
+
+        parts.push('<div class="sec"><button id="deploy">Deploy Prompts</button><button id="preview" class="sec-btn">Preview Role Resolution</button><button id="export" class="sec-btn">Export Current Prompts</button></div>');
+        parts.push('<div id="status"></div>');
+
+        if (diff.create.length) {
+            parts.push('<div class="sec"><h3><span class="pill create">CREATE</span> ' + diff.create.length + ' new prompts</h3>');
+            parts.push('<table><tr><th>External ID</th><th>Name</th><th>Version</th></tr>');
+            diff.create.forEach(function (p) {
+                parts.push('<tr><td>' + p.external_id + '</td><td>' + p.name + '</td><td>' + p.seed_version + '</td></tr>');
+            });
+            parts.push('</table></div>');
+        }
+        if (diff.update.length) {
+            parts.push('<div class="sec"><h3><span class="pill update">UPDATE</span> ' + diff.update.length + ' prompts with newer versions</h3>');
+            parts.push('<table><tr><th>External ID</th><th>Name</th><th>Deployed</th><th>Seed</th></tr>');
+            diff.update.forEach(function (p) {
+                parts.push('<tr><td>' + p.external_id + '</td><td>' + p.name + '</td><td>' + p.deployed_version + '</td><td>' + p.seed_version + '</td></tr>');
+            });
+            parts.push('</table></div>');
+        }
+        if (diff.orphan.length) {
+            parts.push('<div class="sec"><h3><span class="pill orphan">ORPHAN</span> ' + diff.orphan.length + ' deployed but not in seed</h3>');
+            parts.push('<table><tr><th>External ID</th><th>Name</th><th>Version</th></tr>');
+            diff.orphan.forEach(function (p) {
+                parts.push('<tr><td>' + p.external_id + '</td><td>' + p.name + '</td><td>' + p.version + '</td></tr>');
+            });
+            parts.push('</table></div>');
+        }
+
+        var scriptUrl = '/app/site/hosting/scriptlet.nl?script=' +
+            runtime.getCurrentScript().id + '&deploy=' +
+            runtime.getCurrentScript().deploymentId;
+
+        parts.push('<script>(function(){');
+        parts.push('var api = ' + JSON.stringify(scriptUrl) + ';');
+        parts.push('function post(action, body){var b="action="+action;if(body){Object.keys(body).forEach(function(k){b+="&"+encodeURIComponent(k)+"="+encodeURIComponent(body[k])})}return fetch(api,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:b}).then(function(r){return r.json()})}');
+        parts.push('var s = document.getElementById("status");');
+        parts.push('function show(msg){s.style.display="block";s.innerHTML=msg}');
+        parts.push('document.getElementById("deploy").onclick=function(){show("Triggering Map/Reduce...");post("deploy").then(function(r){if(r.success){show("Deploy triggered. Task ID: "+r.taskId+". <a href=\\"#\\" onclick=\\"checkStatus(\'"+r.taskId+"\')\\">Check status</a>")}else{show("<span style=color:#c5221f>Error: "+r.error+"</span>")}})};');
+        parts.push('window.checkStatus=function(tid){post("status",{taskId:tid}).then(function(r){show("Task "+tid+": "+r.status)})};');
+        parts.push('document.getElementById("preview").onclick=function(){show("Computing role matches...");post("preview").then(function(r){show("<pre>"+JSON.stringify(r,null,2)+"</pre>")})};');
+        parts.push('document.getElementById("export").onclick=function(){post("export").then(function(r){show("Exported "+r.count+" prompts. <pre>"+JSON.stringify(r,null,2)+"</pre>")})};');
+        parts.push('})();</script>');
+        return parts.join('\n');
+    }
+
+    function serveHTML(context) {
+        var form = serverWidget.createForm({ title: 'Crafted Intelligence Prompt Deployment' });
+        form.addField({
+            id: 'custpage_seed_html',
+            type: serverWidget.FieldType.INLINEHTML,
+            label: ' '
+        }).defaultValue = renderDashboard();
+        context.response.writePage(form);
     }
 
     // ========== ENTRY POINT ==========
 
     function onRequest(context) {
-        var action = context.request.parameters.action;
-
-        if (action === 'seed-meta') {
-            seedMeta(context.response);
-        } else if (action === 'mirror-roles') {
-            mirrorRoles(context.response);
+        if (context.request.method === 'POST') {
+            try { handlePost(context); }
+            catch (e) { log.error({ title: 'seed POST', details: e.message }); jsonResponse(context.response, { error: e.message }); }
         } else {
-            jsonResponse(context.response, {
-                name: 'Crafted Companion Seed Utility',
-                version: SCRIPT_VERSION,
-                actions: {
-                    'seed-meta': 'Seeds/updates extension records from seed-data.json. Idempotent.',
-                    'mirror-roles': 'Mirrors account NS roles as AI Companion prompt roles with mappings. Idempotent.'
-                },
-                usage: 'Append ?action=seed-meta or ?action=mirror-roles to this URL.',
-                account: runtime.accountId
-            });
+            serveHTML(context);
         }
     }
 

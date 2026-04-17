@@ -1,0 +1,289 @@
+<customrecordtype scriptid="customrecord_dz_companion_prompt">
+    <recordname>Crafted Intelligence Prompt</recordname>
+    <aidescription>Crafted Intelligence prompt record. Stores prompt text, orchestration metadata (tool chain, steps, safety rules, governance), edition targeting, role visibility, and usage analytics. Independent from Oracle AI Companion. Retrieved by getPromptMeta via MCP.</aidescription>
+    <includename>T</includename>
+    <showid>T</showid>
+    <shownotes>T</shownotes>
+    <enablenumbering>F</enablenumbering>
+    <allowinlineediting>T</allowinlineediting>
+    <allowquickadd>F</allowquickadd>
+    <accesstype>USEPERMISSIONLIST</accesstype>
+    <customrecordcustomfields>
+        <!-- ========== PROMPT IDENTITY ========== -->
+        <customrecordcustomfield scriptid="custrecord_dz_cp_prompt_text">
+            <label>Prompt Text</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <ismandatory>T</ismandatory>
+            <description>Full user-facing prompt text. Displayed in Companion Library and sent to AI assistants. Contains tool routing instructions, orchestration header [Crafted Prompt #ID ...], and parameter placeholders like [BARREL NUMBER].</description>
+            <help>Enter the complete prompt text. The AI sends this to Claude/ChatGPT/etc. when a user selects the prompt. Include a Crafted header like "[Crafted Prompt #123 - call getPromptMeta(123) first]" to trigger orchestration.</help>
+            <aidescription>Full user-facing prompt text. Displayed in Companion Library and sent to AI assistants. Contains tool routing instructions and parameter placeholders like [BARREL NUMBER].</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_category">
+            <label>Category</label>
+            <fieldtype>SELECT</fieldtype>
+            <selectrecordtype>[scriptid=customlist_dz_cp_category]</selectrecordtype>
+            <displaytype>NORMAL</displaytype>
+            <ismandatory>T</ismandatory>
+            <description>Crafted Intelligence domain category. Maps to a toolset package (e.g., Barrel Operations = barrel-intelligence toolset). Used for category tab filtering in the Companion Library SPA.</description>
+            <help>Select the Crafted Intelligence category. This determines which tab the prompt appears under in the Companion Library.</help>
+            <aidescription>Crafted Intelligence domain category (Barrel Operations, Lot Profitability, etc.). Used for category tab filtering in the Companion Library SPA.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_subcategory">
+            <label>Subcategory</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>200</displaywidth>
+            <description>Finer-grained categorization within the category. Free text field (e.g., "Barrel Valuation &amp; Finance", "Barrel Aging &amp; Cooperage"). Used for grouping within a category tab in the Library SPA.</description>
+            <help>Optional subcategory for finer grouping within the category tab (e.g., "Barrel Valuation &amp; Finance").</help>
+            <aidescription>Finer categorization within a category (e.g., "Barrel Valuation &amp; Finance"). Used for grouping within category tabs in the Library SPA.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_public">
+            <label>Public</label>
+            <fieldtype>CHECKBOX</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <defaultvalue>T</defaultvalue>
+            <description>Whether this prompt is visible in the Companion Library SPA. Set to F for internal or testing prompts that should only be accessible via direct getPromptMeta call, not browsed by end users.</description>
+            <help>Check to display this prompt in the Companion Library. Uncheck for internal/testing prompts.</help>
+            <aidescription>Whether prompt is visible in the Library SPA. Set to F for internal or testing prompts that should only be accessible via direct getPromptMeta call.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_description">
+            <label>Description</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>400</displaywidth>
+            <description>Short 1-2 sentence description for the Library SPA prompt card. Helps users understand what the prompt does before selecting it. Distinct from the prompt text itself.</description>
+            <help>Enter a brief description (1-2 sentences) shown on the prompt card in the Library SPA.</help>
+            <aidescription>Short 1-2 sentence description for the Library SPA prompt card. Helps users understand what the prompt does before selecting it.</aidescription>
+        </customrecordcustomfield>
+        <!-- ========== ROLE VISIBILITY ========== -->
+        <customrecordcustomfield scriptid="custrecord_dz_cp_visible_roles">
+            <label>Visible To Roles</label>
+            <fieldtype>MULTISELECT</fieldtype>
+            <selectrecordtype>-118</selectrecordtype>
+            <displaytype>NORMAL</displaytype>
+            <description>Roles authorized to see this prompt in the Library SPA. Empty means visible to all roles. Sources from the account's actual NetSuite roles (native role record, type -118). Set during seed by matching role name patterns against account roles.</description>
+            <help>Select which NetSuite roles can see this prompt. Leave empty to make the prompt visible to everyone.</help>
+            <aidescription>Roles that can see this prompt in the Library SPA. Empty means visible to all roles. Sources from the account's NetSuite roles. Set during seed by matching role name patterns.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_role_patterns">
+            <label>Role Seed Patterns</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>HIDDEN</displaytype>
+            <description>JSON array of role name patterns used by the seed script to auto-populate visible_roles. Internal use only (hidden from UI). Example: ["Administrator","Warehouse","Production"]. Patterns matched case-insensitive contains against account role names.</description>
+            <help>Internal field. Populated by the seed script with role name patterns for auto-matching to account roles.</help>
+            <aidescription>JSON array of role name patterns used by the seed script to auto-populate visible_roles. Internal use only. Example: ["Administrator","Warehouse","Production"].</aidescription>
+        </customrecordcustomfield>
+        <!-- ========== ORCHESTRATION ========== -->
+        <customrecordcustomfield scriptid="custrecord_dz_cp_toolset">
+            <label>Toolset</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>200</displaywidth>
+            <ismandatory>T</ismandatory>
+            <description>Script ID of the primary toolset this prompt depends on (e.g., "barrel-intelligence"). Used by the SPA for hard tool validation: if this toolset is not deployed and connected, the prompt is hidden from the Companion Library.</description>
+            <help>Enter the toolset script ID that this prompt depends on. The prompt will be hidden from the Companion Library if this toolset is not deployed.</help>
+            <aidescription>Primary toolset script ID (e.g., "barrel-intelligence"). Used for hard tool validation in the SPA: prompt is hidden if toolset is not deployed and connected.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_tool_chain">
+            <label>Tool Chain</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>400</displaywidth>
+            <description>Human-readable ordered sequence of tool calls (e.g., "getBarrelProfile -&gt; getBarrelCostTrace"). Displayed in the SPA prompt detail modal as a tool chain preview. For machine-readable orchestration, see the Steps field.</description>
+            <help>Enter the ordered tool call sequence using arrow notation (e.g., "toolA -&gt; toolB -&gt; toolC").</help>
+            <aidescription>Human-readable ordered tool sequence (e.g., "getBarrelProfile -&gt; getBarrelCostTrace"). Displayed in SPA detail modal. For machine-readable steps, see the Steps JSON field.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_entry_tool">
+            <label>Entry Tool</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>200</displaywidth>
+            <description>Name of the first tool the AI should call when executing this prompt. Starting point of the tool chain. For single-tool prompts, this is the only tool called.</description>
+            <help>Enter the name of the first tool in the tool chain (e.g., "getBarrelProfile").</help>
+            <aidescription>First tool the AI calls when executing this prompt. Starting point of the tool chain. For single-tool prompts, this is the only tool called.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_steps">
+            <label>Steps</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>JSON array of ordered orchestration steps. Each step: call (tool name), purpose, condition (when to run), depends_on (prior step), params_from (user params). The AI uses this to execute the tool chain in order with conditional logic.</description>
+            <help>JSON array. Example: [{"call":"getBarrelProfile","purpose":"Resolve barrel","params_from":["BARREL NUMBER"]},{"call":"getBarrelCostTrace","condition":"profile.status != 'Empty'","depends_on":"getBarrelProfile"}]</help>
+            <aidescription>JSON array of ordered orchestration steps. Each step: call (tool name), purpose, condition (when to run), depends_on (prior step), params_from (user params). AI uses this for tool chain execution.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_tool_deps">
+            <label>Tool Dependencies</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>JSON array of toolset script IDs that must be deployed for this prompt to function. Used by the SPA for hard tool validation: all listed toolsets must be present or the prompt is hidden.</description>
+            <help>JSON array of required toolset script IDs. Example: ["barrel-intelligence"] or ["barrel-intelligence","inventory-supply"].</help>
+            <aidescription>JSON array of required toolset script IDs (e.g., ["barrel-intelligence"]). All must be deployed for the prompt to appear in the SPA. Used for hard tool validation.</aidescription>
+        </customrecordcustomfield>
+        <!-- ========== EDITION ========== -->
+        <customrecordcustomfield scriptid="custrecord_dz_cp_edition">
+            <label>Edition</label>
+            <fieldtype>SELECT</fieldtype>
+            <selectrecordtype>[scriptid=customlist_dz_pm_edition]</selectrecordtype>
+            <displaytype>NORMAL</displaytype>
+            <ismandatory>T</ismandatory>
+            <description>Crafted ERP edition this prompt targets. Cross-Edition prompts appear in all edition filters. Edition-specific prompts only appear when the account has that edition active (via detectAccountConfig).</description>
+            <help>Select the Crafted ERP edition this prompt targets. Cross-Edition means the prompt works for all editions.</help>
+            <aidescription>Crafted ERP edition this prompt targets (Distillery, Winery, Brewery, Cross-Edition). Used for SPA edition filtering and AI edition-aware logic via detectAccountConfig.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_edition_notes">
+            <label>Edition Notes</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>Free text guidance for the AI on edition-specific behavior differences. For example: "Distillery: use proof gallons. Winery: use cost-per-gallon." The AI reads this after detectAccountConfig to adapt its analysis to the account's edition.</description>
+            <help>Optional notes explaining how the prompt behaves differently across editions.</help>
+            <aidescription>Edition-specific behavior guidance for the AI (e.g., "Distillery: proof gallons. Winery: cost-per-gallon."). AI reads this after detectAccountConfig to adapt analysis.</aidescription>
+        </customrecordcustomfield>
+        <!-- ========== PARAMETERS & SAFETY ========== -->
+        <customrecordcustomfield scriptid="custrecord_dz_cp_params">
+            <label>Parameters</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>JSON object defining user-facing parameters the AI should collect before executing this prompt. Each param: type, required, hint, resolves_to (tool mapping). Advisory for the AI - no UI drives this.</description>
+            <help>JSON schema. Example: {"BARREL NUMBER":{"type":"text","required":true,"hint":"e.g. 092425-02"}}</help>
+            <aidescription>JSON parameter schema for user inputs. Each param: type, required, hint, resolves_to (tool mapping). Advisory for the AI to collect and validate user input before executing.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_safety_rules">
+            <label>Safety Rules</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>JSON array of non-hallucination and data quality rules the AI must follow when executing this prompt. Examples: "Never fabricate barrel costs", "Flag zero-cost barrels as data quality issues".</description>
+            <help>JSON array of safety rules. Example: ["Never fabricate barrel costs","Flag zero-cost as data quality issue"].</help>
+            <aidescription>JSON array of non-hallucination and data quality rules. AI enforces these during execution (e.g., "Never fabricate barrel costs", "Flag zero-cost as data quality issue").</aidescription>
+        </customrecordcustomfield>
+        <!-- ========== GOVERNANCE & ARTIFACTS ========== -->
+        <customrecordcustomfield scriptid="custrecord_dz_cp_governance">
+            <label>Governance Level</label>
+            <fieldtype>SELECT</fieldtype>
+            <selectrecordtype>[scriptid=customlist_dz_pm_complexity]</selectrecordtype>
+            <displaytype>NORMAL</displaytype>
+            <ismandatory>T</ismandatory>
+            <description>Governance tier controlling how the AI orchestrates this prompt. Minimal: single tool, direct execute. Standard: tool chain with edition logic. Governed: safety checks and anomaly flagging. Supervised: user confirmation for writes.</description>
+            <help>Select the governance level. Higher levels add more AI guardrails.</help>
+            <aidescription>Governance tier (Minimal, Standard, Governed, Supervised). Controls AI orchestration behavior: safety checks, edition logic, anomaly flagging, user confirmation for writes.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_artifact">
+            <label>Generates Artifact</label>
+            <fieldtype>CHECKBOX</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <defaultvalue>F</defaultvalue>
+            <description>Whether this prompt produces a visual artifact (HTML dashboard, chart, table) as its primary output. When true, the AI generates a formatted artifact using Crafted design tokens.</description>
+            <help>Check if this prompt generates a visual artifact as its primary output.</help>
+            <aidescription>Whether this prompt generates a visual artifact (dashboard, chart, table). When true, AI produces formatted output using Crafted design tokens. See artifact_type for format.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_artifact_type">
+            <label>Artifact Type</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>200</displaywidth>
+            <description>Type of visual artifact this prompt generates (e.g., "cost-waterfall", "kpi-dashboard", "aging-chart"). Only relevant when Generates Artifact is checked. The AI uses this to select the appropriate output format.</description>
+            <help>Enter the artifact type (e.g., "cost-waterfall"). Only used when Generates Artifact is checked.</help>
+            <aidescription>Artifact format type (e.g., "cost-waterfall", "kpi-dashboard", "aging-chart"). AI uses this to select output format. Only used when artifact=T.</aidescription>
+        </customrecordcustomfield>
+        <!-- ========== METADATA ========== -->
+        <customrecordcustomfield scriptid="custrecord_dz_cp_version">
+            <label>Version</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>50</displaywidth>
+            <description>Semantic version of this prompt (e.g., "1.0.0", "1.1.0", "2.0.0"). Updated via updatePrompt. logExecution records which version was running at execution time for audit trail.</description>
+            <help>Semantic version (e.g., "1.0.0"). Incremented when prompt content or metadata is updated.</help>
+            <aidescription>Semantic version (e.g., "1.0.0"). Updated via updatePrompt. logExecution records which version was running at execution time for audit trail.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_author">
+            <label>Author</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>200</displaywidth>
+            <description>Who created or maintains this prompt. Used for attribution in the Companion Library and support routing. Typically "Doozy Labs" for Crafted-seeded prompts.</description>
+            <help>Prompt creator or maintainer (e.g., "Doozy Labs").</help>
+            <aidescription>Prompt creator or maintainer name (e.g., "Doozy Labs"). Used for attribution in the Companion Library and support routing.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_status">
+            <label>Status</label>
+            <fieldtype>SELECT</fieldtype>
+            <selectrecordtype>[scriptid=customlist_dz_pm_status]</selectrecordtype>
+            <displaytype>NORMAL</displaytype>
+            <ismandatory>T</ismandatory>
+            <description>Lifecycle status. Active: visible and available for AI execution. Draft: hidden, under development. Testing: hidden from users but available for QA via direct getPromptMeta. Deprecated: retired.</description>
+            <help>Select the lifecycle status. Only Active prompts appear in the Library.</help>
+            <aidescription>Lifecycle status (Active, Draft, Testing, Deprecated). Only Active prompts appear in the Companion Library. Testing prompts available via direct getPromptMeta for QA.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_changelog">
+            <label>Changelog</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>Version history notes visible in Library SPA. Records what changed in each version update. Appended by updatePrompt when version bumps. Free-text markdown.</description>
+            <help>Version history notes. Updated automatically by updatePrompt when version bumps.</help>
+            <aidescription>Version history notes visible in Library SPA. Records what changed in each version update. Appended by updatePrompt when version bumps.</aidescription>
+        </customrecordcustomfield>
+        <!-- ========== USAGE ANALYTICS ========== -->
+        <customrecordcustomfield scriptid="custrecord_dz_cp_exec_count">
+            <label>Execution Count</label>
+            <fieldtype>INTEGER</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <defaultvalue>0</defaultvalue>
+            <description>Total execution count incremented by logExecution. Enables "most popular" sorting in Library SPA and usage analytics reporting.</description>
+            <help>Automatic. Incremented each time logExecution is called for this prompt.</help>
+            <aidescription>Total execution count incremented by logExecution. Enables "most popular" sorting in Library SPA and usage analytics.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_last_executed">
+            <label>Last Executed</label>
+            <fieldtype>DATETIMETZ</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>Timestamp of most recent execution. Set by logExecution. Enables staleness detection for prompts not executed in 90+ days.</description>
+            <help>Automatic. Updated each time logExecution is called for this prompt.</help>
+            <aidescription>Timestamp of most recent execution. Set by logExecution. Enables staleness detection for prompts not executed in 90+ days.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_avg_duration">
+            <label>Avg Duration (sec)</label>
+            <fieldtype>INTEGER</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <defaultvalue>0</defaultvalue>
+            <description>Running average execution duration in seconds. Updated by logExecution using incremental average formula: newAvg = round((oldAvg * oldCount + duration) / (oldCount + 1)). Used for performance monitoring.</description>
+            <help>Automatic. Running average of execution durations in seconds.</help>
+            <aidescription>Running average execution duration in seconds. Updated by logExecution using incremental average formula. Used for performance monitoring.</aidescription>
+        </customrecordcustomfield>
+        <!-- ========== COLLECTIONS & DISCOVERY ========== -->
+        <customrecordcustomfield scriptid="custrecord_dz_cp_collection">
+            <label>Collection</label>
+            <fieldtype>TEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <displaywidth>200</displaywidth>
+            <description>Collection name for grouping prompts into workflows (e.g., "Month-End Close", "Barrel Intake"). Used for grouped display in the Library SPA. Simple free text, not a separate record.</description>
+            <help>Optional collection name to group related prompts (e.g., "Month-End Close").</help>
+            <aidescription>Collection name for grouping prompts into workflows (e.g., "Month-End Close", "Barrel Intake"). Used for grouped display in Library SPA.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_related">
+            <label>Related Prompts</label>
+            <fieldtype>CLOBTEXT</fieldtype>
+            <displaytype>NORMAL</displaytype>
+            <description>JSON array of external IDs for "run next" suggestions after this prompt completes (e.g., ["dz_cp_barrel_002","dz_cp_barrel_010"]). Displayed in Library SPA as suggested follow-on prompts.</description>
+            <help>JSON array of related prompt external IDs. Example: ["dz_cp_barrel_002","dz_cp_barrel_010"]</help>
+            <aidescription>JSON array of external IDs for "run next" suggestions after this prompt completes. Displayed in Library SPA.</aidescription>
+        </customrecordcustomfield>
+        <customrecordcustomfield scriptid="custrecord_dz_cp_user_complexity">
+            <label>Complexity</label>
+            <fieldtype>SELECT</fieldtype>
+            <selectrecordtype>[scriptid=customlist_dz_cp_complexity]</selectrecordtype>
+            <displaytype>NORMAL</displaytype>
+            <description>User-facing complexity indicator (Quick, Standard, Deep Analysis). Helps users set expectations for response time and depth. Distinct from Governance Level, which controls AI orchestration tier.</description>
+            <help>Select the user-facing complexity. Quick = single-tool, Standard = multi-tool, Deep Analysis = governed multi-tool.</help>
+            <aidescription>User-facing complexity indicator (Quick, Standard, Deep Analysis). Helps users set expectations for response time and depth.</aidescription>
+        </customrecordcustomfield>
+    </customrecordcustomfields>
+    <permissions>
+        <permission>
+            <permittedrole>[scriptid=customrole_dz_ci_admin]</permittedrole>
+            <permittedlevel>FULL</permittedlevel>
+        </permission>
+        <permission>
+            <permittedrole>[scriptid=customrole_dz_ci_user]</permittedrole>
+            <permittedlevel>VIEW</permittedlevel>
+        </permission>
+    </permissions>
+</customrecordtype>

@@ -1,18 +1,21 @@
 /**
  * dz_sl_companion_library.js
- * Crafted Companion Library — Suitelet
+ * Crafted Intelligence Library - Suitelet
  *
  * GET: Serves the Companion Library HTML page
  * POST: JSON API for prompt data, tool availability, account config
  *
- * Modeled after Oracle's AI Connector Service Companion Suitelet.
+ * Independent from Oracle's AI Companion SuiteApp. Primary queries target
+ * customrecord_dz_companion_prompt. Optional Atlas tab surfaces native
+ * Oracle AI Companion prompts when the Atlas bundle is installed, rendered
+ * read-only with distinct filtering.
  *
  * @NApiVersion 2.1
  * @NScriptType Suitelet
  */
-define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidget'], function (query, log, runtime, file, record, serverWidget) {
+define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/url', 'N/ui/serverWidget'], function (query, log, runtime, file, record, url, serverWidget) {
 
-    var SCRIPT_VERSION = '1.0.0';
+    var SCRIPT_VERSION = '2.0.0';
 
     // ========== HELPERS ==========
 
@@ -36,12 +39,10 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
         try { return JSON.parse(str); } catch (e) { return fallback; }
     }
 
-    // Generate the Crafted header that instructs the AI to call getPromptMeta first
     function craftedHeader(promptId) {
         return '[Crafted Prompt #' + promptId + ' — call getPromptMeta(' + promptId + ') first for orchestration context, safety rules, and tool chain]\n\n';
     }
 
-    // Check if prompt text already has the Crafted header
     function hasCraftedHeader(text) {
         return text && text.indexOf('[Crafted Prompt #') === 0;
     }
@@ -51,247 +52,352 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
         response.write(JSON.stringify(data));
     }
 
+    function getCurrentRoleId() {
+        try {
+            var user = runtime.getCurrentUser();
+            return user && user.role ? parseInt(user.role, 10) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function recordUrl(recordType, recordId) {
+        try {
+            return url.resolveRecord({ recordType: recordType, recordId: recordId });
+        } catch (e) {
+            return '';
+        }
+    }
+
+    // Split a NetSuite multi-select string ("1, 2, 3" or "Foo, Bar") into an array.
+    function splitMultiSelect(v) {
+        if (!v) return [];
+        return String(v).split(',').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
+    }
+
     // ========== POST API ==========
 
     function handlePost(context) {
         var action = context.request.parameters.action;
 
         if (action === 'get-prompts') {
-            var sql = 'SELECT ' +
-                'pm.id AS meta_id, pm.custrecord_dz_pm_prompt_ref AS prompt_id, ' +
-                'pm.externalid AS external_id, p.name AS prompt_name, ' +
-                'p.custrecord_atlas_aicomp_prompt_text AS prompt_text, ' +
-                'BUILTIN.DF(pm.custrecord_dz_pm_domain) AS domain, ' +
-                'pm.custrecord_dz_pm_subdomain AS subdomain, ' +
-                'pm.custrecord_dz_pm_toolset AS toolset, ' +
-                'pm.custrecord_dz_pm_tool_chain AS tool_chain, ' +
-                'pm.custrecord_dz_pm_entry_tool AS entry_tool, ' +
-                'pm.custrecord_dz_pm_steps AS steps, ' +
-                'pm.custrecord_dz_pm_tool_deps AS tool_deps, ' +
-                'BUILTIN.DF(pm.custrecord_dz_pm_edition) AS edition, ' +
-                'pm.custrecord_dz_pm_edition_notes AS edition_notes, ' +
-                'pm.custrecord_dz_pm_params AS params, ' +
-                'pm.custrecord_dz_pm_safety_rules AS safety_rules, ' +
-                'BUILTIN.DF(pm.custrecord_dz_pm_governance) AS governance, ' +
-                'pm.custrecord_dz_pm_artifact AS artifact, ' +
-                'pm.custrecord_dz_pm_artifact_type AS artifact_type, ' +
-                'pm.custrecord_dz_pm_version AS version, ' +
-                'pm.custrecord_dz_pm_author AS author, ' +
-                'BUILTIN.DF(pm.custrecord_dz_pm_status) AS status ' +
-                'FROM customrecord_dz_prompt_meta pm ' +
-                'JOIN customrecord_atlas_aicomp_prompts p ON pm.custrecord_dz_pm_prompt_ref = p.id ' +
-                "WHERE BUILTIN.DF(pm.custrecord_dz_pm_status) = 'Active' " +
-                'ORDER BY pm.custrecord_dz_pm_domain, p.name';
-            var rows = runSQL(sql);
-            var prompts = rows.map(function (r) {
-                return {
-                    meta_id: r.meta_id, prompt_id: r.prompt_id, external_id: r.external_id,
-                    prompt_name: r.prompt_name || '', prompt_text: r.prompt_text || '',
-                    domain: r.domain || '', subdomain: r.subdomain || '',
-                    toolset: r.toolset || '', tool_chain: r.tool_chain || '',
-                    entry_tool: r.entry_tool || '', steps: parseJSON(r.steps, []),
-                    tool_deps: parseJSON(r.tool_deps, []), edition: r.edition || '',
-                    edition_notes: r.edition_notes || '', params: parseJSON(r.params, {}),
-                    safety_rules: parseJSON(r.safety_rules, []), governance: r.governance || '',
-                    artifact: r.artifact === 'T', artifact_type: r.artifact_type || '',
-                    version: r.version || '', author: r.author || '', status: r.status || ''
-                };
-            });
-            jsonResponse(context.response, { prompts: prompts, count: prompts.length });
-
+            jsonResponse(context.response, getCraftedPrompts());
+        } else if (action === 'get-atlas-prompts') {
+            jsonResponse(context.response, getAtlasPrompts(context.request.parameters));
+        } else if (action === 'get-atlas-availability') {
+            jsonResponse(context.response, getAtlasAvailability());
+        } else if (action === 'get-atlas-filters') {
+            jsonResponse(context.response, getAtlasFilters());
         } else if (action === 'get-tool-availability') {
-            // Check tool availability by looking for script files in the File Cabinet
-            // custtoolset is not queryable via SuiteQL, so we check for deployed script files
-            var avail = { 'barrel-intelligence': false, 'lot-profitability': false, 'inventory-supply': false, 'compliance-audit': false, 'mrp-intelligence': false, 'batch-genealogy': false };
-            try {
-                var scripts = runSQL("SELECT name FROM file WHERE folder IN (SELECT id FROM mediaitemfolder WHERE name = 'DoozyTools') AND name LIKE 'dz_ct_%' AND name LIKE '%.js'");
-                scripts.forEach(function (r) {
-                    var fn = (r.name || '').toLowerCase();
-                    if (fn.indexOf('barrel') > -1 || fn.indexOf('brl') > -1) avail['barrel-intelligence'] = true;
-                    if (fn.indexOf('lot') > -1) avail['lot-profitability'] = true;
-                    if (fn.indexOf('inv') > -1 || fn.indexOf('bom') > -1 || fn.indexOf('item') > -1) avail['inventory-supply'] = true;
-                    if (fn.indexOf('compliance') > -1 || fn.indexOf('audit') > -1) avail['compliance-audit'] = true;
-                    if (fn.indexOf('mrp') > -1) avail['mrp-intelligence'] = true;
-                    if (fn.indexOf('genealogy') > -1 || fn.indexOf('batch') > -1 || fn.indexOf('lineage') > -1) avail['batch-genealogy'] = true;
-                });
-            } catch (e) {
-                // If query fails, default all to true so prompts are visible
-                log.debug({ title: 'getToolAvailability', details: 'Fallback: defaulting all to true. ' + e.message });
-                Object.keys(avail).forEach(function (k) { avail[k] = true; });
-            }
-            jsonResponse(context.response, avail);
-
-        } else if (action === 'get-domains') {
-            jsonResponse(context.response, runSQL('SELECT id, name FROM customlist_dz_pm_domain ORDER BY id'));
-
-        } else if (action === 'auto-setup') {
-            jsonResponse(context.response, runAutoSetup());
-
+            jsonResponse(context.response, getToolAvailability());
+        } else if (action === 'get-categories' || action === 'get-domains') {
+            jsonResponse(context.response, runSQL('SELECT id, name FROM customlist_dz_cp_category ORDER BY id'));
         } else if (action === 'backfill-headers') {
             jsonResponse(context.response, runBackfillHeaders());
-
+        } else if (action === 'save-custom') {
+            jsonResponse(context.response, saveCustomPrompt(context.request.parameters));
         } else {
             jsonResponse(context.response, { error: 'Unknown action: ' + action });
         }
     }
 
-    // ========== AUTO-SETUP: SEED + MIRROR ROLES ==========
+    // ========== CRAFTED PROMPTS (primary tab) ==========
 
-    function runAutoSetup() {
-        var results = { seeded: [], roles_created: [], roles_mapped: [], errors: [] };
+    function getCraftedPrompts() {
+        var currentRoleId = getCurrentRoleId();
 
-        // --- SEED ATLAS PROMPTS + EXTENSION RECORDS ---
-        try {
-            var seedFiles = runSQL("SELECT id FROM file WHERE name = 'seed-data.json'");
-            if (seedFiles && seedFiles.length > 0) {
-                var seedFile = file.load({ id: seedFiles[0].id });
-                var seedData = JSON.parse(seedFile.getContents());
-                var prompts = seedData.prompts || [];
+        // Single-table query against the independent record. Role filter:
+        // visible_roles IS NULL (visible to all) OR current role in the multi-select.
+        var sql =
+            'SELECT ' +
+            'id AS prompt_id, ' +
+            'name AS prompt_name, ' +
+            'externalid AS external_id, ' +
+            'custrecord_dz_cp_prompt_text AS prompt_text, ' +
+            'custrecord_dz_cp_category AS category_id, ' +
+            'BUILTIN.DF(custrecord_dz_cp_category) AS category, ' +
+            'custrecord_dz_cp_subcategory AS subcategory, ' +
+            'custrecord_dz_cp_description AS description, ' +
+            'custrecord_dz_cp_public AS public, ' +
+            'custrecord_dz_cp_toolset AS toolset, ' +
+            'custrecord_dz_cp_tool_chain AS tool_chain, ' +
+            'custrecord_dz_cp_entry_tool AS entry_tool, ' +
+            'custrecord_dz_cp_steps AS steps, ' +
+            'custrecord_dz_cp_tool_deps AS tool_deps, ' +
+            'BUILTIN.DF(custrecord_dz_cp_edition) AS edition, ' +
+            'custrecord_dz_cp_edition_notes AS edition_notes, ' +
+            'custrecord_dz_cp_params AS params, ' +
+            'custrecord_dz_cp_safety_rules AS safety_rules, ' +
+            'BUILTIN.DF(custrecord_dz_cp_governance) AS governance, ' +
+            'custrecord_dz_cp_artifact AS artifact, ' +
+            'custrecord_dz_cp_artifact_type AS artifact_type, ' +
+            'custrecord_dz_cp_version AS version, ' +
+            'custrecord_dz_cp_author AS author, ' +
+            'BUILTIN.DF(custrecord_dz_cp_status) AS status, ' +
+            'custrecord_dz_cp_changelog AS changelog, ' +
+            'custrecord_dz_cp_exec_count AS exec_count, ' +
+            'custrecord_dz_cp_last_executed AS last_executed, ' +
+            'custrecord_dz_cp_avg_duration AS avg_duration, ' +
+            'custrecord_dz_cp_collection AS collection, ' +
+            'custrecord_dz_cp_related AS related, ' +
+            'BUILTIN.DF(custrecord_dz_cp_user_complexity) AS complexity, ' +
+            'custrecord_dz_cp_visible_roles AS visible_roles ' +
+            'FROM customrecord_dz_companion_prompt ' +
+            "WHERE BUILTIN.DF(custrecord_dz_cp_status) = 'Active' " +
+            "AND (custrecord_dz_cp_public = 'T' OR custrecord_dz_cp_public IS NULL) " +
+            'ORDER BY custrecord_dz_cp_category, name';
 
-                // Get existing Atlas prompts by externalid
-                var atlasRows = runSQL("SELECT id, externalid FROM customrecord_atlas_aicomp_prompts WHERE externalid LIKE 'aiprompt_crafted_%'");
-                var atlasByExtId = {};
-                atlasRows.forEach(function (r) { atlasByExtId[r.externalid] = r.id; });
-
-                // Get existing extension records by externalid
-                var metaRows = runSQL('SELECT id, externalid FROM customrecord_dz_prompt_meta');
-                var metaByExtId = {};
-                metaRows.forEach(function (r) { metaByExtId[r.externalid] = r.id; });
-
-                prompts.forEach(function (p) {
-                    if (metaByExtId[p.external_id]) return; // extension record exists, skip
-                    // Check governance before each record creation
-                    var remaining = runtime.getCurrentScript().getRemainingUsage();
-                    if (remaining < 100) { log.audit({ title: 'auto-setup', details: 'Governance low (' + remaining + '), stopping seed batch' }); return; }
-                    try {
-                        // Step 1: Ensure Atlas prompt exists
-                        var atlasId = atlasByExtId[p.atlas_external_id];
-                        if (!atlasId && p.prompt_text) {
-                            var atlas = record.create({ type: 'customrecord_atlas_aicomp_prompts' });
-                            atlas.setValue({ fieldId: 'name', value: p.name });
-                            atlas.setValue({ fieldId: 'externalid', value: p.atlas_external_id });
-                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_text', value: p.prompt_text });
-                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_category', value: 6 }); // Manufacturing
-                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_subcat', value: p.subdomain || '' });
-                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_roles', value: [5] }); // Administrator
-                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_inds', value: [17] }); // Food & Beverage
-                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_public', value: true });
-                            atlas.setValue({ fieldId: 'custrecord_atlas_aicomp_sdf_seeded', value: false });
-                            atlasId = atlas.save();
-                            atlasByExtId[p.atlas_external_id] = atlasId;
-
-                            // Now that we have the ID, update the prompt_text with the header
-                            try {
-                                record.submitFields({
-                                    type: 'customrecord_atlas_aicomp_prompts',
-                                    id: atlasId,
-                                    values: { custrecord_atlas_aicomp_prompt_text: craftedHeader(atlasId) + p.prompt_text }
-                                });
-                            } catch (hdrErr) {
-                                log.debug({ title: 'auto-setup', details: 'Header update failed for ' + atlasId + ': ' + hdrErr.message });
-                            }
-                        }
-                        if (!atlasId) { results.errors.push({ name: p.name, error: 'No Atlas prompt and no prompt_text' }); return; }
-
-                        // Step 2: Create extension record
-                        var rec = record.create({ type: 'customrecord_dz_prompt_meta' });
-                        rec.setValue({ fieldId: 'name', value: p.name });
-                        rec.setValue({ fieldId: 'externalid', value: p.external_id });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_prompt_ref', value: atlasId });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_domain', value: p.domain || 1 });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_subdomain', value: p.subdomain || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_toolset', value: p.toolset || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_tool_chain', value: p.tool_chain || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_entry_tool', value: p.entry_tool || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_steps', value: p.steps ? JSON.stringify(p.steps) : '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_tool_deps', value: p.tool_deps || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_edition', value: p.edition || 4 });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_edition_notes', value: p.edition_notes || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_params', value: p.params ? JSON.stringify(p.params) : '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_safety_rules', value: p.safety_rules ? JSON.stringify(p.safety_rules) : '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_governance', value: p.governance || 1 });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_artifact', value: p.artifact === true });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_artifact_type', value: p.artifact_type || '' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_version', value: p.version || '1.0.0' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_author', value: p.author || 'Doozy Labs' });
-                        rec.setValue({ fieldId: 'custrecord_dz_pm_status', value: p.status || 1 });
-                        var metaId = rec.save();
-                        results.seeded.push({ metaId: metaId, atlasId: atlasId, name: p.name });
-                    } catch (e) {
-                        results.errors.push({ name: p.name, error: e.message });
-                    }
-                });
+        var rows = runSQL(sql);
+        var prompts = [];
+        rows.forEach(function (r) {
+            // Apply role filter in-memory: visible_roles is a comma-delimited string
+            // of role IDs in SuiteQL, formatted with spaces like "1, 2, 3, 19, ...".
+            // Strip all whitespace before the lookup so currentRoleId matches anywhere
+            // in the list, not just the first position.
+            if (currentRoleId && r.visible_roles) {
+                var normalized = ',' + String(r.visible_roles).replace(/\s+/g, '') + ',';
+                if (normalized.indexOf(',' + currentRoleId + ',') === -1) return;
             }
-        } catch (e) {
-            results.errors.push({ action: 'seed', error: e.message });
-        }
 
-        // --- MIRROR ROLES ---
+            prompts.push({
+                source: 'crafted',
+                prompt_id: parseInt(r.prompt_id, 10),
+                record_url: recordUrl('customrecord_dz_companion_prompt', parseInt(r.prompt_id, 10)),
+                prompt_name: r.prompt_name || '',
+                external_id: r.external_id || '',
+                prompt_text: r.prompt_text || '',
+                category: r.category || '',
+                subcategory: r.subcategory || '',
+                description: r.description || '',
+                public: r.public === 'T',
+                toolset: r.toolset || '',
+                tool_chain: r.tool_chain || '',
+                entry_tool: r.entry_tool || '',
+                steps: parseJSON(r.steps, []),
+                tool_deps: parseJSON(r.tool_deps, []),
+                edition: r.edition || '',
+                edition_notes: r.edition_notes || '',
+                params: parseJSON(r.params, {}),
+                safety_rules: parseJSON(r.safety_rules, []),
+                governance: r.governance || '',
+                artifact: r.artifact === 'T',
+                artifact_type: r.artifact_type || '',
+                version: r.version || '',
+                author: r.author || '',
+                status: r.status || '',
+                changelog: r.changelog || '',
+                exec_count: parseInt(r.exec_count, 10) || 0,
+                last_executed: r.last_executed || '',
+                avg_duration: parseInt(r.avg_duration, 10) || 0,
+                collection: r.collection || '',
+                related: parseJSON(r.related, []),
+                complexity: r.complexity || ''
+            });
+        });
+
+        return { prompts: prompts, count: prompts.length, source: 'crafted', _version: SCRIPT_VERSION };
+    }
+
+    // ========== ATLAS PROMPTS (optional secondary tab) ==========
+
+    function getAtlasAvailability() {
+        // Probe for the Atlas record type. If the query throws (record doesn't
+        // exist) or returns zero, hide the Atlas tab gracefully.
         try {
-            var nsRoles = runSQL("SELECT id, name FROM role WHERE isinactive = 'F' ORDER BY name");
-            var companionRoles = runSQL('SELECT id, name FROM customrecord_atlas_aicomp_prompt_roles ORDER BY name');
-            var companionByName = {};
-            companionRoles.forEach(function (r) { companionByName[(r.name || '').toLowerCase().trim()] = r; });
+            var rows = runSQL('SELECT COUNT(*) AS cnt FROM customrecord_atlas_aicomp_prompts');
+            var cnt = rows && rows.length > 0 ? parseInt(rows[0].cnt, 10) || 0 : 0;
+            return { available: cnt > 0, count: cnt };
+        } catch (e) {
+            log.debug({ title: 'atlas-availability', details: 'Atlas not installed or not queryable: ' + e.message });
+            return { available: false, count: 0 };
+        }
+    }
 
-            var mappings = runSQL('SELECT custrecord_atlas_aicomp_ns_role_id AS ns_role FROM customrecord_atlas_aicomp_role_mapping');
-            var mappedNsRoles = {};
-            mappings.forEach(function (m) { mappedNsRoles[m.ns_role] = true; });
+    function getAtlasPrompts(params) {
+        params = params || {};
+        try {
+            var where = [];
+            var sqlParams = [];
+            if (params.category) {
+                where.push('p.custrecord_atlas_aicomp_prompt_category = ?');
+                sqlParams.push(parseInt(params.category, 10));
+            }
+            if (params.search) {
+                where.push('(LOWER(p.name) LIKE ? OR LOWER(p.custrecord_atlas_aicomp_prompt_text) LIKE ?)');
+                var like = '%' + String(params.search).toLowerCase() + '%';
+                sqlParams.push(like, like);
+            }
 
-            nsRoles.forEach(function (nsRole) {
-                var rem = runtime.getCurrentScript().getRemainingUsage();
-                if (rem < 80) return; // governance check
-                try {
-                    var key = (nsRole.name || '').toLowerCase().trim();
-                    var companionRole = companionByName[key];
+            var sql =
+                'SELECT ' +
+                'p.id AS prompt_id, ' +
+                'p.name AS prompt_name, ' +
+                'p.externalid AS external_id, ' +
+                'p.custrecord_atlas_aicomp_prompt_text AS prompt_text, ' +
+                'BUILTIN.DF(p.custrecord_atlas_aicomp_prompt_category) AS category, ' +
+                'p.custrecord_atlas_aicomp_prompt_subcat AS subcategory, ' +
+                'p.custrecord_atlas_aicomp_prompt_inds AS industry_ids, ' +
+                'BUILTIN.DF(p.custrecord_atlas_aicomp_prompt_inds) AS industry_names, ' +
+                'p.custrecord_atlas_aicomp_prompt_roles AS role_ids, ' +
+                'BUILTIN.DF(p.custrecord_atlas_aicomp_prompt_roles) AS role_names, ' +
+                'p.custrecord_atlas_aicomp_sdf_seeded AS sdf_seeded ' +
+                'FROM customrecord_atlas_aicomp_prompts p ' +
+                (where.length ? 'WHERE ' + where.join(' AND ') + ' ' : '') +
+                'ORDER BY p.custrecord_atlas_aicomp_prompt_category, p.name';
 
-                    if (!companionRole) {
-                        var newRole = record.create({ type: 'customrecord_atlas_aicomp_prompt_roles' });
-                        newRole.setValue({ fieldId: 'name', value: nsRole.name.trim() });
-                        newRole.setValue({ fieldId: 'externalid', value: 'aipromptrole_crafted_' + nsRole.id });
-                        var newId = newRole.save();
-                        companionRole = { id: newId, name: nsRole.name.trim() };
-                        companionByName[key] = companionRole;
-                        results.roles_created.push({ id: newId, name: nsRole.name, ns_role_id: nsRole.id });
-                    }
+            var rows = runSQL(sql, sqlParams);
+            var prompts = rows.map(function (r) {
+                return {
+                    source: 'atlas',
+                    prompt_id: parseInt(r.prompt_id, 10),
+                    record_url: recordUrl('customrecord_atlas_aicomp_prompts', parseInt(r.prompt_id, 10)),
+                    prompt_name: r.prompt_name || '',
+                    external_id: r.external_id || '',
+                    prompt_text: r.prompt_text || '',
+                    category: r.category || '',
+                    subcategory: r.subcategory || '',
+                    industry_ids: splitMultiSelect(r.industry_ids),
+                    industry_names: splitMultiSelect(r.industry_names),
+                    role_ids: splitMultiSelect(r.role_ids),
+                    role_names: splitMultiSelect(r.role_names),
+                    sdf_seeded: r.sdf_seeded === 'T',
+                    // Native Atlas prompts carry no orchestration metadata — empty defaults
+                    // so the SPA rendering logic can treat them uniformly.
+                    toolset: '',
+                    tool_chain: '',
+                    steps: [],
+                    safety_rules: [],
+                    params: {},
+                    governance: '',
+                    artifact: false
+                };
+            });
+            return { prompts: prompts, count: prompts.length, source: 'atlas', _version: SCRIPT_VERSION };
+        } catch (e) {
+            log.error({ title: 'get-atlas-prompts', details: e.message });
+            return { prompts: [], count: 0, source: 'atlas', error: 'Atlas query failed: ' + e.message };
+        }
+    }
 
-                    if (!mappedNsRoles[nsRole.id]) {
-                        var mapping = record.create({ type: 'customrecord_atlas_aicomp_role_mapping' });
-                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_ns_role_id', value: nsRole.id });
-                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_ns_role_name', value: nsRole.name });
-                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_prompt_role', value: companionRole.id });
-                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_map_confidence', value: 100 });
-                        mapping.setValue({ fieldId: 'custrecord_atlas_aicomp_mapping_method', value: 3 }); // Manual Override
-                        var mapId = mapping.save();
-                        results.roles_mapped.push({ id: mapId, ns_role: nsRole.name, companion_role: companionRole.name });
-                    }
-                } catch (e) {
-                    results.errors.push({ role: nsRole.name, error: e.message });
-                }
+    function getAtlasFilters() {
+        // Atlas custom lists are queryable by their real scriptids:
+        //   customlist_atlas_aicomp_prompt_cat (7 categories)
+        //   customlist_atlas_aicomp_prompt_ind (39 industries)
+        //   customrecord_atlas_aicomp_prompt_roles (extensible, ~74 roles)
+        var result = { categories: [], industries: [], roles: [] };
+        try {
+            result.categories = runSQL("SELECT id, name FROM customlist_atlas_aicomp_prompt_cat WHERE isinactive = 'F' ORDER BY id");
+        } catch (e) { log.debug({ title: 'atlas-categories', details: e.message }); }
+        try {
+            result.industries = runSQL("SELECT id, name FROM customlist_atlas_aicomp_prompt_ind WHERE isinactive = 'F' ORDER BY name");
+        } catch (e) { log.debug({ title: 'atlas-industries', details: e.message }); }
+        try {
+            result.roles = runSQL("SELECT id, name FROM customrecord_atlas_aicomp_prompt_roles WHERE isinactive = 'F' ORDER BY name");
+        } catch (e) { log.debug({ title: 'atlas-roles', details: e.message }); }
+        return result;
+    }
+
+    // ========== TOOL AVAILABILITY ==========
+
+    function getToolAvailability() {
+        var avail = {
+            'barrel-intelligence': false,
+            'lot-profitability': false,
+            'inventory-supply': false,
+            'compliance-audit': false,
+            'mrp-intelligence': false,
+            'batch-genealogy': false
+        };
+        try {
+            var scripts = runSQL(
+                "SELECT name FROM file " +
+                "WHERE folder IN (SELECT id FROM mediaitemfolder WHERE name = 'DoozyTools') " +
+                "AND name LIKE 'dz_ct_%' AND name LIKE '%.js'"
+            );
+            scripts.forEach(function (r) {
+                var fn = (r.name || '').toLowerCase();
+                if (fn.indexOf('barrel') > -1 || fn.indexOf('brl') > -1) avail['barrel-intelligence'] = true;
+                if (fn.indexOf('lot') > -1) avail['lot-profitability'] = true;
+                if (fn.indexOf('inv') > -1 || fn.indexOf('bom') > -1 || fn.indexOf('item') > -1) avail['inventory-supply'] = true;
+                if (fn.indexOf('compliance') > -1 || fn.indexOf('audit') > -1) avail['compliance-audit'] = true;
+                if (fn.indexOf('mrp') > -1) avail['mrp-intelligence'] = true;
+                if (fn.indexOf('genealogy') > -1 || fn.indexOf('batch') > -1 || fn.indexOf('lineage') > -1) avail['batch-genealogy'] = true;
             });
         } catch (e) {
-            results.errors.push({ action: 'mirror-roles', error: e.message });
+            log.debug({ title: 'getToolAvailability', details: 'Fallback: defaulting all to true. ' + e.message });
+            Object.keys(avail).forEach(function (k) { avail[k] = true; });
         }
+        return avail;
+    }
 
-        results.summary = results.seeded.length + ' seeded, ' + results.roles_created.length + ' roles created, ' + results.roles_mapped.length + ' mapped, ' + results.errors.length + ' errors';
-        log.audit({ title: 'auto-setup', details: results.summary });
-        return results;
+    // ========== SAVE CUSTOM PROMPT ==========
+
+    function saveCustomPrompt(params) {
+        try {
+            var promptText = params.promptText;
+            if (!promptText) return { error: 'promptText is required' };
+
+            var user = runtime.getCurrentUser();
+            var userName = (user && user.name) || 'Unknown User';
+            var userId = user && user.id ? parseInt(user.id, 10) : 0;
+            var userRole = user && user.role ? parseInt(user.role, 10) : null;
+            var sourceName = params.sourceName || 'Untitled';
+            var sourceSource = params.sourceSource === 'atlas' ? 'Oracle AI Companion' : 'Crafted Intelligence';
+            var sourceId = params.sourceId || '';
+            var ts = Date.now();
+
+            var rec = record.create({ type: 'customrecord_dz_companion_prompt' });
+            rec.setValue({ fieldId: 'name', value: 'Custom: ' + sourceName });
+            rec.setValue({ fieldId: 'externalid', value: 'dz_cp_custom_' + userId + '_' + ts });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_prompt_text', value: promptText });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_category', value: parseInt(params.sourceCategory, 10) || 7 });
+            if (params.sourceSubcategory) rec.setValue({ fieldId: 'custrecord_dz_cp_subcategory', value: params.sourceSubcategory });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_description', value: 'User-customized from ' + sourceSource + ' prompt: ' + sourceName });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_public', value: true });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_toolset', value: params.sourceToolset || 'custom' });
+            if (params.sourceToolChain) rec.setValue({ fieldId: 'custrecord_dz_cp_tool_chain', value: params.sourceToolChain });
+            if (params.sourceEntryTool) rec.setValue({ fieldId: 'custrecord_dz_cp_entry_tool', value: params.sourceEntryTool });
+            if (params.sourceSteps) rec.setValue({ fieldId: 'custrecord_dz_cp_steps', value: params.sourceSteps });
+            if (params.sourceToolDeps) rec.setValue({ fieldId: 'custrecord_dz_cp_tool_deps', value: params.sourceToolDeps });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_edition', value: parseInt(params.sourceEdition, 10) || 4 });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_governance', value: parseInt(params.sourceGovernance, 10) || 1 });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_status', value: 1 });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_version', value: '1.0.0' });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_author', value: userName });
+            rec.setValue({ fieldId: 'custrecord_dz_cp_collection', value: 'My Prompts' });
+            if (userRole) rec.setValue({ fieldId: 'custrecord_dz_cp_visible_roles', value: [userRole] });
+
+            var newId = rec.save();
+            log.audit({ title: 'save-custom', details: 'User ' + userName + ' saved custom prompt ' + newId + ' from ' + sourceSource + ' source ' + sourceId });
+
+            return {
+                success: true,
+                recordId: newId,
+                recordUrl: recordUrl('customrecord_dz_companion_prompt', newId),
+                message: 'Saved as user prompt #' + newId
+            };
+        } catch (e) {
+            log.error({ title: 'save-custom', details: e.message });
+            return { error: 'Save failed: ' + e.message };
+        }
     }
 
     // ========== BACKFILL HEADERS ==========
 
     function runBackfillHeaders() {
+        // Ensure every active Crafted prompt has a [Crafted Prompt #ID ...] header
+        // at the start of its prompt text. Idempotent: skips prompts that already have one.
         var results = { updated: [], skipped: [], errors: [] };
         try {
-            // Get all Crafted Atlas prompts and their text
             var rows = runSQL(
-                "SELECT p.id, p.name, p.custrecord_atlas_aicomp_prompt_text AS prompt_text " +
-                "FROM customrecord_atlas_aicomp_prompts p " +
-                "JOIN customrecord_dz_prompt_meta pm ON pm.custrecord_dz_pm_prompt_ref = p.id"
+                'SELECT id, name, custrecord_dz_cp_prompt_text AS prompt_text ' +
+                'FROM customrecord_dz_companion_prompt ' +
+                "WHERE BUILTIN.DF(custrecord_dz_cp_status) = 'Active'"
             );
 
             rows.forEach(function (r) {
                 var rem = runtime.getCurrentScript().getRemainingUsage();
-                if (rem < 80) return; // governance check
+                if (rem < 80) { results.skipped.push({ id: r.id, reason: 'governance' }); return; }
                 try {
                     if (hasCraftedHeader(r.prompt_text)) {
                         results.skipped.push({ id: r.id, name: r.name });
@@ -299,9 +405,9 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
                     }
                     var newText = craftedHeader(r.id) + (r.prompt_text || '');
                     record.submitFields({
-                        type: 'customrecord_atlas_aicomp_prompts',
+                        type: 'customrecord_dz_companion_prompt',
                         id: r.id,
-                        values: { custrecord_atlas_aicomp_prompt_text: newText }
+                        values: { custrecord_dz_cp_prompt_text: newText }
                     });
                     results.updated.push({ id: r.id, name: r.name });
                 } catch (e) {
@@ -311,7 +417,7 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
         } catch (e) {
             results.errors.push({ action: 'backfill', error: e.message });
         }
-        results.summary = results.updated.length + ' updated, ' + results.skipped.length + ' already had header, ' + results.errors.length + ' errors';
+        results.summary = results.updated.length + ' updated, ' + results.skipped.length + ' skipped, ' + results.errors.length + ' errors';
         log.audit({ title: 'backfill-headers', details: results.summary });
         return results;
     }
@@ -323,7 +429,6 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
             runtime.getCurrentScript().id + '&deploy=' +
             runtime.getCurrentScript().deploymentId;
 
-        // Load HTML template from File Cabinet
         var htmlFiles = runSQL("SELECT id FROM file WHERE name = 'companion-library.html'");
         var html;
         if (htmlFiles && htmlFiles.length > 0) {
@@ -334,8 +439,6 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
             html = '<p>companion-library.html not found in File Cabinet.</p>';
         }
 
-        // Extract style + body content for INLINEHTML
-        // Keep <style> blocks but strip document wrapper tags
         html = html.replace(/<!DOCTYPE[^>]*>/i, '')
                     .replace(/<\/?html[^>]*>/gi, '')
                     .replace(/<head[^>]*>/gi, '')
@@ -344,7 +447,7 @@ define(['N/query', 'N/log', 'N/runtime', 'N/file', 'N/record', 'N/ui/serverWidge
                     .replace(/<title>[\s\S]*?<\/title>/gi, '')
                     .replace(/<\/?body[^>]*>/gi, '');
 
-        var form = serverWidget.createForm({ title: 'Crafted Companion Library' });
+        var form = serverWidget.createForm({ title: 'Crafted Intelligence Library' });
         form.addField({
             id: 'custpage_companion_html',
             type: serverWidget.FieldType.INLINEHTML,

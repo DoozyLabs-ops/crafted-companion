@@ -1,0 +1,14 @@
+<customlist scriptid="customlist_dz_cp_complexity">
+    <name>Prompt Complexity</name>
+    <customvalues>
+        <customvalue scriptid="val_quick">
+            <value>Quick</value>
+        </customvalue>
+        <customvalue scriptid="val_standard">
+            <value>Standard</value>
+        </customvalue>
+        <customvalue scriptid="val_deep">
+            <value>Deep Analysis</value>
+        </customvalue>
+    </customvalues>
+</customlist>

@@ -1,4 +1,25 @@
-# CLAUDE.md — Crafted Companion v2
+# CLAUDE.md — Crafted Companion
+
+> **⚠ V3 INDEPENDENCE UPDATE (2026-04-17) — READ THIS FIRST**
+>
+> The "v2 native-to-Oracle" architecture described below has been **superseded** by **v3 Independence**. The Atlas bundle-lock constraints (7 fixed categories, fragile FK JOINs, no custom-field extensibility) proved limiting. We have pivoted to a single independent record — no Oracle AI Companion dependency for prompt storage.
+>
+> **v3 canonical objects:**
+> - `customrecord_dz_companion_prompt` (29 fields) — owns prompt text, categories, roles, orchestration metadata
+> - `customlist_dz_cp_category` (7 values) — our own categories, not Oracle's
+> - `customlist_dz_cp_complexity` (3 values) — user-facing complexity (Quick / Standard / Deep Analysis)
+> - `customrole_dz_ci_admin`, `customrole_dz_ci_user` — custom roles with bidirectional record permissions
+> - `customscript_dz_mr_promptseed` — Map/Reduce seed script replaces the SPA auto-setup loop
+>
+> **v3 retired objects:** `customrecord_dz_prompt_meta` (extension record, replaced by the independent record), `customlist_dz_pm_domain` (replaced by `customlist_dz_cp_category`). Their XML files have been removed from this package. Deployed instances in TSTDRV1912378 should be inactivated — see Phase G of the rewrite plan.
+>
+> **Dual-view Library UI:** the Library Suitelet now shows a primary "Crafted Intelligence" tab (queries the independent record) and an optional "Oracle AI Companion" tab (conditional on Atlas bundle presence, read-only). The Atlas tab is a convenience view — Atlas prompts run without Crafted orchestration.
+>
+> **External ID convention changed:** Crafted prompts now use `dz_cp_*` (not `aiprompt_crafted_*`). Companion tools bumped to `SCRIPT_VERSION = '2.0.0'`. The `getPromptMeta` response shape adds `description`, `collection`, `related`, `complexity`, `exec_count`, `last_executed`, `avg_duration`, `changelog` and drops `meta_id` (single-table query; `prompt_id` is the record ID).
+>
+> **SDF lesson captured**: custom record ↔ role permissions are bidirectional. The record's `<permissions>` uses `<permittedrole>[scriptid=...]</permittedrole>`; the role's `<permissions>` uses `<permkey>[scriptid=...]</permkey>`; levels must match. The `[scriptid=...]` bracket notation is required on both sides.
+>
+> The "v2 native-to-Oracle" content below is preserved for historical context. When in doubt about current architecture, trust this banner and the approved plan at `~/.claude/plans/users-lukehood-documents-claude-project-distributed-sphinx.md`.
 
 ---
 

@@ -7,16 +7,16 @@
     <enablenumbering>F</enablenumbering>
     <allowinlineediting>F</allowinlineediting>
     <allowquickadd>F</allowquickadd>
-    <accesstype>NONENEEDED</accesstype>
+    <accesstype>USEPERMISSIONLIST</accesstype>
     <customrecordcustomfields>
         <customrecordcustomfield scriptid="custrecord_dz_el_prompt_ref">
             <label>Companion Prompt Ref</label>
             <fieldtype>INTEGER</fieldtype>
             <displaytype>NORMAL</displaytype>
             <ismandatory>T</ismandatory>
-            <description>Internal ID of the Atlas AI Companion prompt that was executed. Used to JOIN with customrecord_atlas_aicomp_prompts and customrecord_dz_prompt_meta for execution analytics. Stored as integer because the Atlas record type is bundle-locked.</description>
-            <help>Internal ID of the Atlas companion prompt that was executed.</help>
-            <aidescription>Internal ID of the executed Atlas companion prompt. Used to JOIN with prompt and extension records for execution analytics. Stored as integer (Atlas is bundle-locked).</aidescription>
+            <description>Internal ID of the Crafted Intelligence prompt record (customrecord_dz_companion_prompt) that was executed. Used for execution analytics and incremental usage counters on the prompt record itself. Stored as integer to match the record type's internal ID.</description>
+            <help>Internal ID of the Crafted Intelligence prompt that was executed.</help>
+            <aidescription>Internal ID of the executed Crafted Intelligence prompt record (customrecord_dz_companion_prompt). Used for execution analytics and JOINs against prompt records.</aidescription>
         </customrecordcustomfield>
         <customrecordcustomfield scriptid="custrecord_dz_el_exec_date">
             <label>Execution Date</label>
@@ -79,4 +79,14 @@
             <aidescription>AI agent that executed this prompt (e.g., "claude", "chatgpt"). Supplements Oracle's built-in usage counters with per-execution granularity.</aidescription>
         </customrecordcustomfield>
     </customrecordcustomfields>
+    <permissions>
+        <permission>
+            <permittedrole>[scriptid=customrole_dz_ci_admin]</permittedrole>
+            <permittedlevel>VIEW</permittedlevel>
+        </permission>
+        <permission>
+            <permittedrole>[scriptid=customrole_dz_ci_user]</permittedrole>
+            <permittedlevel>CREATE</permittedlevel>
+        </permission>
+    </permissions>
 </customrecordtype>

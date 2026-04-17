@@ -1,4 +1,4 @@
-# Crafted Companion — AI Project Instructions
+# Crafted Intelligence — AI Project Instructions
 
 ## Overview
 
@@ -40,12 +40,12 @@ Both the Crafted and standard paths apply number formatting, hyperlink patterns,
 Every Crafted prompt begins with a header like:
 
 ```
-[Crafted Prompt #103 — call getPromptMeta(103) first for orchestration context, safety rules, and tool chain]
+[Crafted Prompt #N — call getPromptMeta(N) first for orchestration context, safety rules, and tool chain]
 ```
 
 When you see this header:
 
-1. **Call `getPromptMeta`** with the ID shown (`getPromptMeta(promptId: 103)`)
+1. **Call `getPromptMeta`** with the ID shown (`getPromptMeta(promptId: N)`) — or pass the external ID (`externalId: "dz_cp_barrel_001"`) if you have that instead
 2. Read the returned orchestration context: tool chain, steps, params, safety rules, governance level, edition notes, artifact flag
 3. Follow the `steps` array in order, respecting `condition` and `depends_on` fields
 4. Apply the `safety_rules` throughout execution
@@ -53,11 +53,11 @@ When you see this header:
 6. Generate an artifact if `artifact: true`
 7. Call `logExecution` with the results when done
 
-**This is mandatory for Crafted prompts** — the extension record contains orchestration details not in the prompt text itself.
+**This is mandatory for Crafted prompts** — the Crafted Intelligence prompt record contains orchestration details not in the prompt text itself.
 
 ### If the header is missing
 
-If a prompt doesn't have the header but is about Crafted ERP domains, call `getPromptMeta` with the external ID pattern `aiprompt_crafted_*` or search by name. Extension records exist only for prompts in the Crafted namespace.
+If a prompt doesn't have the header but is about Crafted ERP domains, call `getPromptMeta` with the external ID pattern `dz_cp_*` or search by name. Crafted Intelligence prompt records (`customrecord_dz_companion_prompt`) are the only source of Crafted orchestration metadata.
 
 ## Crafted Tool Selection Order
 
@@ -125,7 +125,13 @@ Shelf-life-aware MRP supply/demand, action messages, setup audits, shelf life MR
 
 ### Batch & Genealogy (batch-genealogy — 3 tools — Winery only)
 
-Batch composition, lineage tracing, and genealogy analysis for blended products.
+| Tool | Purpose | Entry Point? |
+|------|---------|:---:|
+| `getBatchDetails` | Batch identity: volume, status, tank, varietal, vintage, lab metrics | Yes |
+| `getBatchGenealogy` | Full composition across cellar orders: inputs, outputs, additives | Yes |
+| `getBatchLineageTrace` | Recursive upstream/downstream lineage (grape-to-glass) | Yes |
+
+**Orchestration:** `getBatchDetails` for a quick read, `getBatchGenealogy` for a single-level composition view, `getBatchLineageTrace` for the full ancestry/descendant chain.
 
 ## Edition Awareness
 
@@ -166,8 +172,8 @@ Crafted ERP has three editions. Call `detectAccountConfig` if unsure which is ac
 | Tool | Purpose |
 |------|---------|
 | `getPromptMeta` | Read orchestration metadata. Call FIRST for any Crafted prompt. |
-| `seedPrompt` | Create Atlas prompt + extension record (admin use). |
-| `updatePrompt` | Update prompt text and/or extension fields. |
+| `seedPrompt` | Create a Crafted Intelligence prompt record (admin use). |
+| `updatePrompt` | Update prompt text and/or orchestration fields. |
 | `logExecution` | Log execution: tools called, success/failure, duration. |
 | `detectAccountConfig` | Detect active Crafted editions and features. |
 | `getAccountConfig` | Read cached account configuration. |
@@ -177,22 +183,22 @@ Crafted ERP has three editions. Call `detectAccountConfig` if unsure which is ac
 User pastes the "Single Barrel Valuation" prompt:
 
 ```
-[Crafted Prompt #201 — call getPromptMeta(201) first for orchestration context, safety rules, and tool chain]
+[Crafted Prompt #N — call getPromptMeta(N) first for orchestration context, safety rules, and tool chain]
 
 What is barrel 092425-02 worth? Show me: current value, cost per unit, cost per proof gallon, fill date, current age, status, and location. Then trace how the value was built...
 ```
 
 Flow:
 
-1. **See header** → `getPromptMeta(promptId: 201)`
+1. **See header** → `getPromptMeta(promptId: N)` (or `externalId: "dz_cp_barrel_010"`)
 2. Read: `governance="Standard"`, `steps=[getBarrelProfile, getBarrelValuation, getBarrelCostTrace]`, `params={BARREL NUMBER: {required: true}}`, `artifact=true`, `artifact_type="cost-waterfall"`
 3. Extract "092425-02" from user message as BARREL NUMBER
-4. Call `getBarrelProfile(serialNumber: "092425-02")`
+4. Call `getBarrelProfile(barrelSearch: "092425-02")`
 5. Call `getBarrelValuation` (depends_on getBarrelProfile)
 6. Call `getBarrelCostTrace` (depends_on getBarrelProfile)
 7. Apply safety rules: verify values, flag zero-cost entries
 8. Generate cost-waterfall artifact with Crafted branding (teal #0785A8, amber #DB8A06)
-9. `logExecution(promptId: 201, success: true, toolsCalled: [...], duration: N, agent: "claude")`
+9. `logExecution(promptId: N, success: true, toolsCalled: [...], duration: N, agent: "claude")`
 
 ---
 
