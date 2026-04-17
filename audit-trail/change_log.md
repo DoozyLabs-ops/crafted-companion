@@ -1,5 +1,63 @@
 # Change Log — Crafted Companion
 
+## 2026-04-17 — v3 Independence Rewrite (shipped)
+
+Replaced the v2 Atlas-extension architecture with a single independent record. No more FK dependency on Oracle's bundle-locked AI Companion for prompt storage.
+
+### Schema changes
+- **Added**: `customrecord_dz_companion_prompt` (29 fields) — independent prompt record, `<accesstype>USEPERMISSIONLIST</accesstype>`
+- **Added**: `customlist_dz_cp_category` (7 values, replaces `customlist_dz_pm_domain`)
+- **Added**: `customlist_dz_cp_complexity` (Quick / Standard / Deep Analysis — user-facing)
+- **Added**: `customrole_dz_ci_admin`, `customrole_dz_ci_user` — bidirectional `[scriptid=...]` record permissions
+- **Added**: `customscript_dz_mr_promptseed` Map/Reduce script deployment
+- **Removed**: `customrecord_dz_prompt_meta.xml`, `customlist_dz_pm_domain.xml`
+- **Updated**: `customrecord_dz_exec_log` — FK description now references the new independent record
+- **Updated**: `customscript_dz_sl_compseed` — `<allroles>T</allroles>` for admin audience
+
+### Runtime changes
+- **Companion tools v2.0.0** — single-table queries (no Atlas JOIN); `logExecution` wraps every code path in `Promise.resolve(JSON.stringify(...))` and writes usage analytics (`exec_count`, `last_executed`, `avg_duration`) back to the prompt record
+- **`getPromptMeta` output** adds `description`, `collection`, `related`, `complexity`, `exec_count`, `last_executed`, `avg_duration`, `changelog`, `public`; drops `meta_id`
+- **New Map/Reduce seed** (`dz_mr_prompt_seed.js`) — idempotent version-aware create/update, role-pattern fuzzy matching against native NS roles, reads `seed-data.json` v3.0.0
+
+### Library SPA
+- **Dual-view layout** — primary Crafted Intelligence tab + conditional Oracle AI Companion tab (Atlas read-only, hidden when SuiteApp absent; probed via `get-atlas-availability`)
+- **Atlas tab filter bar** mirrors Oracle native Library: Category (7 from `customlist_atlas_aicomp_prompt_cat`) + Industry (39 from `customlist_atlas_aicomp_prompt_ind`) + Role (74 from `customrecord_atlas_aicomp_prompt_roles`)
+- **Feature parity with Oracle UI**: popout icon, Open Record link (uses `N/url.resolveRecord`), Customize mode with editable textarea, Save as User Prompt (creates new `customrecord_dz_companion_prompt` with `collection="My Prompts"`, `author=currentUser`, `visible_roles=[currentRole]`)
+- **Role-based filtering** uses whitespace-tolerant lookup (SuiteQL multi-select returns `"1, 2, 3"` with spaces)
+- **Removed** the auto-setup loop — replaced by the admin deployment dashboard
+
+### Admin Suitelet
+- **Deployment dashboard** (`dz_sl_companion_seed.js`) — diff view (create / update / skip / orphan), role-resolution preview, deploy trigger via `N/task`, status polling, JSON backup export
+
+### Seed data v3.0.0
+- 37 prompts across 6 categories with new fields (`description`, `complexity`, `collection`, `related`, `role_patterns`)
+- External IDs changed from `dz_pm_*` → `dz_cp_*`
+- Removed `atlas_external_id`
+
+### Docs
+- Parent `CLAUDE.md` — v3 Independence banner at top
+- `SKILL.md` — title, batch-genealogy tool table, corrected `barrelSearch` param, generic example IDs
+- `README.md` — rewritten for v3
+- `audit-trail/gate_checkpoint_log.md` — v3 sign-off section (6 checkpoints)
+- `docs/crafted-companion-pitch.html` — end-to-end updated
+- `docs/discovery/csd-assessment-briefing.md` — CSD framework assessment added
+- `src/Objects/customrecord_dz_prompt_meta.xml` + `src/Objects/customlist_dz_pm_domain.xml` — removed
+
+### SDF lesson captured
+Custom record ↔ role permissions are bidirectional and require `[scriptid=...]` bracket notation on **both** sides:
+- Record's `<permissions>` uses `<permittedrole>[scriptid=customrole_dz_ci_admin]</permittedrole>`
+- Role's `<permissions>` uses `<permkey>[scriptid=customrecord_dz_companion_prompt]</permkey>`
+- Levels must match on both sides
+
+### Deployed to TSTDRV1912378
+- 37 prompts seeded via Map/Reduce with working role resolution (e.g. `dz_cp_barrel_001` matched 27 roles)
+- 37 old `customrecord_dz_prompt_meta` records inactivated, then record type deleted (cascaded instances)
+- 37 orphan Atlas prompts (`aiprompt_crafted_*`) inactivated — bundle-locked, can't delete
+- MCP connector reconnected; v2.0.0 schemas verified via functional call
+- GitHub: branch `v3-independence` merged to `main` via PR #1
+
+---
+
 ## 2026-04-14 — Full Build Session (Phase 0 + Phase 1 + Phase 3)
 
 ### Phase 0: Foundation
