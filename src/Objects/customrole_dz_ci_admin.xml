@@ -1,0 +1,28 @@
+<role scriptid="customrole_dz_ci_admin">
+    <name>Crafted Intelligence Administrator</name>
+    <centertype>BASIC</centertype>
+    <employeerestriction>NONE</employeerestriction>
+    <issalesrole>F</issalesrole>
+    <issupportrole>F</issupportrole>
+    <restricttimeandexpenses>F</restricttimeandexpenses>
+    <restrictbydevice>F</restrictbydevice>
+    <coreadminpermission>F</coreadminpermission>
+    <permissions>
+        <permission>
+            <permkey>[scriptid=customrecord_dz_companion_prompt]</permkey>
+            <permlevel>FULL</permlevel>
+        </permission>
+        <permission>
+            <permkey>[scriptid=customrecord_dz_exec_log]</permkey>
+            <permlevel>VIEW</permlevel>
+        </permission>
+        <permission>
+            <permkey>LIST_FILECABINET</permkey>
+            <permlevel>VIEW</permlevel>
+        </permission>
+        <permission>
+            <permkey>ADMI_CUSTOMSCRIPT</permkey>
+            <permlevel>FULL</permlevel>
+        </permission>
+    </permissions>
+</role>

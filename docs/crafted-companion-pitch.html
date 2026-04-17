@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crafted Companion — Leadership Briefing</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+    --ci-primary:#0785A8; --ci-primary-dark:#006486;
+    --ci-secondary:#5CB8B2; --ci-secondary-dark:#50A29E;
+    --ci-accent:#DB8A06; --ci-accent-dark:#BD7A2A;
+    --ci-neutral:#373A36; --ci-neutral-light:#939593;
+    --ci-success:#84B75C; --ci-warning:#DB8A06; --ci-danger:#A83137;
+    --ci-bg:#FFFFFF; --ci-bg-surface:#F8F9FA; --ci-bg-muted:#EEF2F4;
+    --ci-border:#E0E6EA;
+    --ci-font-heading:"Bebas Neue",sans-serif;
+    --ci-font-body:"Lato",sans-serif;
+    --ci-shadow-sm:0 1px 2px rgba(0,0,0,.05);
+    --ci-shadow-md:0 4px 6px rgba(0,0,0,.1);
+    --ci-shadow-lg:0 10px 15px rgba(0,0,0,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--ci-font-body);color:var(--ci-neutral);background:var(--ci-bg);line-height:1.6;font-size:15px;}
+
+/* === HEADER === */
+.header{background:linear-gradient(135deg,var(--ci-primary) 0%,var(--ci-primary-dark) 100%);color:white;padding:2rem 2rem 1.5rem;border-bottom:4px solid var(--ci-accent);}
+.header-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.header-brand{display:flex;align-items:center;gap:1rem;}
+.header-logo{width:56px;height:56px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--ci-font-heading);font-size:1.8rem;letter-spacing:1px;}
+.header-title h1{font-family:var(--ci-font-heading);font-size:2.4rem;letter-spacing:2px;line-height:1;}
+.header-title p{font-size:.95rem;font-weight:300;opacity:.92;margin-top:.25rem;}
+.header-meta{font-size:.8rem;opacity:.85;text-align:right;}
+.header-meta strong{display:block;font-size:.95rem;font-weight:700;letter-spacing:.5px;}
+
+/* === TAB NAV === */
+.tabnav{position:sticky;top:0;z-index:100;background:white;border-bottom:1px solid var(--ci-border);box-shadow:var(--ci-shadow-sm);}
+.tabnav-inner{max-width:1300px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:thin;}
+.tab{padding:1rem 1.25rem;background:none;border:none;font-family:var(--ci-font-body);font-weight:700;font-size:.82rem;letter-spacing:.5px;text-transform:uppercase;color:var(--ci-neutral-light);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all .2s;}
+.tab:hover{color:var(--ci-primary);background:var(--ci-bg-surface);}
+.tab.active{color:var(--ci-primary);border-bottom-color:var(--ci-accent);}
+.tab-num{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;background:var(--ci-bg-muted);color:var(--ci-neutral-light);border-radius:50%;font-size:.7rem;margin-right:.5rem;}
+.tab.active .tab-num{background:var(--ci-accent);color:white;}
+
+/* === CONTAINER === */
+.container{max-width:1300px;margin:0 auto;padding:2rem;}
+.panel{display:none;animation:fadeIn .3s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+/* === TYPOGRAPHY === */
+h2{font-family:var(--ci-font-heading);font-size:2.2rem;color:var(--ci-primary);letter-spacing:1.5px;padding-bottom:.75rem;border-bottom:3px solid var(--ci-accent);margin-bottom:1.5rem;}
+h3{font-family:var(--ci-font-heading);font-size:1.4rem;letter-spacing:1px;color:var(--ci-primary-dark);margin:1.75rem 0 .75rem;}
+h4{font-family:var(--ci-font-body);font-size:1.05rem;font-weight:900;color:var(--ci-neutral);margin:1.25rem 0 .5rem;}
+p{margin-bottom:.9rem;}
+p + p{margin-top:-.25rem;}
+ul,ol{margin:.5rem 0 1rem 1.5rem;}
+li{margin-bottom:.4rem;}
+strong{font-weight:700;color:var(--ci-neutral);}
+em{font-style:italic;color:var(--ci-primary-dark);}
+code{font-family:"SF Mono","Consolas",monospace;font-size:.85em;background:var(--ci-bg-muted);padding:.1em .35em;border-radius:3px;color:var(--ci-primary-dark);}
+.lede{font-size:1.15rem;font-weight:300;color:var(--ci-neutral);margin-bottom:1.5rem;max-width:900px;}
+
+/* === CARDS === */
+.card{background:var(--ci-bg-surface);border:1px solid var(--ci-border);border-radius:8px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.card-accent{border-left:4px solid var(--ci-accent);}
+.card-primary{border-left:4px solid var(--ci-primary);}
+.card-success{border-left:4px solid var(--ci-success);}
+.card-danger{border-left:4px solid var(--ci-danger);}
+.card h4{margin-top:0;}
+
+/* === KPI GRID === */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1rem 0 1.5rem;}
+.kpi{background:white;border:1px solid var(--ci-border);border-radius:8px;padding:1.25rem;box-shadow:var(--ci-shadow-sm);position:relative;overflow:hidden;}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--ci-primary);}
+.kpi.accent::before{background:var(--ci-accent);}
+.kpi.success::before{background:var(--ci-success);}
+.kpi.danger::before{background:var(--ci-danger);}
+.kpi-label{font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--ci-neutral-light);font-weight:700;}
+.kpi-value{font-family:var(--ci-font-heading);font-size:2.2rem;color:var(--ci-primary);letter-spacing:1px;line-height:1.1;margin:.4rem 0;}
+.kpi.accent .kpi-value{color:var(--ci-accent);}
+.kpi.success .kpi-value{color:var(--ci-success);}
+.kpi.danger .kpi-value{color:var(--ci-danger);}
+.kpi-note{font-size:.8rem;color:var(--ci-neutral-light);}
+
+/* === TABLES === */
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem;background:white;border:1px solid var(--ci-border);border-radius:6px;overflow:hidden;}
+th{background:var(--ci-primary);color:white;font-family:var(--ci-font-body);font-weight:700;text-align:left;padding:.7rem 1rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;}
+td{padding:.65rem 1rem;border-bottom:1px solid var(--ci-border);}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:var(--ci-bg-surface);}
+td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td.pos{color:var(--ci-success);font-weight:700;}
+td.neg{color:var(--ci-danger);font-weight:700;}
+
+/* === ARCHITECTURE === */
+.arch-stack{display:flex;flex-direction:column;gap:.5rem;margin:1.5rem 0;}
+.arch-layer{border-radius:8px;padding:1.25rem;color:white;position:relative;box-shadow:var(--ci-shadow-md);}
+.arch-layer.native{background:linear-gradient(135deg,#555 0%,#3A3A3A 100%);}
+.arch-layer.extension{background:linear-gradient(135deg,var(--ci-primary) 0%,var(--ci-primary-dark) 100%);}
+.arch-layer.tools{background:linear-gradient(135deg,var(--ci-accent) 0%,var(--ci-accent-dark) 100%);}
+.arch-layer.ai{background:linear-gradient(135deg,var(--ci-secondary) 0%,var(--ci-secondary-dark) 100%);}
+.arch-layer h4{color:white;margin:0 0 .5rem;font-family:var(--ci-font-heading);letter-spacing:1px;font-size:1.2rem;}
+.arch-layer-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem;}
+.arch-chip{background:rgba(255,255,255,.2);padding:.25rem .7rem;border-radius:12px;font-size:.78rem;font-weight:700;}
+.arch-arrow{text-align:center;font-size:1.5rem;color:var(--ci-neutral-light);line-height:1;}
+
+/* === ERD === */
+.erd-container{background:white;border:1px solid var(--ci-border);border-radius:8px;padding:1.5rem;margin:1rem 0;overflow-x:auto;}
+.erd-svg{display:block;min-width:900px;width:100%;height:auto;}
+
+/* === SIMULATOR === */
+.sim-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem;}
+@media (max-width:900px){.sim-wrap{grid-template-columns:1fr;}}
+.sim-controls{background:var(--ci-bg-surface);border:1px solid var(--ci-border);border-radius:8px;padding:1.5rem;}
+.sim-output{background:white;border:2px solid var(--ci-primary);border-radius:8px;padding:1.5rem;}
+.sim-group{margin-bottom:1.25rem;}
+.sim-label{display:flex;justify-content:space-between;align-items:baseline;font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ci-neutral);margin-bottom:.4rem;}
+.sim-label .sim-value{font-family:var(--ci-font-heading);font-size:1.4rem;color:var(--ci-primary);letter-spacing:1px;}
+.sim-slider{width:100%;-webkit-appearance:none;appearance:none;height:6px;background:var(--ci-bg-muted);border-radius:3px;outline:none;}
+.sim-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--ci-accent);cursor:pointer;border:2px solid white;box-shadow:var(--ci-shadow-sm);}
+.sim-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--ci-accent);cursor:pointer;border:2px solid white;}
+.sim-toggle{display:flex;gap:.4rem;flex-wrap:wrap;}
+.sim-btn{flex:1;min-width:100px;padding:.55rem;background:white;border:2px solid var(--ci-border);border-radius:6px;cursor:pointer;font-weight:700;font-size:.82rem;color:var(--ci-neutral-light);transition:all .2s;}
+.sim-btn:hover{border-color:var(--ci-primary);color:var(--ci-primary);}
+.sim-btn.active{background:var(--ci-primary);border-color:var(--ci-primary);color:white;}
+.sim-tier-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.5rem;}
+.sim-tier-inputs label{font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--ci-neutral-light);}
+.sim-tier-inputs input{width:100%;padding:.4rem;border:1px solid var(--ci-border);border-radius:4px;font-family:var(--ci-font-body);font-size:.9rem;}
+.sim-big{font-family:var(--ci-font-heading);font-size:3.5rem;color:var(--ci-accent);letter-spacing:2px;line-height:1;text-align:center;margin:.5rem 0;}
+.sim-big-label{text-align:center;font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--ci-neutral-light);font-weight:700;margin-bottom:1rem;}
+.sim-sub{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:1rem 0;}
+.sim-sub-card{text-align:center;padding:.75rem;background:var(--ci-bg-surface);border-radius:6px;}
+.sim-sub-value{font-family:var(--ci-font-heading);font-size:1.6rem;color:var(--ci-primary);letter-spacing:1px;}
+.sim-sub-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--ci-neutral-light);font-weight:700;}
+.sim-breakdown{margin-top:1rem;border-top:1px solid var(--ci-border);padding-top:1rem;}
+.sim-bar-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;font-size:.85rem;}
+.sim-bar-label{width:70px;font-weight:700;}
+.sim-bar-track{flex:1;height:18px;background:var(--ci-bg-muted);border-radius:9px;overflow:hidden;}
+.sim-bar-fill{height:100%;background:linear-gradient(90deg,var(--ci-primary),var(--ci-secondary));transition:width .3s;}
+.sim-bar-val{width:90px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--ci-primary-dark);}
+.sim-chart{margin-top:1rem;}
+.sim-preset{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;}
+.sim-preset-btn{padding:.35rem .75rem;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:white;border:1px solid var(--ci-border);border-radius:12px;cursor:pointer;color:var(--ci-neutral);}
+.sim-preset-btn:hover{background:var(--ci-bg-muted);}
+
+/* === SIM CONTEXT (Pipeline KPI strip) === */
+.sim-context{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin:1.25rem 0 1rem;background:linear-gradient(135deg,var(--ci-bg-surface) 0%,#FFFFFF 100%);border:1px solid var(--ci-border);border-left:4px solid var(--ci-accent);border-radius:6px;padding:.85rem 1rem;}
+.sim-context-card{text-align:left;}
+.sim-context-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--ci-neutral-light);font-weight:700;margin-bottom:.15rem;}
+.sim-context-value{font-family:var(--ci-font-heading);font-size:1.4rem;color:var(--ci-primary-dark);letter-spacing:1px;line-height:1.1;}
+.sim-context-note{font-size:.7rem;color:var(--ci-neutral-light);margin-top:.1rem;}
+.sim-context-title{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;color:var(--ci-accent-dark);margin-bottom:.5rem;display:block;}
+
+/* === REFERENCE BASELINES (anchor markers under adoption slider) === */
+.sim-baseline-row{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem;}
+.sim-baseline-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .55rem;background:var(--ci-bg-muted);border-radius:10px;font-size:.7rem;font-weight:700;color:var(--ci-neutral);}
+.sim-baseline-chip strong{color:var(--ci-primary-dark);}
+.sim-baseline-bar{position:relative;height:4px;background:var(--ci-bg-muted);border-radius:2px;margin-top:.4rem;}
+.sim-baseline-marker{position:absolute;top:-3px;width:2px;height:10px;background:var(--ci-accent);}
+.sim-baseline-marker-label{position:absolute;top:-22px;font-size:.62rem;font-weight:700;color:var(--ci-accent-dark);white-space:nowrap;transform:translateX(-50%);}
+
+/* === TWO-TRACK OUTPUT === */
+.sim-track-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.75rem 0;}
+.sim-track-card{padding:.7rem;border-radius:6px;text-align:center;}
+.sim-track-existing{background:#E8F4F8;border-left:3px solid var(--ci-primary);}
+.sim-track-newlogo{background:#FDF4E7;border-left:3px solid var(--ci-accent);}
+.sim-track-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.8px;font-weight:700;color:var(--ci-neutral-light);margin-bottom:.2rem;}
+.sim-track-value{font-family:var(--ci-font-heading);font-size:1.5rem;letter-spacing:1px;line-height:1.1;}
+.sim-track-existing .sim-track-value{color:var(--ci-primary-dark);}
+.sim-track-newlogo .sim-track-value{color:var(--ci-accent-dark);}
+.sim-track-detail{font-size:.7rem;color:var(--ci-neutral-light);margin-top:.15rem;}
+
+/* === REALITY WARNINGS === */
+.sim-warning{font-size:.72rem;color:var(--ci-danger);font-weight:700;margin-top:.35rem;display:none;}
+.sim-warning.show{display:block;}
+
+/* === CALLOUTS === */
+.callout{padding:1rem 1.25rem;border-radius:6px;margin:1rem 0;border-left:4px solid;}
+.callout-info{background:#E8F4F8;border-color:var(--ci-primary);}
+.callout-warn{background:#FDF4E7;border-color:var(--ci-accent);}
+.callout-success{background:#EEF7E5;border-color:var(--ci-success);}
+.callout-danger{background:#F9E7E8;border-color:var(--ci-danger);}
+.callout-label{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.3rem;opacity:.7;}
+
+/* === CODE BLOCKS === */
+pre{background:var(--ci-neutral);color:#E8E8E8;padding:1rem 1.25rem;border-radius:6px;overflow-x:auto;font-family:"SF Mono","Consolas",monospace;font-size:.82rem;margin:1rem 0;line-height:1.5;}
+pre code{background:none;color:inherit;padding:0;}
+
+/* === STATUS PILLS === */
+.pill{display:inline-block;padding:.15rem .6rem;border-radius:10px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.pill-done{background:#EEF7E5;color:var(--ci-success);}
+.pill-inflight{background:#FDF4E7;color:var(--ci-accent-dark);}
+.pill-planned{background:#E8F4F8;color:var(--ci-primary);}
+.pill-shelved{background:#EEEEEE;color:var(--ci-neutral-light);}
+
+/* === TOOL GRID === */
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin:1rem 0;}
+.tool-domain{background:white;border:1px solid var(--ci-border);border-radius:8px;padding:1rem 1.25rem;}
+.tool-domain-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;padding-bottom:.5rem;border-bottom:1px solid var(--ci-border);}
+.tool-domain-name{font-family:var(--ci-font-heading);letter-spacing:1px;color:var(--ci-primary);font-size:1.1rem;}
+.tool-domain-count{background:var(--ci-accent);color:white;padding:.15rem .5rem;border-radius:8px;font-size:.75rem;font-weight:700;}
+.tool-list{font-size:.8rem;color:var(--ci-neutral-light);line-height:1.8;}
+.tool-list code{font-size:.8rem;color:var(--ci-primary-dark);}
+
+/* === FOOTER === */
+.footer{background:var(--ci-neutral);color:#CCC;padding:2rem;text-align:center;font-size:.85rem;margin-top:3rem;}
+.footer strong{color:white;}
+
+/* === UTIL === */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1rem 0;}
+@media (max-width:900px){.two-col{grid-template-columns:1fr;}}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1rem 0;}
+@media (max-width:900px){.three-col{grid-template-columns:1fr;}}
+.text-muted{color:var(--ci-neutral-light);}
+.text-small{font-size:.85rem;}
+.mt-lg{margin-top:1.5rem;}
+</style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <div class="header-brand">
+            <div class="header-logo">CC</div>
+            <div class="header-title">
+                <h1>CRAFTED COMPANION</h1>
+                <p>Leadership Briefing &middot; Product &amp; Commercial Strategy</p>
+            </div>
+        </div>
+        <div class="header-meta">
+            <strong>Prepared for Product Leadership</strong>
+            2026-04-17 &middot; Doozy Labs
+        </div>
+    </div>
+</header>
+
+<nav class="tabnav">
+    <div class="tabnav-inner" id="tabnav">
+        <button class="tab active" data-panel="exec"><span class="tab-num">1</span>Executive Summary</button>
+        <button class="tab" data-panel="story"><span class="tab-num">2</span>The Story</button>
+        <button class="tab" data-panel="ai-companion"><span class="tab-num">3</span>AI Companion 101</button>
+        <button class="tab" data-panel="crafted-companion"><span class="tab-num">4</span>What We Built</button>
+        <button class="tab" data-panel="architecture"><span class="tab-num">5</span>Architecture</button>
+        <button class="tab" data-panel="current"><span class="tab-num">6</span>Current State</button>
+        <button class="tab" data-panel="roadmap"><span class="tab-num">7</span>Roadmap</button>
+        <button class="tab" data-panel="commercial"><span class="tab-num">8</span>Commercial</button>
+        <button class="tab" data-panel="risks"><span class="tab-num">9</span>Risks</button>
+        <button class="tab" data-panel="appendix"><span class="tab-num">10</span>Appendix</button>
+    </div>
+</nav>
+
+<main class="container">
+
+<!-- ================ 1. EXECUTIVE SUMMARY ================ -->
+<section class="panel active" id="exec">
+    <h2>Executive Summary</h2>
+    <p class="lede">Crafted Intelligence is Doozy's independent AI prompt library and orchestration layer for Crafted ERP — a first-class product customers install alongside their ERP. It coexists with Oracle's native AI Companion (surfacing those prompts read-only in a secondary tab) but does <em>not</em> depend on it.</p>
+
+    <div class="callout callout-info">
+        <div class="callout-label">v3 Independence Update (2026-04-17)</div>
+        <p style="margin-bottom:.3rem">This deck reflects the product as it stands today after the <strong>v3 Independence rewrite</strong>. We decoupled from Oracle's bundle-locked AI Companion record type at the data layer: prompt text, categories, roles, and orchestration metadata all live in a single Doozy-owned record (<code>customrecord_dz_companion_prompt</code>, 29 fields).</p>
+        <p style="margin-bottom:0">Our Library Suitelet keeps feature parity with Oracle's native UI and surfaces Atlas prompts read-only in a secondary tab when the SuiteApp is installed — but we no longer need it. Earlier sections in this deck referencing "extension records," "FK to atlas_prompts," or "v2 native-to-Oracle" describe the superseded architecture; Section 5 Architecture reflects the current v3 model.</p>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Addressable Base</div><div class="kpi-value">116</div><div class="kpi-note">active Crafted ERP customers (Jan 2026 ARR Metrics)</div></div>
+        <div class="kpi accent"><div class="kpi-label">Base ARR</div><div class="kpi-value">$7.33M</div><div class="kpi-note">Crafted ERP recurring (ARR Metrics Jan 2026)</div></div>
+        <div class="kpi success"><div class="kpi-label">Build State</div><div class="kpi-value">Prototype<br>Validated</div><div class="kpi-note">37 prompts, 41 tools, 6 domains deployed in Distillery Demo — pre-launch QA pass required</div></div>
+        <div class="kpi accent"><div class="kpi-label">Revenue Opportunity</div><div class="kpi-value">+7–14%</div><div class="kpi-note">incremental ARR lift at conservative-to-aggressive attach</div></div>
+    </div>
+
+    <h3>In One Sentence</h3>
+    <p>We took an ERP platform that NetSuite's generic AI can't understand (because it doesn't know what a proof gallon is) and shipped an AI layer that does — making Crafted ERP the only AI-native craft-beverage ERP in the market.</p>
+
+    <h3>Why Now</h3>
+    <div class="two-col">
+        <div class="card card-primary">
+            <h4>NetSuite changed the game</h4>
+            <p>In late 2025 Oracle shipped their AI Companion framework — a native, governed, prompt-library-based AI interface built directly into NetSuite. Every NetSuite customer now has a default AI experience.</p>
+        </div>
+        <div class="card card-accent">
+            <h4>Generic AI can't serve craft</h4>
+            <p>NetSuite's AI knows invoices and purchase orders. It doesn't know angel's share, TTB readiness, lot genealogy, barrel cost traces, or shelf-life-aware MRP. That gap is our wedge.</p>
+        </div>
+    </div>
+
+    <h3>What We Shipped</h3>
+    <ul>
+        <li><strong>41 Crafted ERP intelligence tools</strong> across 6 domains (Barrel Ops, Lot Profitability, Inventory &amp; Supply, Compliance &amp; Audit, MRP, Batch Genealogy)</li>
+        <li><strong>37 pre-built prompts</strong> seeded via Map/Reduce, edition-aware (Distillery / Winery / Brewery / Cross-Edition), with rich metadata (description, complexity, collection, related prompts, usage analytics)</li>
+        <li><strong>Independent record architecture</strong> — Doozy-owned prompt storage with 29 fields covering prompt text, orchestration, governance, role visibility, and usage analytics. No dependency on Oracle's bundle-locked AI Companion for prompt data.</li>
+        <li><strong>Governance model</strong> with 4 rigor tiers (Minimal / Standard / Governed / Supervised) for safe AI execution</li>
+        <li><strong>Dual-view Library Suitelet</strong> — primary "Crafted Intelligence" tab (our prompts) plus conditional "Oracle AI Companion" tab (read-only view of native prompts when the Atlas SuiteApp is installed). Role-gated, hard-validated against deployed toolsets. Popout, Open Record, Customize (in-session edit), and Save as User Prompt actions with full feature parity to Oracle's native UI.</li>
+        <li><strong>Admin deployment dashboard</strong> — diff view (create / update / skip / orphan), one-click Map/Reduce seed trigger, role-resolution preview, JSON backup export.</li>
+        <li><strong>Two custom roles</strong> (<code>customrole_dz_ci_admin</code>, <code>customrole_dz_ci_user</code>) with bidirectional record permissions, deployable via SDF.</li>
+        <li><strong>Single-install skill file</strong> — customers install one thing and get the unified Crafted Intelligence experience.</li>
+    </ul>
+
+    <h3>The Ask</h3>
+    <div class="card card-accent">
+        <h4>Product Leadership decision points</h4>
+        <ol>
+            <li>Bless a <strong>pricing approach</strong> (see Section 8 — recommended: flat module add-on at ~$599–$999/mo, per edition)</li>
+            <li>Approve <strong>GA launch timeline</strong> and packaging as a named SKU</li>
+            <li>Confirm <strong>go-to-market motion</strong> — upsell to existing 116 customers first, then lead-with-AI for new logos</li>
+        </ol>
+    </div>
+
+    <h3>Why This Is Strategic, Not Just Tactical</h3>
+    <div class="three-col">
+        <div class="card card-primary"><h4>Defensive moat</h4><p>Keeps existing customers anchored to Crafted ERP as AI becomes table stakes.</p></div>
+        <div class="card card-accent"><h4>Offensive wedge</h4><p>New logos shopping for an "AI-native" craft ERP have exactly one choice.</p></div>
+        <div class="card card-success"><h4>Revenue expansion</h4><p>Net new ARR stream layered on top of the existing subscription — highest-margin product in the catalog.</p></div>
+    </div>
+</section>
+
+<!-- ================ 2. THE STORY ================ -->
+<section class="panel" id="story">
+    <h2>The Story</h2>
+    <p class="lede">How we got here, and why the pivot from v1 to v2 is a strategic advantage rather than a setback.</p>
+
+    <h3>Act 1 — The Problem</h3>
+    <p>Crafted ERP customers live in a world of operational questions that generic NetSuite can't answer directly:</p>
+    <div class="two-col">
+        <div class="card">
+            <h4>What NetSuite AI can handle</h4>
+            <ul class="text-small">
+                <li>"Show me invoices over $50K"</li>
+                <li>"Top 10 customers by revenue this quarter"</li>
+                <li>"Aged receivables by customer"</li>
+            </ul>
+        </div>
+        <div class="card card-accent">
+            <h4>What Crafted customers actually ask</h4>
+            <ul class="text-small">
+                <li>"What is barrel 092425-02 worth, and trace the cost back to the purchase order"</li>
+                <li>"Are we ready to file this month's TTB? What's blocking us?"</li>
+                <li>"For lot WHS-2024-0847, where did we make or lose money from raw materials through retail?"</li>
+                <li>"Which barrels are 4+ years old and ready to harvest?"</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>Act 2 — Crafted Intelligence v1 (2024–2025)</h3>
+    <div class="card card-success">
+        <h4>We built the right thing at the right time</h4>
+        <p>Crafted Intelligence v1 launched as a standalone AI orchestration layer — custom prompt management, custom tool scripts, custom UI, all Doozy-owned. It proved the concept: craft-beverage customers wanted AI that understood their domain, and they engaged with it.</p>
+        <p class="text-small text-muted">It included: prompt-engine (playbook management), barrel-intelligence, lot-profitability, inventory-supply, compliance-audit, MRP, and batch-genealogy packages. Each a separate SDF project, each independently deployed.</p>
+    </div>
+
+    <h3>Act 3 — NetSuite Changes the Game</h3>
+    <p>In late 2025, Oracle released the <strong>NetSuite AI Companion</strong> — a native SuiteApp providing:</p>
+    <ul>
+        <li>A governed prompt library with roles, industries, and categories</li>
+        <li>Atlas prompt records that integrate directly into NetSuite's permissions model</li>
+        <li>A clean library UI with Copy / Send-to-Claude / Send-to-ChatGPT actions</li>
+        <li>Usage analytics (copy counts per prompt, per AI provider)</li>
+        <li>Native integration with the MCP (Model Context Protocol) connector</li>
+    </ul>
+    <p>This changed the strategic calculus. Every Crafted ERP customer would soon have an Oracle-native AI experience by default. The question became: <em>do we compete with it or extend it?</em></p>
+
+    <h3>Act 4 — v2: Built on Oracle, Learned the Limits</h3>
+    <div class="card">
+        <h4>The v2 attempt</h4>
+        <p>Our first instinct when Oracle shipped Atlas was to <strong>extend</strong> it — store orchestration metadata in a Doozy extension record FK-linked to Oracle's bundle-locked prompt record. Ride Oracle's rails for governance, roles, and library UX. We shipped this architecture and seeded 12 barrel prompts into the TSTDRV1912378 demo.</p>
+    </div>
+
+    <h4>Why v2 hit a wall</h4>
+    <ul>
+        <li><strong>Categories were capped at 7</strong> — Oracle's Atlas category list is bundle-locked. "Barrel Operations" and "Lot Profitability" had to ride under "Manufacturing" with subcategory hacks.</li>
+        <li><strong>No room to add fields</strong> — user-facing complexity, collection grouping, execution analytics, and changelog fields couldn't live on the Atlas record; they were trapped in the extension layer and required a JOIN on every read.</li>
+        <li><strong>Fragile at every Oracle release</strong> — every update to Atlas threatens our FK query. We'd be permanent downstream-of-Oracle, reacting to schema changes.</li>
+        <li><strong>Identity dilution</strong> — "we extend Oracle's library" is a weaker market position than "Crafted Intelligence is its own product that happens to coexist with Oracle's."</li>
+    </ul>
+
+    <h3>Act 5 — v3: Independence (2026-04-17)</h3>
+    <div class="card card-primary">
+        <h4>The strategic pivot</h4>
+        <p>With zero customers yet deployed on v2, we took the clean moment and rebuilt. Prompt text, categories, roles, and orchestration metadata all live in <em>one</em> Doozy-owned record. The Atlas SuiteApp becomes optional — we surface its prompts read-only in a secondary library tab when it's installed, but we don't depend on it. Crafted Intelligence is its own product.</p>
+    </div>
+
+    <h4>What changed across the three versions</h4>
+    <table>
+        <thead>
+            <tr><th>Concern</th><th>v1 (Prompt Engine)</th><th>v2 (Atlas Extension)</th><th>v3 (Independence — shipped)</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Prompt storage</td><td>Custom records (Doozy-owned)</td><td>Atlas prompt + extension record (FK linked, JOINed)</td><td><strong>Single independent record — 29 fields</strong></td></tr>
+            <tr><td>Categories</td><td>Doozy list</td><td>Oracle's 7 locked values</td><td><strong>Doozy list — 7 domain values + General</strong></td></tr>
+            <tr><td>Role control</td><td>Doozy roles</td><td>Mirror NS roles into Atlas role record</td><td><strong>Native NS roles via role-pattern matching</strong></td></tr>
+            <tr><td>Library UI</td><td>Custom Suitelet</td><td>Extends Oracle's native library</td><td><strong>Dual-view Suitelet — Crafted primary, Atlas read-only tab</strong></td></tr>
+            <tr><td>Oracle dependency</td><td>None</td><td>Bundle-locked FK coupling</td><td><strong>Optional — for display only if Atlas installed</strong></td></tr>
+            <tr><td>Customize / Save</td><td>—</td><td>—</td><td><strong>In-session edit + Save as User Prompt (new record)</strong></td></tr>
+            <tr><td>Maintenance posture</td><td>Full-stack</td><td>Downstream-of-Oracle (schema risk)</td><td><strong>Own the lane; coexist without depending</strong></td></tr>
+        </tbody>
+    </table>
+
+    <h3>The Takeaway</h3>
+    <p>v1 proved customers wanted domain AI. v2 taught us the limits of riding a bundle-locked platform. v3 is the mature product: an AI layer customers buy and install that delivers Doozy's domain expertise standalone — and politely surfaces Oracle's native prompts alongside for users who have both.</p>
+</section>
+
+<!-- ================ 3. AI COMPANION 101 ================ -->
+<section class="panel" id="ai-companion">
+    <h2>NetSuite AI Companion 101</h2>
+    <p class="lede">Leadership context: what Oracle shipped, why it matters, and what it does and doesn't do.</p>
+
+    <h3>What It Is</h3>
+    <p>NetSuite AI Companion is Oracle's native AI interface layer for NetSuite. It's a bundle-locked SuiteApp that installs into any NetSuite account and provides a curated library of pre-built prompts that users can invoke through Claude, ChatGPT, or other MCP-compatible AI clients.</p>
+
+    <div class="card card-primary">
+        <h4>The key idea</h4>
+        <p>Instead of every user typing ad-hoc AI queries, the Companion provides a <strong>governed library of high-quality prompts</strong> — curated by role, industry, and category — that users browse and copy into their AI tool of choice. Oracle calls this "prompt engineering as a first-class enterprise artifact."</p>
+    </div>
+
+    <h3>What Oracle Ships</h3>
+    <div class="tool-grid">
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Prompt Library</span><span class="tool-domain-count">~120</span></div>
+            <p class="text-small text-muted">Pre-built prompts across ~40 industries, categorized by role. Examples: "Top slow-paying customers", "Aged receivables by segment".</p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">MCP Connector</span><span class="tool-domain-count">Tools</span></div>
+            <p class="text-small text-muted">A native MCP server that exposes NetSuite data (records, saved searches, SuiteQL, reports) as tools AI assistants can call.</p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Role Governance</span><span class="tool-domain-count">Native</span></div>
+            <p class="text-small text-muted">Prompts are filtered by the current user's role. Admins curate what each role sees.</p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Usage Analytics</span><span class="tool-domain-count">Tracked</span></div>
+            <p class="text-small text-muted">Every Copy / Send-to-Claude / Send-to-ChatGPT action is logged per user per prompt.</p>
+        </div>
+    </div>
+
+    <h3>The 8-Object Schema</h3>
+    <p>Internally, the SuiteApp is built on 8 native records and lists (all bundle-locked — we can't modify them, but we can reference them):</p>
+    <table>
+        <thead><tr><th>Object</th><th>Type</th><th>Purpose</th></tr></thead>
+        <tbody>
+            <tr><td><code>customrecord_atlas_aicomp_prompts</code></td><td>Record</td><td>The prompt text, category, subcategory, role, industry, external ID</td></tr>
+            <tr><td><code>customrecord_atlas_aicomp_prompt_roles</code></td><td>Record</td><td>Extensible list of prompt roles (Admin, Controller, etc.)</td></tr>
+            <tr><td><code>customrecord_atlas_aicomp_copyaction</code></td><td>Record</td><td>Usage log: who copied/sent what, to which AI provider, when</td></tr>
+            <tr><td><code>customrecord_atlas_aicomp_settings</code></td><td>Record</td><td>AI provider URLs (Claude, ChatGPT)</td></tr>
+            <tr><td><code>customrecord_atlas_aicomp_role_map</code></td><td>Record</td><td>Maps NetSuite roles to prompt roles (with AI-mapping confidence)</td></tr>
+            <tr><td><code>customlist_atlas_aicomp_prompt_cat</code></td><td>List</td><td>7 locked categories (Manufacturing, Finance, Sales, etc.)</td></tr>
+            <tr><td><code>customlist_atlas_aicomp_prompt_ind</code></td><td>List</td><td>39 locked industries (Food &amp; Beverage, Manufacturing, etc.)</td></tr>
+            <tr><td><code>customlist_atlas_aicomp_mapping_method</code></td><td>List</td><td>Method used for role mapping (AI Mapped, Manual, etc.)</td></tr>
+        </tbody>
+    </table>
+
+    <h3>What It Does Well</h3>
+    <ul>
+        <li>Generic business questions that ride on standard NetSuite records</li>
+        <li>Standard reports, saved searches, SuiteQL queries</li>
+        <li>Cross-industry knowledge (A/R, A/P, inventory basics, GL)</li>
+        <li>Role-based gating and governance</li>
+    </ul>
+
+    <h3>What It Doesn't Do</h3>
+    <ul>
+        <li><strong>Industry-specific operational logic</strong> — it doesn't know what a proof gallon is, or how to compute angel's share, or what makes a batch "harvest-ready"</li>
+        <li><strong>Custom record orchestration</strong> — complex multi-step workflows across barrel records, lot numbers, cellar orders</li>
+        <li><strong>Domain-aware safety rules</strong> — e.g., TTB filing readiness requires specific validation not shipped in the base</li>
+        <li><strong>Compliance-grade execution guarantees</strong> — beyond generic access control</li>
+    </ul>
+
+    <div class="callout callout-info">
+        <div class="callout-label">The Gap We Fill</div>
+        Oracle ships the <strong>platform</strong> and the <strong>generic prompts</strong>. Customers in specialized industries (craft beverage, cannabis, CPG, etc.) need <em>someone</em> to provide the <strong>domain intelligence</strong>. That someone is the ISV — which in craft beverage is Doozy.
+    </div>
+</section>
+
+<!-- ================ 4. WHAT CRAFTED COMPANION IS ================ -->
+<section class="panel" id="crafted-companion">
+    <h2>What Crafted Intelligence Is</h2>
+    <p class="lede">An independent AI prompt library and orchestration layer purpose-built for Crafted ERP — Doozy's domain expertise delivered as a product.</p>
+
+    <h3>The Core Pattern</h3>
+    <div class="card card-primary">
+        <h4>Standalone, with graceful coexistence</h4>
+        <p>Crafted Intelligence is its own product. It installs into any NetSuite account running Crafted ERP and provides a curated library of 37 domain-specific prompts and 41 intelligence tools. If Oracle's AI Companion SuiteApp is also installed, we surface its prompts read-only in a secondary "Oracle AI Companion" tab inside our Library — so users get a single pane of glass. If it isn't, the tab simply doesn't appear. We don't depend on it.</p>
+    </div>
+
+    <h3>What Gets Added</h3>
+    <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Pre-built Prompts</div><div class="kpi-value">37</div><div class="kpi-note">across 6 intelligence domains</div></div>
+        <div class="kpi accent"><div class="kpi-label">Domain Tools</div><div class="kpi-value">41</div><div class="kpi-note">Custom Tool Scripts exposed via MCP</div></div>
+        <div class="kpi success"><div class="kpi-label">Editions Supported</div><div class="kpi-value">3</div><div class="kpi-note">Distillery / Winery / Brewery</div></div>
+        <div class="kpi"><div class="kpi-label">Governance Tiers</div><div class="kpi-value">4</div><div class="kpi-note">Minimal / Standard / Governed / Supervised</div></div>
+    </div>
+
+    <h3>The 6 Intelligence Domains</h3>
+    <div class="tool-grid">
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Barrel Operations</span><span class="tool-domain-count">8 tools</span></div>
+            <p class="text-small">Single-barrel lookup, portfolio valuation, aging analysis, cost traces, angel's share, location mapping.</p>
+            <p class="text-small text-muted"><code>getBarrelProfile</code> &middot; <code>getBarrelValuation</code> &middot; <code>getBarrelCostTrace</code> &middot; <code>getBarrelKPIs</code> &middot; <code>getBarrelAging</code> &middot; <code>getBarrelInventory</code> &middot; <code>getBarrelActivityHistory</code> &middot; <code>getBarrelLocationMap</code></p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Lot Profitability</span><span class="tool-domain-count">7 tools</span></div>
+            <p class="text-small">End-to-end lot P&amp;L: raw materials → production → retail, with backward cost trees and forward sales trails.</p>
+            <p class="text-small text-muted"><code>getLotProfitability</code> &middot; <code>getLotCostTree</code> &middot; <code>getLotSalesTrail</code> &middot; <code>getLotYieldAnalysis</code> &middot; <code>getLotCostVariance</code> &middot; <code>getLotGLDetail</code> &middot; <code>getItemCostTrend</code></p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Inventory &amp; Supply</span><span class="tool-domain-count">9 tools</span></div>
+            <p class="text-small">Item intelligence meta-orchestrator, snapshots, aging, alerts, costed BOM, production variance.</p>
+            <p class="text-small text-muted"><code>searchItems</code> &middot; <code>getItemIntelligence</code> &middot; <code>getInventorySnapshot</code> &middot; <code>getInventoryAging</code> &middot; <code>getInventoryTrend</code> &middot; <code>getInventoryAlerts</code> &middot; <code>getCostedBOM</code> &middot; <code>getProductionCostVariance</code> &middot; <code>getSpotLightOccurrences</code></p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Compliance &amp; Audit</span><span class="tool-domain-count">8 tools</span></div>
+            <p class="text-small">TTB readiness scores, filing status, gain/loss analysis, data quality audits, accounting anomalies, audit trails.</p>
+            <p class="text-small text-muted"><code>getComplianceReadiness</code> &middot; <code>getComplianceFilingStatus</code> &middot; <code>getGainLossAnalysis</code> &middot; <code>getDataQualityAudit</code> &middot; <code>getAccountingAnomalies</code> &middot; <code>getTransactionAuditTrail</code> &middot; <code>auditFieldChanges</code> &middot; <code>traceTransaction</code></p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">MRP Intelligence</span><span class="tool-domain-count">6 tools</span></div>
+            <p class="text-small">Shelf-life-aware MRP, supply/demand analysis, action messages, setup audits, shelf life risk.</p>
+            <p class="text-small text-muted"><code>analyzeMRPSupplyDemand</code> &middot; <code>getMRPActionMessages</code> &middot; <code>runMRPSetupAudit</code> &middot; <code>runShelfLifeMRP</code> &middot; <code>analyzeShelfLifeRisk</code> &middot; <code>getSupplyPlanAnalysis</code></p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Batch Genealogy</span><span class="tool-domain-count">3 tools</span></div>
+            <p class="text-small">Winery-specific. Batch identity, full blending lineage, genealogy trace for blended products.</p>
+            <p class="text-small text-muted"><code>getBatchDetails</code> &middot; <code>getBatchGenealogy</code> &middot; <code>getBatchLineageTrace</code></p>
+        </div>
+    </div>
+
+    <h3>The Orchestration Model</h3>
+    <p>Every Crafted prompt begins with a header that triggers the orchestration handshake:</p>
+    <pre><code>[Crafted Prompt #201 — call getPromptMeta(201) first for orchestration context, safety rules, and tool chain]
+
+What is barrel RUM1000095 worth? Show me current value, cost per proof gallon,
+fill date, age, status, and location. Then trace how the value was built.</code></pre>
+
+    <p>When an AI assistant (Claude, ChatGPT) sees this header, it performs a deterministic 5-step flow:</p>
+    <ol>
+        <li><code>getPromptMeta(201)</code> → returns orchestration envelope: steps, params, safety rules, governance tier, artifact flag</li>
+        <li>Validate params against user input (substitute <code>[BARREL NUMBER]</code>)</li>
+        <li>Execute the tool chain in order, respecting <code>depends_on</code></li>
+        <li>Apply safety rules (e.g., "never fabricate values", "flag zero-cost entries")</li>
+        <li><code>logExecution</code> with results, duration, success flag, agent identity</li>
+    </ol>
+
+    <h3>Why This Pattern Matters</h3>
+    <div class="two-col">
+        <div class="card card-success">
+            <h4>Deterministic execution</h4>
+            <p>The AI doesn't improvise the sequence — it follows an orchestration plan Doozy authored. Reduces hallucination risk and makes behavior auditable.</p>
+        </div>
+        <div class="card card-primary">
+            <h4>Governance-aware</h4>
+            <p>Four rigor tiers let us match AI autonomy to data sensitivity. A portfolio read is "Minimal"; a compliance readiness check is "Governed".</p>
+        </div>
+    </div>
+
+    <h3>Example End-to-End</h3>
+    <p>User pastes the "Single Barrel Valuation" prompt into Claude. What happens:</p>
+    <pre><code>User:  [Crafted Prompt #201 — ...] What is barrel RUM1000095 worth?
+
+Claude: [calls getPromptMeta(201)]
+        → reads: governance=Standard, steps=[getBarrelProfile, getBarrelValuation, getBarrelCostTrace]
+        → reads: params={BARREL NUMBER: required}, artifact=cost-waterfall
+
+Claude: [extracts "RUM1000095" as BARREL NUMBER]
+        [calls getBarrelProfile(barrelSearch: "RUM1000095")]
+        → returns: 11 years old, 68.9 PG, 130 proof, at Heaven Hill
+
+Claude: [calls getBarrelValuation(serialNumber: "RUM1000095")]
+        → returns: $241.18 current value, $3.50/PG
+
+Claude: [calls getBarrelCostTrace(barrelSearch: "RUM1000095")]
+        → returns: Item Receipt 3/10/2023, PO #208, $241.18
+
+Claude: [applies safety rules, generates cost-waterfall artifact]
+        [calls logExecution(promptId: 201, success: true, ...)]
+</code></pre>
+</section>
+
+<!-- ================ 5. ARCHITECTURE ================ -->
+<section class="panel" id="architecture">
+    <h2>Architecture &amp; How It Works</h2>
+    <p class="lede">Engineering-grade breakdown of the three layers, data model, and orchestration plumbing.</p>
+
+    <h3>The Three-Layer Model (v3)</h3>
+    <div class="arch-stack">
+        <div class="arch-layer ai">
+            <h4>AI CLIENT LAYER</h4>
+            <p>Claude, ChatGPT, or any MCP-compatible AI assistant. Reads prompts from the Crafted Intelligence Library and calls tools through the NetSuite MCP connector.</p>
+            <div class="arch-layer-chips">
+                <span class="arch-chip">Claude</span><span class="arch-chip">ChatGPT</span><span class="arch-chip">Cowork</span><span class="arch-chip">MCP Protocol</span>
+            </div>
+        </div>
+        <div class="arch-arrow">▼</div>
+        <div class="arch-layer extension">
+            <h4>CRAFTED INTELLIGENCE CORE (DOOZY-OWNED)</h4>
+            <p>Single independent record owns prompt text, categories, roles, orchestration metadata, and usage analytics. No dependency on Oracle's AI Companion for data.</p>
+            <div class="arch-layer-chips">
+                <span class="arch-chip">Companion Prompt (29 fields)</span><span class="arch-chip">Exec Log (8 fields)</span><span class="arch-chip">Category List (7)</span><span class="arch-chip">Complexity List (3)</span><span class="arch-chip">Edition List</span><span class="arch-chip">Status List</span><span class="arch-chip">CI Admin / User Roles</span>
+            </div>
+        </div>
+        <div class="arch-arrow">▼</div>
+        <div class="arch-layer native" style="background:linear-gradient(135deg,#888 0%,#666 100%);">
+            <h4>NATIVE ORACLE LAYER (OPTIONAL — COEXISTENCE SURFACE)</h4>
+            <p>When Oracle's AI Companion SuiteApp is installed, our Library Suitelet surfaces its prompts read-only in a secondary tab (Category / Industry / Role filters mirror Oracle's native UI). When absent, the tab is hidden. Never written to.</p>
+            <div class="arch-layer-chips">
+                <span class="arch-chip">Atlas Prompts</span><span class="arch-chip">Atlas Categories (7)</span><span class="arch-chip">Atlas Industries (39)</span><span class="arch-chip">Atlas Roles (74)</span><span class="arch-chip">Read-only</span>
+            </div>
+        </div>
+        <div class="arch-arrow">▼</div>
+        <div class="arch-layer tools">
+            <h4>CRAFTED DOMAIN TOOL LAYER</h4>
+            <p>41 Custom Tool Scripts across 6 toolsets plus 4 companion tools (getPromptMeta v2.0.0, seedPrompt, updatePrompt, logExecution). Each exposed to the MCP connector with typed schemas.</p>
+            <div class="arch-layer-chips">
+                <span class="arch-chip">barrel-intelligence</span><span class="arch-chip">lot-profitability</span><span class="arch-chip">inventory-supply</span><span class="arch-chip">compliance-audit</span><span class="arch-chip">mrp-intelligence</span><span class="arch-chip">batch-genealogy</span><span class="arch-chip">dz_companion</span>
+            </div>
+        </div>
+    </div>
+
+    <h3>Entity Relationship Diagram (v3)</h3>
+    <div class="erd-container">
+        <svg class="erd-svg" viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg">
+            <!-- Crafted Intelligence Core background -->
+            <rect x="20" y="20" width="960" height="260" fill="#E8F4F8" stroke="#0785A8" stroke-width="1" rx="6"/>
+            <text x="40" y="42" font-family="Bebas Neue" font-size="14" fill="#006486" letter-spacing="1">CRAFTED INTELLIGENCE CORE (DOOZY-OWNED, INDEPENDENT)</text>
+
+            <!-- companion_prompt (main record) -->
+            <rect x="50" y="60" width="280" height="200" fill="#0785A8" stroke="#006486" rx="4"/>
+            <text x="190" y="82" text-anchor="middle" font-family="Bebas Neue" font-size="12" fill="white" letter-spacing="1">DZ_COMPANION_PROMPT (29 fields)</text>
+            <line x1="60" y1="90" x2="320" y2="90" stroke="#5CB8B2"/>
+            <text x="60" y="108" font-family="Lato" font-size="10" fill="white">id (PK), name, externalid (dz_cp_*)</text>
+            <text x="60" y="124" font-family="Lato" font-size="10" fill="white">prompt_text, description, public</text>
+            <text x="60" y="140" font-family="Lato" font-size="10" fill="white">category, subcategory, collection</text>
+            <text x="60" y="156" font-family="Lato" font-size="10" fill="white">toolset, tool_chain, entry_tool</text>
+            <text x="60" y="172" font-family="Lato" font-size="10" fill="white">steps, tool_deps, params (JSON)</text>
+            <text x="60" y="188" font-family="Lato" font-size="10" fill="white">safety_rules, governance, artifact</text>
+            <text x="60" y="204" font-family="Lato" font-size="10" fill="white">edition, edition_notes, complexity</text>
+            <text x="60" y="220" font-family="Lato" font-size="10" fill="white" font-weight="700">visible_roles (multi-select → role)</text>
+            <text x="60" y="236" font-family="Lato" font-size="10" fill="white">exec_count, last_executed, avg_duration</text>
+            <text x="60" y="252" font-family="Lato" font-size="10" fill="white">version, author, status, changelog, related</text>
+
+            <!-- exec_log -->
+            <rect x="360" y="60" width="220" height="200" fill="#0785A8" stroke="#006486" rx="4"/>
+            <text x="470" y="82" text-anchor="middle" font-family="Bebas Neue" font-size="12" fill="white" letter-spacing="1">DZ_EXEC_LOG (8 fields)</text>
+            <line x1="370" y1="90" x2="570" y2="90" stroke="#5CB8B2"/>
+            <text x="370" y="108" font-family="Lato" font-size="10" fill="white">id (PK)</text>
+            <text x="370" y="124" font-family="Lato" font-size="10" fill="white" font-weight="700">prompt_ref (→ companion_prompt)</text>
+            <text x="370" y="140" font-family="Lato" font-size="10" fill="white">exec_date, duration</text>
+            <text x="370" y="156" font-family="Lato" font-size="10" fill="white">tools_called (JSON)</text>
+            <text x="370" y="172" font-family="Lato" font-size="10" fill="white">success (bool), error</text>
+            <text x="370" y="188" font-family="Lato" font-size="10" fill="white">agent (claude / chatgpt)</text>
+            <text x="370" y="204" font-family="Lato" font-size="10" fill="white">version (at exec time)</text>
+
+            <!-- Lists -->
+            <rect x="610" y="60" width="160" height="200" fill="#5CB8B2" stroke="#50A29E" rx="4"/>
+            <text x="690" y="82" text-anchor="middle" font-family="Bebas Neue" font-size="12" fill="white" letter-spacing="1">CRAFTED LISTS</text>
+            <line x1="620" y1="90" x2="760" y2="90" stroke="white"/>
+            <text x="620" y="108" font-family="Lato" font-size="10" fill="white">dz_cp_category (7)</text>
+            <text x="620" y="124" font-family="Lato" font-size="10" fill="white">dz_cp_complexity (3)</text>
+            <text x="620" y="140" font-family="Lato" font-size="10" fill="white">dz_pm_edition (4)</text>
+            <text x="620" y="156" font-family="Lato" font-size="10" fill="white">dz_pm_status (4)</text>
+            <text x="620" y="172" font-family="Lato" font-size="10" fill="white">dz_pm_complexity (4)</text>
+
+            <!-- Roles -->
+            <rect x="800" y="60" width="160" height="200" fill="#84B75C" stroke="#5F9139" rx="4"/>
+            <text x="880" y="82" text-anchor="middle" font-family="Bebas Neue" font-size="12" fill="white" letter-spacing="1">CUSTOM ROLES</text>
+            <line x1="810" y1="90" x2="950" y2="90" stroke="white"/>
+            <text x="810" y="108" font-family="Lato" font-size="10" fill="white">customrole_dz_ci_admin</text>
+            <text x="810" y="124" font-family="Lato" font-size="10" fill="white">customrole_dz_ci_user</text>
+            <text x="810" y="148" font-family="Lato" font-size="9" fill="white" font-style="italic">Bidirectional perms</text>
+            <text x="810" y="162" font-family="Lato" font-size="9" fill="white" font-style="italic">with companion_prompt</text>
+            <text x="810" y="176" font-family="Lato" font-size="9" fill="white" font-style="italic">and exec_log</text>
+
+            <!-- Toolsets layer -->
+            <rect x="20" y="300" width="960" height="130" fill="#FDF4E7" stroke="#DB8A06" stroke-width="1" rx="6"/>
+            <text x="40" y="322" font-family="Bebas Neue" font-size="14" fill="#BD7A2A" letter-spacing="1">COMPANION + DOMAIN TOOLSETS</text>
+
+            <!-- Companion toolset -->
+            <rect x="50" y="340" width="280" height="80" fill="#DB8A06" stroke="#BD7A2A" rx="4"/>
+            <text x="190" y="360" text-anchor="middle" font-family="Bebas Neue" font-size="12" fill="white" letter-spacing="1">DZ_COMPANION TOOLSET (v2.0.0)</text>
+            <line x1="60" y1="368" x2="320" y2="368" stroke="white"/>
+            <text x="60" y="386" font-family="Lato" font-size="10" fill="white" font-weight="700">getPromptMeta(id | externalId)</text>
+            <text x="60" y="400" font-family="Lato" font-size="10" fill="white">seedPrompt, updatePrompt, logExecution</text>
+            <text x="60" y="414" font-family="Lato" font-size="9" fill="white" font-style="italic">Single-table queries &middot; writes exec_count / last_executed</text>
+
+            <!-- Map/Reduce -->
+            <rect x="360" y="340" width="280" height="80" fill="#DB8A06" stroke="#BD7A2A" rx="4"/>
+            <text x="500" y="360" text-anchor="middle" font-family="Bebas Neue" font-size="12" fill="white" letter-spacing="1">DZ_MR_PROMPTSEED (Map/Reduce)</text>
+            <line x1="370" y1="368" x2="630" y2="368" stroke="white"/>
+            <text x="370" y="386" font-family="Lato" font-size="10" fill="white">Reads seed-data.json (v3.0.0, 37 prompts)</text>
+            <text x="370" y="400" font-family="Lato" font-size="10" fill="white">Idempotent create/update by externalid</text>
+            <text x="370" y="414" font-family="Lato" font-size="9" fill="white" font-style="italic">Role-pattern match against native NS roles</text>
+
+            <!-- Library Suitelet -->
+            <rect x="670" y="340" width="290" height="80" fill="#DB8A06" stroke="#BD7A2A" rx="4"/>
+            <text x="815" y="360" text-anchor="middle" font-family="Bebas Neue" font-size="12" fill="white" letter-spacing="1">DZ_SL_COMPLIB (Library Suitelet)</text>
+            <line x1="680" y1="368" x2="950" y2="368" stroke="white"/>
+            <text x="680" y="386" font-family="Lato" font-size="10" fill="white">Dual-view: Crafted (primary) + Atlas tab</text>
+            <text x="680" y="400" font-family="Lato" font-size="10" fill="white">Popout &middot; Open Record &middot; Customize &middot; Save As</text>
+            <text x="680" y="414" font-family="Lato" font-size="9" fill="white" font-style="italic">Role-filtered via visible_roles multi-select</text>
+
+            <!-- Atlas Coexistence Layer (optional) -->
+            <rect x="20" y="450" width="960" height="90" fill="#F5F5F5" stroke="#999" stroke-dasharray="6 3" stroke-width="1" rx="6"/>
+            <text x="40" y="472" font-family="Bebas Neue" font-size="14" fill="#666" letter-spacing="1">ORACLE AI COMPANION (OPTIONAL — COEXISTENCE SURFACE, READ-ONLY)</text>
+            <text x="40" y="492" font-family="Lato" font-size="11" fill="#555">customrecord_atlas_aicomp_prompts &middot; customlist_atlas_aicomp_prompt_cat (7) &middot; customlist_atlas_aicomp_prompt_ind (39) &middot; customrecord_atlas_aicomp_prompt_roles (74)</text>
+            <text x="40" y="510" font-family="Lato" font-size="10" fill="#888" font-style="italic">If SuiteApp is installed, Library Suitelet surfaces these prompts in a secondary tab with Oracle's native Category / Industry / Role filters. No FK dependency; gracefully hidden when absent.</text>
+            <text x="40" y="528" font-family="Lato" font-size="10" fill="#888">Probed via get-atlas-availability action. Tab hidden on probe failure or zero results.</text>
+
+            <!-- Domain tools layer -->
+            <rect x="20" y="560" width="960" height="50" fill="#FDF4E7" stroke="#DB8A06" stroke-width="1" rx="6"/>
+            <text x="40" y="580" font-family="Bebas Neue" font-size="14" fill="#BD7A2A" letter-spacing="1">CRAFTED DOMAIN TOOLS (6 TOOLSETS, 41 TOOLS)</text>
+            <text x="40" y="600" font-family="Lato" font-size="11" fill="#555">barrel-intelligence (8) &middot; lot-profitability (7) &middot; inventory-supply (9) &middot; compliance-audit (8) &middot; mrp-intelligence (6) &middot; batch-genealogy (3)</text>
+        </svg>
+    </div>
+
+    <div class="callout callout-info">
+        <div class="callout-label">The Key Architectural Insight (v3)</div>
+        <code>customrecord_dz_companion_prompt</code> is a single independent record that owns everything a prompt needs — text, category, roles, orchestration steps, safety rules, edition targeting, usage analytics, collection grouping. When an AI client sees a Crafted prompt header, it calls <code>getPromptMeta</code> which executes a <em>single-table query</em> (no JOIN) and returns the v2.0.0 response shape. Oracle's Atlas prompts are still available — but only as a read-only coexistence surface in the Library UI, never as a dependency for our data path.
+    </div>
+
+    <h3>The Orchestration Flow (v3)</h3>
+    <pre><code>┌────────────────┐
+│  AI Assistant  │  reads prompt text, sees header [Crafted Prompt #101 — ...]
+└────────┬───────┘
+         │
+         ▼                        MCP
+┌──────────────────┐         ◄─────────────────►   ┌─────────────────┐
+│ NetSuite MCP     │──────── getPromptMeta(101) ──►│ DZ Companion    │
+│ Connector        │                               │ Toolset (v2.0.0)│
+└──────────────────┘         ◄──── {prompt_text,   └────────┬────────┘
+         │                          steps, params,          │
+         │                          safety_rules,           │ Single-table
+         │                          governance, edition,    │ SELECT
+         │                          complexity, artifact,   │ FROM dz_companion_prompt
+         │                          exec_count,             │ WHERE id = 101
+         │                          last_executed}  ──┐     ▼
+         │                                            │  ┌─────────────┐
+         │                                            └──│ Independent │
+         │                                               │ Record      │
+         │                                               └─────────────┘
+         ▼
+  AI executes step 1 → step 2 → step 3 (respecting depends_on)
+  Applies safety_rules during each step
+  Generates artifact if artifact=true
+         │
+         ▼
+  logExecution(promptId, success, duration, toolsCalled, agent)
+         │
+         ├──► writes new row to dz_exec_log (8 fields)
+         └──► increments exec_count, updates last_executed & avg_duration on prompt</code></pre>
+
+    <h3>Governance Ladder</h3>
+    <table>
+        <thead><tr><th>Tier</th><th>AI Behavior</th><th>Use For</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Minimal</strong></td><td>Execute directly. Format result. No extra checks.</td><td>Simple reads (portfolio valuation, inventory snapshots)</td></tr>
+            <tr><td><strong>Standard</strong></td><td>Follow tool chain. Apply edition logic. Generate artifact if flagged.</td><td>Multi-step analytics (single-barrel cost trace)</td></tr>
+            <tr><td><strong>Governed</strong></td><td>Validate params → detect edition → execute → apply safety rules → flag anomalies → format.</td><td>Compliance-sensitive (TTB readiness, data quality audits)</td></tr>
+            <tr><td><strong>Supervised</strong></td><td>Require user confirmation before each write. Log execution. Explain before doing.</td><td>Any write operation (future use; currently read-only)</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Installation Flow (v3)</h3>
+    <ol>
+        <li><strong>Doozy deploys Crafted Intelligence SDF bundle</strong> via SuiteCloud CLI — creates the independent record, custom lists, 2 custom roles (<code>customrole_dz_ci_admin</code> / <code>customrole_dz_ci_user</code>), 2 Suitelets (Library + Admin Deployment Dashboard), and the Map/Reduce seed script.</li>
+        <li><strong>Domain toolsets deploy</strong> based on customer edition (barrel-intelligence for distilleries, batch-genealogy for wineries, etc.). Prompts requiring missing toolsets are hidden by the Library's hard tool-validation check.</li>
+        <li><strong>Admin opens the Deployment Dashboard Suitelet</strong> — sees a diff (create / update / skip / orphan) between the packaged <code>seed-data.json</code> and current deployed state. Click <strong>Preview Role Resolution</strong> to verify which account roles the pattern matching will grant access to (e.g. "Administrator", "Controller", "Warehouse"). Click <strong>Deploy Prompts</strong> to trigger the Map/Reduce.</li>
+        <li><strong>Map/Reduce runs</strong> — creates 37 <code>customrecord_dz_companion_prompt</code> records idempotently (skips up-to-date, updates older versions, creates missing). Role-pattern matching populates <code>visible_roles</code> against the account's real NetSuite roles.</li>
+        <li><strong>MCP connector picks up new schemas</strong> on reconnect — v2.0.0 <code>getPromptMeta</code> / <code>seedPrompt</code> / <code>updatePrompt</code> / <code>logExecution</code> available.</li>
+        <li><strong>Customer installs the Crafted Intelligence skill file</strong> into Claude / ChatGPT / Cowork. If Oracle's AI Companion SuiteApp is also installed, the Library's secondary Oracle tab lights up automatically — no extra configuration.</li>
+    </ol>
+
+    <h3>TTB Compliance — Architectural Complexity</h3>
+    <p>This warrants its own architectural discussion because it's more complex than "query CERP records." Multiple compliance models exist and a given account could be on any of them.</p>
+
+    <div class="callout callout-danger">
+        <div class="callout-label">Compliance Has Two Orthogonal Dimensions</div>
+        <p>Compliance tool behavior is determined by the <strong>combination</strong> of <em>compliance model</em> and <em>Crafted ERP edition</em> on a given customer account. Both must be probed at runtime; neither can be assumed.</p>
+
+        <h4 style="margin-top:1rem">Dimension 1 — Compliance Model (account-level)</h4>
+        <p>The custom list <code>customlist_dz_ic_compliance</code> enumerates how a given Crafted ERP account handles compliance:</p>
+        <table style="margin-top:.75rem">
+            <thead><tr><th>Compliance Model</th><th>Meaning</th><th>Tool Behavior</th></tr></thead>
+            <tbody>
+                <tr><td><strong>None</strong></td><td>Account has Crafted ERP but Compliance Edition is NOT enabled</td><td>Compliance tools must detect this and return "not configured" — not fail silently or return zero</td></tr>
+                <tr><td><strong>Legacy</strong></td><td>Account uses the older compliance workflow (custom fields, older saved searches, legacy report records)</td><td>Tools read legacy workflow definitions + saved search criteria via <code>dz_ct_search_def</code> to drive reports</td></tr>
+                <tr><td><strong>Total Compliance</strong> <span class="text-muted text-small">(list value: "Current")</span></td><td>Account uses the modern Crafted ERP Compliance Edition</td><td>Tools use CE_ native records + modern report generators — <em>and</em> still need <code>dz_ct_search_def</code> to read the configured search criteria that drive the reports</td></tr>
+            </tbody>
+        </table>
+        <p style="margin-top:.75rem;margin-bottom:0">The TTB Filing Readiness playbook's Block 1 is a hard gate: if <code>complianceModel = "none"</code> or <code>activeTTBLicenseCount = 0</code>, the analysis stops and escalates to the user with remediation instructions.</p>
+    </div>
+
+    <div class="callout callout-warn">
+        <div class="callout-label">Dimension 2 — Crafted ERP Edition</div>
+        <p>Each edition files a different set of TTB forms. Compliance tools must know the edition (or both, for dual-edition accounts) to determine which filing types apply:</p>
+        <table style="margin-top:.5rem">
+            <thead><tr><th>Edition</th><th>TTB Report Types</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Distillery</strong></td><td>MRPDO (Produced Distilled Spirits), MRPCO (Produced Cordials), MRSO (Storage)</td><td>Proof gallon tracking, DSP license, angel's share analysis</td></tr>
+                <tr><td><strong>Winery</strong></td><td>TTB F 5120.17 (Wine Report), excise tax returns, inventory reports</td><td>Gallons (not PG), batch genealogy, vintage/appellation fields</td></tr>
+                <tr><td><strong>Brewery</strong></td><td>TTB F 5130.9 (Brewer's Report of Operations), excise tax returns</td><td>Barrels/BBL units, no barrel aging concept</td></tr>
+            </tbody>
+        </table>
+        <p style="margin-top:.5rem;margin-bottom:0">Accounts may be <strong>dual-edition</strong> (e.g., distillery + winery under one license). Compliance tools must handle both simultaneously.</p>
+    </div>
+
+    <h4>The Real Matrix — Edition × Compliance Model</h4>
+    <p>Compliance tool behavior is the cross product of these two dimensions. This is the branching logic compliance tools must implement correctly:</p>
+    <table>
+        <thead><tr><th></th><th>Legacy Mode</th><th>Total Compliance Mode</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Distillery</strong></td><td>Legacy distillery workflow + saved searches for MRPDO/MRPCO/MRSO</td><td>CE_MRPDO/MRPCO/MRSO records + modern report generator + search definitions</td></tr>
+            <tr><td><strong>Winery</strong></td><td>Legacy winery workflow + saved searches for wine reports</td><td>Modern winery compliance records + report generator + search definitions</td></tr>
+            <tr><td><strong>Brewery</strong></td><td>Legacy brewery workflow + saved searches for BRO</td><td>Modern brewery compliance records + report generator + search definitions</td></tr>
+        </tbody>
+    </table>
+    <p class="text-muted text-small"><strong>Key insight:</strong> <code>dz_ct_search_def</code> is required in <em>both</em> compliance modes, not just Legacy. Even Total Compliance customers configure their reports via saved searches — the difference is what records feed those searches and what report generator consumes them.</p>
+
+    <h4>Supporting Infrastructure That MUST Be Preserved</h4>
+    <p>The v1 Prompt Engine package contains account-config infrastructure that compliance tools depend on. Careless retirement of v1 would break compliance:</p>
+    <table>
+        <thead><tr><th>Artifact</th><th>Purpose</th><th>Retirement Status</th></tr></thead>
+        <tbody>
+            <tr><td><code>customrecord_dz_intel_config</code></td><td>Singleton cache of account config (compliance model, editions, license counts, feature flags)</td><td><strong>PRESERVE</strong> — compliance tools fall back to this when live probe fails</td></tr>
+            <tr><td><code>customlist_dz_ic_compliance</code></td><td>None / Legacy / Current enum</td><td><strong>PRESERVE</strong> — canonical compliance-model vocabulary</td></tr>
+            <tr><td><code>customrecord_dz_wf_cache</code></td><td>Cached workflow definitions (so AI can reason about configured workflows without live NS workflow API calls)</td><td><strong>PRESERVE OR MIGRATE</strong> — needed for workflow audit analysis</td></tr>
+            <tr><td><code>customrecord_dz_brand_profile</code></td><td>Account brand identity, edition mix, customer-specific conventions</td><td><strong>PRESERVE</strong> — drives edition-aware prompt behavior</td></tr>
+            <tr><td><code>dz_ct_workflow_reader</code></td><td>Custom Tool that reads live workflow definitions (the "workflow audit tool")</td><td><strong>PRESERVE</strong> — compliance analysis depends on this</td></tr>
+            <tr><td><code>dz_ct_brand_profile</code></td><td>Reads brand profile record</td><td><strong>PRESERVE</strong></td></tr>
+            <tr><td><code>dz_ss_workflow_cache</code></td><td>Scheduled script that refreshes <code>wf_cache</code></td><td><strong>PRESERVE</strong></td></tr>
+            <tr><td><code>dz_ct_search_def</code></td><td>Reads saved search definitions (criteria, filters, formulas) so compliance can understand how reports are actually configured per account</td><td><strong>PRESERVE</strong> — critical for <em>both</em> Legacy AND Total Compliance modes (both drive reports through saved searches)</td></tr>
+            <tr><td><code>customrecord_dz_analysis_prompt</code>, <code>dz_ap_section</code>, <code>dz_ap_exec_log</code>, <code>dz_ap_shared_sec</code></td><td>v1 playbook management records (superseded by the Crafted Intelligence independent record)</td><td><strong>SAFE TO RETIRE</strong> — <code>customrecord_dz_companion_prompt</code> covers these use cases</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-warn">
+        <div class="callout-label">Why This Changes The Pitch Narrative</div>
+        <p>Earlier framing said "retire v1 entirely, pivot to v2." The accurate story is: <strong>retire the v1 prompt/playbook management records; preserve or migrate the account-config and workflow-cache infrastructure</strong>. Companion v2 doesn't replace that infrastructure — it depends on it.</p>
+    </div>
+
+    <h4>Where Should Account-Config Infrastructure Live? — Options Under Evaluation</h4>
+    <p>This is an open architectural decision. Four candidate approaches:</p>
+    <table>
+        <thead><tr><th>Option</th><th>Approach</th><th>Verdict</th></tr></thead>
+        <tbody>
+            <tr>
+                <td><strong>A. Foundation package</strong></td>
+                <td>Extract <code>intel_config</code>, <code>wf_cache</code>, <code>brand_profile</code>, <code>ic_compliance</code>, <code>detectAccountConfig</code>, <code>getAccountConfig</code>, <code>workflow_reader</code>, <code>search_def</code> into a new <code>crafted-foundation</code> package</td>
+                <td><span class="pill pill-planned">Backup if C/D insufficient</span> Clean but more to maintain; customers install one more thing</td>
+            </tr>
+            <tr>
+                <td><strong>B. Fold into Companion</strong></td>
+                <td>Move foundation infrastructure into <code>crafted-companion</code>; deprecate v1 entirely</td>
+                <td><span class="pill pill-shelved">Not preferred</span> Creates coupling debt — domain packages would need Companion installed</td>
+            </tr>
+            <tr>
+                <td><strong>C. Live probe only (preferred candidate)</strong></td>
+                <td>Retire <code>intel_config</code> / <code>wf_cache</code>. Probe live each invocation. <strong>Three sub-options for where probing lives</strong> — see below.</td>
+                <td><span class="pill pill-done">Preferred</span> Always accurate, no stale-cache bugs, no custom records — but probing target needs to be chosen carefully</td>
+            </tr>
+            <tr>
+                <td><strong>D. Native NS detection</strong></td>
+                <td>Probe NetSuite's native infrastructure: <code>bundleInstallation</code> records (is Compliance Edition installed?), feature flags, existence of CE_ records, role metadata. No Doozy-owned cache.</td>
+                <td><span class="pill pill-done">Co-preferred</span> Most scalable long-term; reduces Doozy infrastructure footprint to near-zero</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Option C — Three Sub-Variants For Where Probing Lives</h4>
+    <p>If we go with Option C (live probe, no cache), the question becomes: <em>where does the probe execute?</em> Three plausible homes, ordered by adaptability:</p>
+    <table>
+        <thead><tr><th>Variant</th><th>Probing Lives In</th><th>Adaptability</th><th>Trade-Offs</th></tr></thead>
+        <tbody>
+            <tr>
+                <td><strong>C-1. In the prompt itself</strong></td>
+                <td>Each prompt's <code>steps</code> array starts with a config-detection step that calls existing tools (<code>detectAccountConfig</code> or equivalent)</td>
+                <td>HIGH — change a prompt's needs without redeploying tools; no new infrastructure</td>
+                <td>Every prompt invocation pays the probe cost; not shared across prompts in a session; AI must follow steps strictly</td>
+            </tr>
+            <tr>
+                <td><strong>C-2. As a Companion extension tool</strong></td>
+                <td>Add <code>getAccountConfig</code> as a 5th companion tool (alongside <code>getPromptMeta</code>, <code>logExecution</code>, etc.). Returns live probe each call. Prompt orchestration calls it once.</td>
+                <td>HIGH — single source of truth; centrally maintained; reachable from every prompt via <code>tool_chain</code></td>
+                <td>Couples probing into Companion; not callable outside Companion context — but Companion is the orchestration layer anyway</td>
+            </tr>
+            <tr>
+                <td><strong>C-3. Embedded in each domain tool</strong></td>
+                <td>Each compliance tool runs its own config probe internally before returning data</td>
+                <td>MEDIUM — tools are self-contained; usable outside Companion</td>
+                <td>Duplication across tools; harder to evolve the probe; harder to keep config logic consistent</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="text-muted text-small"><strong>Strongest C variant: C-2.</strong> Treat config as a first-class Companion concern, callable as a tool from any prompt's orchestration. One implementation, one set of tests, leveraged by every prompt that needs config.</p>
+
+    <h4>Option D — What's Detectable Natively, What's Not</h4>
+    <p>If we go with Option D (NetSuite-native detection), we need to know which config dimensions are detectable from platform-native artifacts and which aren't:</p>
+    <table>
+        <thead><tr><th>Config Dimension</th><th>Native Detection Path</th><th>Coverage</th></tr></thead>
+        <tbody>
+            <tr><td>Crafted ERP installed?</td><td><code>bundleInstallation</code> record query</td><td><span class="pill pill-done">Yes</span></td></tr>
+            <tr><td>Crafted ERP Compliance Edition installed?</td><td><code>bundleInstallation</code> record query</td><td><span class="pill pill-done">Yes</span></td></tr>
+            <tr><td>Active editions (Distillery/Winery/Brewery/RTD/Core)</td><td>Existence of edition-specific items in catalog or features in <code>config.load(config.Type.FEATURES)</code></td><td><span class="pill pill-done">Yes</span></td></tr>
+            <tr><td>Compliance model (None / Legacy / Total)</td><td><strong>Inferable from script presence + record existence</strong>: Total = MELL script deployed + CE_LCN records exist; Legacy = old workflow scripts present + saved-search-driven; None = no compliance scripts</td><td><span class="pill pill-inflight">Probable</span></td></tr>
+            <tr><td>Active TTB license count</td><td>Direct query: <code>SELECT COUNT(*) FROM CUSTOMRECORD_CE_LCN WHERE custrecord_ce_usedforttb='T' AND isinactive='F'</code></td><td><span class="pill pill-done">Yes</span></td></tr>
+            <tr><td>MELL enabled?</td><td>Script deployment query: does <code>customscript_*mell*</code> exist and is it deployed?</td><td><span class="pill pill-inflight">Probable</span></td></tr>
+            <tr><td>Multi-subsidiary, currency count</td><td><code>config.load</code> + subsidiary record queries</td><td><span class="pill pill-done">Yes</span></td></tr>
+            <tr><td>Costing methods, LOT/SERIAL/AVG</td><td>Item costing fields + feature flags</td><td><span class="pill pill-done">Yes</span></td></tr>
+            <tr><td><code>old_compliance_workflows</code> count</td><td>Workflow metadata API or saved search of workflow records</td><td><span class="pill pill-inflight">Probable</span></td></tr>
+            <tr><td>Brand profile / customer-specific conventions</td><td><strong>Likely not detectable natively</strong> — these are Doozy-curated metadata, not platform-native</td><td><span class="pill pill-shelved">Gap</span></td></tr>
+            <tr><td>Workflow definitions cache (for AI reasoning)</td><td><strong>Native workflow API exists but querying live every time is expensive</strong></td><td><span class="pill pill-shelved">Gap (cost)</span></td></tr>
+        </tbody>
+    </table>
+    <p class="text-muted text-small"><strong>Coverage assessment:</strong> Option D covers ~70-80% of what <code>dz_intel_config</code> currently caches. The remaining 20-30% (brand profile, full workflow cache) might be unavoidable Doozy-owned infrastructure — but could ship as small targeted records rather than the current intel_config singleton.</p>
+
+    <div class="callout callout-success">
+        <div class="callout-label">Recommended Direction</div>
+        <p style="margin-bottom:.5rem">Pursue <strong>C-2 + D as a hybrid</strong>:</p>
+        <ul style="margin-bottom:.5rem">
+            <li><strong>C-2</strong> provides the centralized <code>getAccountConfig</code> tool callable from any prompt</li>
+            <li><strong>D</strong> determines what that tool actually probes — start with native detection wherever possible, fall back to small targeted records only for dimensions native detection can't cover</li>
+        </ul>
+        <p style="margin-bottom:0">This minimizes Doozy infrastructure while keeping config queries fast and centrally maintained. Decision is captured as a Compliance Deep-Dive Workstream deliverable — needs verification that D's "Probable" coverage rows actually work in practice.</p>
+    </div>
+
+    <h4>Saved Search Dependency (Required for BOTH Modes)</h4>
+    <p><strong>Both Legacy and Total Compliance customers drive their TTB reports from saved searches</strong> with specific filter and formula configurations. The reports are only as trustworthy as the searches feeding them. Compliance tools must:</p>
+    <ul>
+        <li>Discover which saved searches exist for compliance filing (by name pattern, script ID, or brand profile reference)</li>
+        <li>Read their search criteria via <code>dz_ct_search_def</code> — understand what filters, formulas, and joins the customer uses</li>
+        <li>Validate that search criteria match what the TTB filing workflow expects (correct date filtering, account filtering, proof/ABV computation, edition-specific field references)</li>
+        <li>Surface discrepancies as data quality issues — before they become filing errors</li>
+    </ul>
+    <p>This is what makes Crafted Companion's compliance layer actually valuable. "Query <code>CUSTOMRECORD_CE_LCN</code>" is the floor; <strong>understanding the customer's configured reporting chain</strong> is the ceiling.</p>
+
+    <h3>Deployment Artifact Summary (v3)</h3>
+    <table>
+        <thead><tr><th>Artifact Type</th><th>Count</th><th>Purpose</th></tr></thead>
+        <tbody>
+            <tr><td>Custom records</td><td>2</td><td><code>dz_companion_prompt</code> (29 fields, independent) &middot; <code>dz_exec_log</code> (8 fields)</td></tr>
+            <tr><td>Custom lists</td><td>5</td><td><code>dz_cp_category</code> (7) &middot; <code>dz_cp_complexity</code> (3) &middot; <code>dz_pm_edition</code> (4) &middot; <code>dz_pm_status</code> (4) &middot; <code>dz_pm_complexity</code> (4, governance)</td></tr>
+            <tr><td>Custom roles</td><td>2</td><td><code>customrole_dz_ci_admin</code> &middot; <code>customrole_dz_ci_user</code> (bidirectional permissions)</td></tr>
+            <tr><td>Custom toolsets</td><td>1</td><td><code>dz_companion</code> (4 tools, v2.0.0)</td></tr>
+            <tr><td>Companion tools</td><td>4</td><td><code>getPromptMeta</code>, <code>seedPrompt</code>, <code>updatePrompt</code>, <code>logExecution</code> (single-table, writes usage analytics back to prompt record)</td></tr>
+            <tr><td>Map/Reduce scripts</td><td>1</td><td><code>dz_mr_prompt_seed</code> — idempotent seed from <code>seed-data.json</code> with role-pattern resolution</td></tr>
+            <tr><td>Domain tools</td><td>41</td><td>across 6 intelligence toolsets (one per domain)</td></tr>
+            <tr><td>Suitelets</td><td>2</td><td>Dual-view Library UI + Admin Deployment Dashboard (diff / preview / deploy / export)</td></tr>
+            <tr><td>Seeded prompts</td><td>37</td><td>across 6 categories, edition-aware, role-filtered</td></tr>
+            <tr><td>Skill files</td><td>1</td><td>Crafted Intelligence single-install skill (works standalone or alongside Oracle's base skill)</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ================ 6. CURRENT STATE ================ -->
+<section class="panel" id="current">
+    <h2>Current State</h2>
+    <p class="lede">As of 2026-04-17 — v3 Independence rewrite fully shipped and verified in the Distillery Demo (TSTDRV1912378).</p>
+
+    <h3>Build Status Matrix</h3>
+    <table>
+        <thead><tr><th>Component</th><th>Status</th><th>Notes</th></tr></thead>
+        <tbody>
+            <tr><td>SDF foundation (2 records, 5 lists, 2 roles, 1 toolset)</td><td><span class="pill pill-done">Complete</span></td><td>v3 independent record <code>customrecord_dz_companion_prompt</code> deployed. Roles use bidirectional <code>[scriptid=...]</code> permissions.</td></tr>
+            <tr><td>4 companion tools (getPromptMeta, logExecution, seedPrompt, updatePrompt)</td><td><span class="pill pill-done">Complete</span></td><td><strong>v2.0.0</strong> — single-table queries, writes usage analytics back to prompt record, <code>logExecution</code> returns <code>Promise.resolve(JSON.stringify(...))</code> on every code path</td></tr>
+            <tr><td>Map/Reduce seed script</td><td><span class="pill pill-done">Complete</span></td><td><code>dz_mr_prompt_seed</code> — idempotent version-aware create/update, role-pattern matching against native NS roles</td></tr>
+            <tr><td>37 seeded prompts across 6 categories</td><td><span class="pill pill-done">Complete</span></td><td>Seeded via Map/Reduce; role resolution verified (e.g. <code>dz_cp_barrel_001</code> matched 27 roles in TSTDRV1912378)</td></tr>
+            <tr><td>Role visibility via pattern matching</td><td><span class="pill pill-done">Complete</span></td><td>Prompts carry <code>role_patterns</code> (JSON); seed script matches against live <code>role</code> records and populates <code>visible_roles</code> multi-select</td></tr>
+            <tr><td>Dual-view Library Suitelet</td><td><span class="pill pill-done">Complete</span></td><td>Crafted primary tab (34 visible post-tool-filter) + conditional Oracle AI Companion tab (filters mirror Oracle native: Category / Industry / Role). Popout, Open Record, Customize, Save as User Prompt all live.</td></tr>
+            <tr><td>Admin Deployment Dashboard</td><td><span class="pill pill-done">Complete</span></td><td>Diff view, role resolution preview, deploy trigger, status polling, JSON export</td></tr>
+            <tr><td>v2 data cleanup in Distillery Demo</td><td><span class="pill pill-done">Complete</span></td><td>Old <code>customrecord_dz_prompt_meta</code> type deleted (cascaded 37 instances). 37 orphan Atlas prompts inactivated. Test probe deleted.</td></tr>
+            <tr><td>MCP connector reconnected &amp; v2.0.0 verified</td><td><span class="pill pill-done">Complete</span></td><td>Functional call to <code>getPromptMeta(dz_cp_barrel_001)</code> returned full v2.0.0 shape</td></tr>
+            <tr><td>Audit trail stage-gate log updated</td><td><span class="pill pill-done">Complete</span></td><td><code>audit-trail/gate_checkpoint_log.md</code> has v3 sign-off section with 6 checkpoints</td></tr>
+            <tr><td>Cross-edition validation (Winery demo)</td><td><span class="pill pill-planned">Planned</span></td><td>Deploy to TSTDRV1915090; confirm Atlas tab hides gracefully and Winery-edition prompts surface correctly</td></tr>
+            <tr><td>v1 Prompt Engine retirement (scoped)</td><td><span class="pill pill-planned">Planned — scope refinement required</span></td><td>RETIRE: <code>dz_analysis_prompt</code>, <code>dz_ap_section</code>, <code>dz_ap_shared_sec</code>, <code>dz_ap_exec_log</code>. PRESERVE: <code>dz_intel_config</code>, <code>dz_wf_cache</code>, <code>dz_brand_profile</code>, <code>customlist_dz_ic_compliance</code>, <code>dz_ct_workflow_reader</code>, <code>dz_ct_brand_profile</code>, <code>dz_ss_workflow_cache</code> — account-config infrastructure compliance tools depend on.</td></tr>
+            <tr><td>Admin guide / deployment runbook / TDS</td><td><span class="pill pill-inflight">In flight</span></td><td>Partial — Library Suitelet docs done; deployment dashboard documented in code comments</td></tr>
+            <tr><td>Usage analytics dashboard</td><td><span class="pill pill-planned">Phase 2</span></td><td>Build on top of <code>exec_log</code> + per-prompt counters (<code>exec_count</code>, <code>last_executed</code>, <code>avg_duration</code>)</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Live Demo Readiness</h3>
+    <p>The following three prompts are wired end-to-end against real data in the Distillery Demo:</p>
+
+    <div class="two-col">
+        <div class="card card-primary">
+            <h4>Prompt #107 — Barrel Portfolio Valuation</h4>
+            <p class="text-small"><strong>Data verified:</strong> $1.26M total value across 1,635 barrels in 12 item groups. Highlights: RYB1FB-53 at $270K, SHR1FB-53-2020 at $225K.</p>
+            <p class="text-small"><strong>Artifact:</strong> valuation-table with auto-flagging. Will catch WTB1FB-53-JB showing -31 barrels at -$30,944 as a data quality issue — unplanned "wow" moment.</p>
+            <p class="text-small text-muted">Governance: Minimal &middot; Edition: Cross-Edition</p>
+        </div>
+        <div class="card card-accent">
+            <h4>Prompt #201 — Single Barrel Valuation</h4>
+            <p class="text-small"><strong>Data verified:</strong> Barrel RUM1000095 — $241.18 value, $3.50/PG, 11-year-old rum barrel at Heaven Hill, traceable to Item Receipt 3/10/2023 from PO #208.</p>
+            <p class="text-small"><strong>Tool chain:</strong> getBarrelProfile → getBarrelValuation → getBarrelCostTrace</p>
+            <p class="text-small text-muted">Governance: Standard &middot; Artifact: cost-waterfall</p>
+        </div>
+    </div>
+    <div class="card card-success">
+        <h4>Prompt #315 — Compliance Readiness Score</h4>
+        <p class="text-small"><strong>Data verified:</strong> 54/100 AT_RISK score. 90 open accounting periods, 8 items with negative inventory, 1 transaction missing proof values. Closes the demo with real operational stakes.</p>
+        <p class="text-small text-muted">Governance: Governed &middot; Artifact: compliance-scorecard</p>
+    </div>
+
+    <h3>What's Actually Been Validated (Honest Accounting)</h3>
+    <table>
+        <thead><tr><th>Claim</th><th>Actual State</th><th>Gap Before GA</th></tr></thead>
+        <tbody>
+            <tr>
+                <td>End-to-end deployed in a real CERP demo</td>
+                <td><span class="pill pill-done">Verified</span> in Distillery Demo (TSTDRV1912378) only</td>
+                <td>Winery and Brewery demo accounts not yet validated end-to-end</td>
+            </tr>
+            <tr>
+                <td>All 4 governance tiers exercised</td>
+                <td><span class="pill pill-inflight">Partial</span> Minimal / Standard / Governed ran one-off in this session; Supervised has no write-op use case yet</td>
+                <td>Systematic test matrix across all 37 prompts × 4 governance tiers</td>
+            </tr>
+            <tr>
+                <td>Role visibility via pattern matching</td>
+                <td><span class="pill pill-done">Verified</span> Map/Reduce seed populated <code>visible_roles</code> on all 37 prompts. Library correctly filters by current user's role ID (whitespace-tolerant lookup fixed).</td>
+                <td>Per-role validation: sanity check each role's visible-prompt set against expected curation per role type</td>
+            </tr>
+            <tr>
+                <td>MCP response format validated</td>
+                <td><span class="pill pill-done">Verified</span> v2.0.0 — all 4 companion tools return <code>Promise.resolve(JSON.stringify({...}))</code> on every code path. <code>getPromptMeta(dz_cp_barrel_001)</code> functionally returns the complete v2.0.0 shape.</td>
+                <td>Systematic regression tests for every tool × error path</td>
+            </tr>
+            <tr>
+                <td>Library UI matches Oracle's native UX</td>
+                <td><span class="pill pill-done">Verified</span> Atlas tab filter bar mirrors Oracle native (Search / Category / Industry / Role). Popout, Open Record, Customize, Save as User Prompt shipped with feature parity.</td>
+                <td>Final pixel-level polish on the Crafted tab detail modal</td>
+            </tr>
+            <tr>
+                <td>Installable via SuiteCloud CLI</td>
+                <td><span class="pill pill-inflight">Iteratively</span> deployed many times over; no clean-install dry-run to a pristine account</td>
+                <td>Document the single-command deploy flow and test it on a fresh account</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-danger">
+        <div class="callout-label">Not Yet Done — Product Validation &amp; QA Pass</div>
+        <p style="margin-bottom:.5rem">What exists today is an <strong>engineering-grade prototype proven in one demo account</strong>. Before customer-facing launch we need a formal validation pass:</p>
+        <ul>
+            <li><strong>Tool accuracy audit</strong> — each of the 41 domain tools validated against ground-truth queries (saved searches, SuiteQL baselines). Verify returned numbers are correct, not just that the tool doesn't error.</li>
+            <li><strong>Multi-account testing</strong> — deploy and exercise against 3+ customer-shaped accounts (Distillery, Winery, Brewery at minimum). Edition awareness is advertised; has to be proven on real data from each edition.</li>
+            <li><strong>Prompt orchestration matrix</strong> — all 37 prompts × all orchestration paths; validate tool chains execute correctly end-to-end.</li>
+            <li><strong>Role governance audit</strong> — for each mirrored role, confirm visible prompts and executable tool chains match expected permissions.</li>
+            <li><strong>Regression suite</strong> — automated tests against demo accounts to catch breakages on future deploys.</li>
+            <li><strong>Beta cohort</strong> — 3-5 real customers running it in production with telemetry collection and structured feedback loops.</li>
+        </ul>
+    </div>
+
+    <div class="callout callout-warn">
+        <div class="callout-label">Gating items before customer-facing launch</div>
+        <ul>
+            <li><strong>Product validation pass</strong> — multi-account tool accuracy testing across all domains (see Phase 1.5 in Roadmap)</li>
+            <li>Cross-edition validation (Winery + Brewery) — batch-genealogy edition-awareness proven on Winery account</li>
+            <li>Compliance domain has its own dedicated workstream (see Roadmap) — non-compliance domains do not depend on it</li>
+            <li>Admin guide + customer-facing documentation</li>
+            <li>Pricing / SKU / packaging decision (this presentation)</li>
+            <li>Support model decision — who triages prompt bugs vs. data bugs vs. Oracle platform bugs</li>
+            <li>Clean-install deploy runbook tested on a fresh account</li>
+        </ul>
+    </div>
+</section>
+
+<!-- ================ 7. ROADMAP ================ -->
+<section class="panel" id="roadmap">
+    <h2>Roadmap</h2>
+    <p class="lede">What's next — both the immediate path to GA and the strategic horizon.</p>
+
+    <h3>Phase 1.5 — Product Validation (Pre-GA, Blocking)</h3>
+    <div class="callout callout-danger">
+        <div class="callout-label">This phase must complete before customer launch</div>
+        What's built today is an engineering prototype proven in a single demo account. Customer-facing launch requires a structured validation pass that exercises every tool, every edition, every governance tier, and every role configuration. This is non-optional.
+    </div>
+
+    <table>
+        <thead><tr><th>Validation Track</th><th>Scope</th><th>Exit Criteria</th></tr></thead>
+        <tbody>
+            <tr>
+                <td><strong>Tool Accuracy Audit</strong></td>
+                <td>All 41 domain tools + 4 companion tools</td>
+                <td>Each tool's output reconciles to a ground-truth baseline (saved search, SuiteQL, or native report) within rounding tolerance</td>
+            </tr>
+            <tr>
+                <td><strong>Multi-Account Validation</strong></td>
+                <td>Distillery + Winery + Brewery demo accounts</td>
+                <td>All 37 prompts execute successfully and return sensible results in each edition</td>
+            </tr>
+            <tr>
+                <td><strong>Edition Awareness</strong></td>
+                <td>Edition-specific tools and prompts (e.g., batch-genealogy Winery-only, angel's share Distillery-only)</td>
+                <td>Edition-exclusive content hidden in wrong editions; edition-aware content adapts language (PG vs. gallons vs. BBL)</td>
+            </tr>
+            <tr>
+                <td><strong>Orchestration Integrity</strong></td>
+                <td>Every prompt's steps → tool chain → artifact</td>
+                <td>AI executes orchestration deterministically; <code>depends_on</code> respected; <code>logExecution</code> records every run</td>
+            </tr>
+            <tr>
+                <td><strong>Role Governance Audit</strong></td>
+                <td>All mirrored roles × all prompts</td>
+                <td>Each role sees exactly the prompts it should and can execute exactly the tool chains it should</td>
+            </tr>
+            <tr>
+                <td><strong>Basic compliance tool smoke test</strong></td>
+                <td>Verify compliance tools don't error or return misleading data on representative accounts; full deep-dive handled in separate workstream (see below)</td>
+                <td>Tools either return meaningful results or cleanly signal "compliance not configured" — never silent failure</td>
+            </tr>
+            <tr>
+                <td><strong>Regression Suite</strong></td>
+                <td>Automated test harness against demo accounts</td>
+                <td>Tests run on every deploy; breakage caught before customer impact</td>
+            </tr>
+            <tr>
+                <td><strong>Governance Budget Stress Test</strong></td>
+                <td>Complex multi-step prompts (e.g., #201 cost trace, #201-style multi-tool orchestrations)</td>
+                <td>No prompt exhausts 1,000-unit budget; worst-case tool chain documented</td>
+            </tr>
+            <tr>
+                <td><strong>Beta Customer Cohort</strong></td>
+                <td>3-5 production customers for 30–60 days</td>
+                <td>Structured feedback; zero unrecovered data integrity issues; at least 70% of participants renew to paid</td>
+            </tr>
+            <tr>
+                <td><strong>Clean-Install Deploy Runbook</strong></td>
+                <td>Single-command deploy to a pristine NetSuite account</td>
+                <td>Documented runbook executed end-to-end without manual intervention</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Parallel — Compliance Deep-Dive Workstream</h3>
+    <div class="callout callout-warn">
+        <div class="callout-label">Runs in parallel to Phase 1.5, on its own timeline</div>
+        <p>The compliance architecture (Edition × Compliance-Model matrix, account-config foundation decision, saved-search validation) is complex enough to warrant its own dedicated workstream rather than bundling it with general GA validation. This lets the 5 non-compliance domains (Barrel Ops, Lot Profitability, Inventory &amp; Supply, MRP Intelligence, Batch Genealogy) progress to GA without waiting for compliance architecture resolution.</p>
+    </div>
+
+    <div class="callout callout-info">
+        <div class="callout-label">This workstream is NOT starting from scratch</div>
+        <p style="margin-bottom:.5rem">Substantial v1 (Crafted Intelligence) research already exists. The deep-dive owner should read these first before deriving anything new:</p>
+        <ul style="margin-bottom:0;font-size:.88rem">
+            <li><code>docs/compliance/compliance-architecture.md</code> — definitive v1 compliance research (TTB form catalog by edition, Total vs Legacy model breakdown, MELL script context)</li>
+            <li><code>docs/compliance/compliance-intelligence-reference.md</code> — compliance intelligence reference</li>
+            <li><code>docs/config-snapshots/condition-matrix.yaml</code> — universal contract: every <code>dz_intel_config</code> field and which sections/tools it gates</li>
+            <li><code>docs/config-snapshots/distillery-demo.yaml</code>, <code>winery-demo.yaml</code> — real config snapshots showing what <code>detectAccountConfig</code> returns</li>
+            <li><code>packages/prompt-engine/prompts/compliance/ttb-filing-readiness/ttb-filing-readiness-v1.md</code> — production TTB Filing Readiness playbook (13-section governed analysis)</li>
+            <li><code>packages/compliance-audit/src/FileCabinet/SuiteScripts/DoozyTools/</code> — all v1 compliance tool source</li>
+            <li><code>packages/prompt-engine/docs/specs/architecture-v2.md</code> — v1 → v2 architecture spec</li>
+        </ul>
+    </div>
+
+    <div class="callout callout-warn">
+        <div class="callout-label">Heads-up — compliance is more dimensional than the 6-cell matrix above</div>
+        <p>The earlier 6-cell Edition × Compliance-Model matrix is a useful first approximation, but verified against real config snapshots:</p>
+        <ul style="margin-bottom:0;font-size:.88rem">
+            <li><strong>Multi-edition accounts are common.</strong> The Distillery Demo has 4 active editions (Brewery + Distillery + Winery + Non-Alcoholic). Edition is multi-select, not single-value. Tools must handle any subset of TTB forms simultaneously.</li>
+            <li><strong>Even Total Compliance accounts can have legacy workflows present.</strong> The <code>old_compliance_workflows</code> count is a separate dimension from <code>compliance_model</code>.</li>
+            <li><strong>Distillery has more TTB forms than just MRPDO/MRPCO/MRSO.</strong> Add MRSTO (Storage) and Tax/FET (Federal Excise Tax). Brewery has both Monthly AND Quarterly BRO + BET (Beer Excise Tax). Full enumeration is in <code>compliance-architecture.md</code>.</li>
+            <li><strong>Total Compliance is powered by 4 Suitelets + MELL User Event script.</strong> The deep-dive needs to enumerate these dependencies.</li>
+        </ul>
+    </div>
+
+    <table>
+        <thead><tr><th>Compliance Track</th><th>Scope</th><th>Exit Criteria</th></tr></thead>
+        <tbody>
+            <tr>
+                <td><strong>Account-config foundation decision</strong></td>
+                <td>Evaluate Options A–D (see Section 5). Decide where config infrastructure lives and how it's detected.</td>
+                <td>Written ADR with chosen approach; migration path from current v1 location documented</td>
+            </tr>
+            <tr>
+                <td><strong>Edition × Model matrix validation</strong></td>
+                <td>All 6 cells (Distillery/Winery/Brewery × Legacy/Total) tested on representative customer accounts</td>
+                <td>Each cell produces correct TTB-ready output OR graceful "not configured" message</td>
+            </tr>
+            <tr>
+                <td><strong>Saved search criteria audit</strong></td>
+                <td><code>dz_ct_search_def</code> validation across all 6 cells; legacy and modern search patterns</td>
+                <td>Search criteria read accurately; compliance tool reconciles search-driven output against expected TTB workflow</td>
+            </tr>
+            <tr>
+                <td><strong>v1 retirement scoping</strong></td>
+                <td>Formalize preserve/retire split for prompt-engine package records and tools</td>
+                <td>Retirement plan approved; legacy customers on v1 have clean migration path</td>
+            </tr>
+            <tr>
+                <td><strong>Compliance prompt validation</strong></td>
+                <td>All 6 compliance prompts (#315–#320) validated against real customer data in each edition</td>
+                <td>Zero false positives / false negatives on test accounts; correct remediation guidance</td>
+            </tr>
+            <tr>
+                <td><strong>Dual-edition account support</strong></td>
+                <td>Accounts with combined distillery + winery licenses</td>
+                <td>Tools correctly handle multiple active editions simultaneously</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Phased GA Strategy</h3>
+    <div class="callout callout-info">
+        <div class="callout-label">Recommended approach</div>
+        <p>Rather than holding GA of the entire product behind the compliance deep-dive, ship in two waves:</p>
+        <ul>
+            <li><strong>Wave 1 GA — Non-compliance domains</strong>: Barrel Ops, Lot Profitability, Inventory &amp; Supply, MRP, Batch Genealogy. Five of six domains, ~31 of 37 prompts. This is the bulk of customer value.</li>
+            <li><strong>Wave 2 GA — Compliance</strong>: follows completion of the Compliance Deep-Dive Workstream. Six prompts in the Compliance &amp; Audit domain.</li>
+        </ul>
+        <p style="margin-bottom:0">Pricing can launch with the full Companion SKU — the compliance prompts are simply marked "coming soon" in the Library UI until Wave 2 ships. Customers get 80%+ of the value immediately.</p>
+    </div>
+
+    <h3>Phase 2 (Post-GA, Near-Term)</h3>
+    <div class="three-col">
+        <div class="card">
+            <h4>Usage Analytics</h4>
+            <p class="text-small">Dashboard on top of <code>dz_exec_log</code>. Which prompts get used, by which roles, with what success rates. Feeds both product improvement and customer success.</p>
+            <span class="pill pill-planned">Planned</span>
+        </div>
+        <div class="card">
+            <h4>KB Articles Library</h4>
+            <p class="text-small">Companion-generated knowledge base articles tied to domain workflows. Customers self-serve "how do I do X" questions with authoritative Crafted-voiced content.</p>
+            <span class="pill pill-planned">Planned</span>
+        </div>
+        <div class="card">
+            <h4>Expanded Prompt Library</h4>
+            <p class="text-small">Beyond the 37 seed prompts. Customer-requested playbooks, seasonal workflows (e.g., harvest planning, TTB quarterly filing).</p>
+            <span class="pill pill-planned">Planned</span>
+        </div>
+    </div>
+
+    <h3>Phase 3 (Strategic Horizon)</h3>
+    <div class="tool-grid">
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Customer-Authored Prompts</span><span class="tool-domain-count">Roadmap</span></div>
+            <p class="text-small">Customers author their own prompts with moderation workflow. Opens up "citizen AI developer" segment. Governance: prompts start as "Draft" → Doozy-reviewed → "Active".</p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">White-Label Mode</span><span class="tool-domain-count">Roadmap</span></div>
+            <p class="text-small">Distribution partners (accounting firms, Crafted implementers) could rebrand a customer-facing version of the Library. Expands channel without expanding build.</p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Cross-Product Tools</span><span class="tool-domain-count">Roadmap</span></div>
+            <p class="text-small">Tie Companion into Doozy's other Custom Tool Scripts packages (Think Tank, advanced modules). Makes the Companion a gateway rather than a standalone SKU.</p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Write-Back Actions</span><span class="tool-domain-count">Roadmap</span></div>
+            <p class="text-small">Move from read-only to guarded write operations. E.g., "Mark these 12 barrels ready for harvest." Requires the Supervised governance tier built but not yet exercised.</p>
+        </div>
+    </div>
+
+    <h3>Shelved (Not Currently Planned)</h3>
+    <div class="card">
+        <h4>Execution-Level Role Governance <span class="pill pill-shelved">Shelved</span></h4>
+        <p class="text-small">Current state: Oracle's role governance controls Library UI visibility; NetSuite permissions enforce data access at the tool-call layer. Customers can't execute prompts they don't have data access for.</p>
+        <p class="text-small">Proposed enhancement: add role checks inside the Custom Tool Scripts themselves (e.g., <code>runtime.getCurrentUser().role</code>) so specific prompts can only be run by specific roles even if the prompt text is copied into an AI session by someone else.</p>
+        <p class="text-small"><strong>Decision (2026-04-15):</strong> Shelved. Current UI curation + NS permissions are sufficient for launch. Revisit only if a customer explicitly requests execution-level gates.</p>
+    </div>
+
+    <h3>Critical Path to GA</h3>
+    <h4>Wave 1 — Non-Compliance Domains</h4>
+    <table>
+        <thead><tr><th>Milestone</th><th>Owner</th><th>Blocker?</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Tool accuracy audit (Phase 1.5)</strong></td><td>Product + Engineering + QA</td><td><strong>Yes — blocks any paid customer access</strong></td></tr>
+            <tr><td><strong>Multi-account validation (Distillery / Winery / Brewery)</strong></td><td>Product + Engineering + QA</td><td><strong>Yes — blocks customer-facing launch</strong></td></tr>
+            <tr><td><strong>Beta cohort (3-5 existing customers)</strong></td><td>Customer Success + Product</td><td><strong>Yes — catches issues not visible in demo accounts</strong></td></tr>
+            <tr><td>Pricing approval</td><td>Product Leadership</td><td>Yes — blocks SKU setup and sales motion</td></tr>
+            <tr><td>Support model decision</td><td>Product + Support</td><td>Yes — blocks customer onboarding</td></tr>
+            <tr><td>SKU / NetSuite item setup</td><td>Ops</td><td>Blocked by pricing approval</td></tr>
+            <tr><td>Admin guide + customer docs</td><td>Product + Engineering + Docs</td><td>Parallel with QA pass</td></tr>
+            <tr><td>Wave 1 GA announcement</td><td>Marketing</td><td>—</td></tr>
+        </tbody>
+    </table>
+
+    <h4>Wave 2 — Compliance &amp; Audit Domain (Parallel Track)</h4>
+    <table>
+        <thead><tr><th>Milestone</th><th>Owner</th><th>Blocker?</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Compliance architecture deep-dive</strong></td><td>Product + Engineering</td><td><strong>Yes — blocks Wave 2 GA only</strong></td></tr>
+            <tr><td><strong>Account-config foundation decision (Options A–D)</strong></td><td>Engineering + Product</td><td><strong>Yes — blocks v1 retirement scope</strong></td></tr>
+            <tr><td><strong>Edition × Compliance-Model matrix validation</strong></td><td>Product + Engineering + QA</td><td><strong>Yes — must validate all 6 cells</strong></td></tr>
+            <tr><td>v1 retirement plan finalized</td><td>Engineering</td><td>Yes — blocks legacy customer migration</td></tr>
+            <tr><td>Compliance prompt validation across editions</td><td>QA</td><td>Yes — blocks Wave 2 GA</td></tr>
+            <tr><td>Wave 2 GA announcement</td><td>Marketing</td><td>—</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-warn">
+        <div class="callout-label">Honest sequencing</div>
+        <p style="margin-bottom:.5rem">Phase 1.5 validation is the longest unknown for Wave 1 — could be 4 weeks or 12 weeks depending on issues surfaced during multi-account testing and beta. Pricing approval and SKU setup happen <em>in parallel</em> with validation. <strong>No paying customer should touch Companion until validation completes.</strong></p>
+        <p style="margin-bottom:0">The Compliance Deep-Dive Workstream runs in parallel and may complete on its own timeline. The compliance domain ships when ready, marked "coming soon" in the Library until then.</p>
+    </div>
+</section>
+
+<!-- ================ 8. COMMERCIAL (SIMULATOR) ================ -->
+<section class="panel" id="commercial">
+    <h2>Commercial Opportunity</h2>
+    <p class="lede">Doozy revenue potential &mdash; with an interactive simulator to explore pricing &times; adoption scenarios against real customer base data.</p>
+
+    <h3>The Opportunity Context</h3>
+    <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Active Customers</div><div class="kpi-value">116</div><div class="kpi-note">Top-Level Parents, ARR Metrics Jan 2026</div></div>
+        <div class="kpi accent"><div class="kpi-label">Base ARR</div><div class="kpi-value">$7.33M</div><div class="kpi-note">Crafted ERP recurring (Jan 2026)</div></div>
+        <div class="kpi success"><div class="kpi-label">Organic Growth</div><div class="kpi-value">9.5–11%</div><div class="kpi-note">annualized (range across windows)</div></div>
+        <div class="kpi"><div class="kpi-label">Avg ARR / customer</div><div class="kpi-value">$63K</div><div class="kpi-note">$7.33M / 116</div></div>
+    </div>
+
+
+    <h3>Customer Base Composition</h3>
+    <div class="two-col">
+        <div>
+            <h4>By Edition (active CERP-prefixed contracts)</h4>
+            <table>
+                <thead><tr><th>Edition</th><th>Customers*</th><th>CERP Sub ARR</th></tr></thead>
+                <tbody>
+                    <tr><td>Distillery</td><td class="num">45</td><td class="num">$1.69M</td></tr>
+                    <tr><td>Brewery</td><td class="num">32</td><td class="num">$1.09M</td></tr>
+                    <tr><td>Winery</td><td class="num">21</td><td class="num">$769K</td></tr>
+                    <tr><td>RTD</td><td class="num">5</td><td class="num">$162K</td></tr>
+                    <tr><td>Core</td><td class="num">4</td><td class="num">$97K</td></tr>
+                    <tr style="border-top:2px solid var(--ci-border)"><td><strong>Distinct CERP customers</strong></td><td class="num"><strong>97</strong></td><td class="num">—</td></tr>
+                    <tr><td class="text-muted">On legacy / non-subscription items only</td><td class="num text-muted">19</td><td class="num text-muted">—</td></tr>
+                    <tr style="background:var(--ci-bg-muted)"><td><strong>Total active customers</strong></td><td class="num"><strong>116</strong></td><td class="num">—</td></tr>
+                </tbody>
+            </table>
+            <p class="text-small text-muted">*Edition rows sum to 107 because <strong>10 customers are multi-edition</strong> (each counted in 2 rows). Distinct CERP-prefixed customers = 97. The remaining 19 of 116 are on legacy-named items (e.g. "Crafted ERP – Basic Brewery Edition") or non-subscription contracts (Integration-only, Support-only).</p>
+        </div>
+        <div>
+            <h4>By Tier (active CERP-prefixed contracts)</h4>
+            <table>
+                <thead><tr><th>Tier</th><th>Customers*</th><th>CERP Sub ARR</th></tr></thead>
+                <tbody>
+                    <tr><td>Enterprise</td><td class="num">35</td><td class="num">$1.90M</td></tr>
+                    <tr><td>Standard</td><td class="num">52</td><td class="num">$1.66M</td></tr>
+                    <tr><td>Basic</td><td class="num">16</td><td class="num">$254K</td></tr>
+                    <tr style="border-top:2px solid var(--ci-border)"><td><strong>Tier-mappable customers</strong></td><td class="num"><strong>~85</strong></td><td class="num">—</td></tr>
+                    <tr><td class="text-muted">On items not mapped to current tier model</td><td class="num text-muted">~31</td><td class="num text-muted">—</td></tr>
+                    <tr style="background:var(--ci-bg-muted)"><td><strong>Total active customers</strong></td><td class="num"><strong>116</strong></td><td class="num">—</td></tr>
+                </tbody>
+            </table>
+            <p class="text-small text-muted">*Tier rows sum to 103 because some customers carry items at multiple tiers. The "tier-mappable" count is approximate — the prior tier breakdown methodology and the multi-tier check were run separately.</p>
+        </div>
+    </div>
+
+    <div class="callout callout-warn">
+        <div class="callout-label">Multi-Edition Customers Are A Real Pattern</div>
+        <p style="margin-bottom:.5rem">Verified directly: <strong>10 of 97 distinct CERP-subscription customers carry items in 2 different editions</strong> (e.g., Distillery + Winery on the same parent account). This is why the edition row sum (107) exceeds distinct customer count (97).</p>
+        <p style="margin-bottom:0">For Companion pricing: a multi-edition customer is still <strong>one customer to attach</strong>. Don't double-count them in adoption modeling. The simulator below correctly uses 116 as the addressable base.</p>
+    </div>
+
+    <h3>Existing Recurring Revenue Mix</h3>
+    <p>For context on where Companion fits alongside Doozy's existing active-subscription streams:</p>
+    <table>
+        <thead><tr><th>Recurring Revenue Stream</th><th>Active Contracts</th><th>Annual Run-Rate</th><th>Type</th></tr></thead>
+        <tbody>
+            <tr><td>Crafted ERP Subscription</td><td class="num">97</td><td class="num">$4.16M</td><td>Core product</td></tr>
+            <tr><td>User Packs (5-pack seat add-ons)</td><td class="num">77</td><td class="num">$1.83M</td><td>Volume add-on</td></tr>
+            <tr><td>Add-On Modules (ABM, Commerce7, etc.)</td><td class="num">63</td><td class="num">$889K</td><td>Functional modules</td></tr>
+            <tr><td>Support (Guided / CERP-only / NS)</td><td class="num">54</td><td class="num">$674K</td><td>Service retainer</td></tr>
+            <tr><td><strong>Doozy Think Tank (managed services)</strong></td><td class="num"><strong>29</strong></td><td class="num"><strong>$647K</strong></td><td><strong>Recurring service tiers</strong></td></tr>
+            <tr><td>Integrations</td><td class="num">34</td><td class="num">$273K</td><td>Module / passthrough</td></tr>
+        </tbody>
+    </table>
+    <div class="callout callout-info">
+        <div class="callout-label">Why Think Tank Matters To This Pitch</div>
+        Doozy Think Tank has <strong>29 active subscriptions totaling $647K ARR</strong> — proving customers pay for Doozy's operational expertise on a recurring basis, not just software. Companion is the productized, AI-mediated version of that same instinct: domain intelligence delivered continuously. Think Tank is our strongest pricing precedent for the higher end of Companion positioning.
+    </div>
+
+    <h3>Pricing Anchors From The Catalog</h3>
+    <p>Real existing Doozy SKUs that serve as pricing comparables — all figures are <strong>active subscriptions only</strong>:</p>
+    <table>
+        <thead><tr><th>Anchor SKU</th><th>Model</th><th>Monthly Rate</th><th>Active Attach</th><th>Implication for Companion</th></tr></thead>
+        <tbody>
+            <tr><td>User 5-Pack</td><td>Per-seat add-on</td><td>$250–$325/pack</td><td><strong>77 of 97 CERP (79%)</strong></td><td>Customers comfortable with volume add-ons</td></tr>
+            <tr><td>Advanced Barrel Management</td><td>Functional module</td><td>$499–$805</td><td>33 customers</td><td>Closest direct comparable — domain-specific module</td></tr>
+            <tr><td>Commerce7 integration</td><td>Module add-on</td><td>$699–$999</td><td>—</td><td>Upper-end module price point</td></tr>
+            <tr><td>Guided Support</td><td>Service retainer</td><td>$752 avg</td><td>44 customers</td><td>Recurring service at similar tier</td></tr>
+            <tr><td><strong>Think Tank Basic (DTT-BA)</strong></td><td>Managed services</td><td>$1,217 avg</td><td><strong>15 active</strong></td><td>Entry managed-services tier — customers pay $15K avg ARR</td></tr>
+            <tr><td><strong>Think Tank Operational (DTT-OP)</strong></td><td>Managed services</td><td>$1,947 avg</td><td><strong>12 active</strong></td><td>Mid-tier managed services — $26K avg ARR</td></tr>
+            <tr><td><strong>Think Tank Strategic (DTT-ST)</strong></td><td>Managed services</td><td>$4,000 flat</td><td><strong>2 active</strong></td><td>Top-tier managed services — $48K ARR — ceiling for advisory</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-info">
+        <div class="callout-label">Two Key Insights For Companion Pricing</div>
+        <p style="margin-bottom:.5rem"><strong>1. Direct comparable:</strong> Advanced Barrel Management at $499–$805/mo with 33/116 attach is the closest existing module analog. Companion is arguably more broadly valuable (all editions, all domains) than ABM (barrel-specific), suggesting a similar-or-higher price with higher attach ceiling.</p>
+        <p><strong>2. Service-tier ceiling:</strong> Think Tank's three active tiers (29 customers, $647K ARR combined) prove Crafted customers pay recurring fees for Doozy expertise from $15K up to $48K/year. Companion productizes that same expertise — at the lower end of that range, with unlimited scale, no human staffing, and higher margin.</p>
+    </div>
+
+    <h3 style="margin-top:3rem">Interactive ARR Simulator</h3>
+    <p>Adjust adoption rate, pricing model, and price points to explore Companion's revenue potential. Models <strong>two attach motions in parallel</strong>: retroactive attach to existing customers, and new-logo attach captured at deal close.</p>
+    <p class="text-small text-muted">Note: the "By Edition" breakdown distributes existing-attach across per-edition customer counts (Distillery 45, Brewery 32, Winery 21, RTD 5, Core 4 — summing to 107 due to 10 multi-edition customers double-counted). Total ARR uses 116 as the distinct-customer base. The 19 customers on legacy/non-subscription items are included in the base but not visualized in the edition bars.</p>
+
+    <div class="sim-context">
+        <div style="grid-column:1/-1"><span class="sim-context-title">Verified Pipeline &amp; Logo Cadence Context</span></div>
+        <div class="sim-context-card">
+            <div class="sim-context-label">Open Pipeline</div>
+            <div class="sim-context-value">$550K</div>
+            <div class="sim-context-note">6 open estimates (TCV)</div>
+        </div>
+        <div class="sim-context-card">
+            <div class="sim-context-label">New Logos / Year</div>
+            <div class="sim-context-value">~15</div>
+            <div class="sim-context-note">verified TTM (103 → 116 customers)</div>
+        </div>
+        <div class="sim-context-card">
+            <div class="sim-context-label">Avg New Logo ARR</div>
+            <div class="sim-context-value">~$45K</div>
+            <div class="sim-context-note">$671K TTM / 15 customers</div>
+        </div>
+        <div class="sim-context-card">
+            <div class="sim-context-label">Estimate Win Rate</div>
+            <div class="sim-context-value">76%</div>
+            <div class="sim-context-note">Won / (Won + Lost) — pipeline conversion</div>
+        </div>
+    </div>
+
+    <div class="sim-preset">
+        <span class="text-small text-muted" style="padding:.45rem .5rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:.7rem;">Presets:</span>
+        <button class="sim-preset-btn" onclick="applyPreset('conservative')">Conservative</button>
+        <button class="sim-preset-btn" onclick="applyPreset('recommended')">Recommended</button>
+        <button class="sim-preset-btn" onclick="applyPreset('aggressive')">Aggressive</button>
+        <button class="sim-preset-btn" onclick="applyPreset('stretch')">Stretch</button>
+    </div>
+
+    <div class="sim-wrap">
+        <div class="sim-controls">
+            <div class="sim-group">
+                <div class="sim-label">Pricing Model <span class="sim-value" id="modelLabel">Flat</span></div>
+                <div class="sim-toggle">
+                    <button class="sim-btn active" data-model="flat" onclick="setModel('flat')">Flat Module</button>
+                    <button class="sim-btn" data-model="per-seat" onclick="setModel('per-seat')">Per-Seat</button>
+                    <button class="sim-btn" data-model="tiered" onclick="setModel('tiered')">Edition+Tier</button>
+                </div>
+            </div>
+
+            <div class="sim-group" id="flatGroup">
+                <div class="sim-label">Monthly Price (Flat) <span class="sim-value">$<span id="flatPriceVal">750</span></span></div>
+                <input type="range" class="sim-slider" id="flatPrice" min="199" max="2000" step="50" value="750">
+                <div class="text-small text-muted">ABM comp: $499–$805 &middot; Commerce7: $699–$999 &middot; Guided Support: $752</div>
+            </div>
+
+            <div class="sim-group" id="perSeatGroup" style="display:none">
+                <div class="sim-label">Per-User Monthly Price <span class="sim-value">$<span id="seatPriceVal">50</span></span></div>
+                <input type="range" class="sim-slider" id="seatPrice" min="10" max="150" step="5" value="50">
+                <div class="sim-label" style="margin-top:1rem">Avg Users per Customer <span class="sim-value" id="seatCountVal">15</span></div>
+                <input type="range" class="sim-slider" id="seatCount" min="5" max="50" step="1" value="15">
+                <div class="text-small text-muted">User 5-Pack precedent: $250–$325 per 5-pack = $50–$65/user</div>
+            </div>
+
+            <div class="sim-group" id="tieredGroup" style="display:none">
+                <div class="sim-label">Edition + Tier Matrix (monthly)</div>
+                <div class="sim-tier-inputs">
+                    <div><label>Basic</label><input type="number" id="tierBasic" value="299" min="0"></div>
+                    <div><label>Standard</label><input type="number" id="tierStd" value="599" min="0"></div>
+                    <div><label>Enterprise</label><input type="number" id="tierEnt" value="1299" min="0"></div>
+                </div>
+                <div class="text-small text-muted" style="margin-top:.5rem">Basic (16) &middot; Standard (52) &middot; Enterprise (35) customers</div>
+            </div>
+
+            <div class="sim-group">
+                <div class="sim-label">Existing-Customer Attach <span class="sim-value"><span id="adoptionVal">60</span>%</span></div>
+                <input type="range" class="sim-slider" id="adoption" min="0" max="100" step="5" value="60">
+                <div class="text-small text-muted">% of 116 existing customers retroactively attaching Companion</div>
+                <div class="sim-baseline-row">
+                    <span class="sim-baseline-chip">User 5-Pack: <strong>79%</strong></span>
+                    <span class="sim-baseline-chip">Guided Support: <strong>38%</strong></span>
+                    <span class="sim-baseline-chip">Adv. Barrel Mgmt: <strong>28%</strong></span>
+                    <span class="sim-baseline-chip">Think Tank Basic: <strong>13%</strong></span>
+                </div>
+                <div class="sim-warning" id="adoptionWarning">⚠ Exceeds the highest historical attach rate (User 5-Pack at 79%)</div>
+            </div>
+
+            <div class="sim-group">
+                <div class="sim-label">New-Logo Attach <span class="sim-value"><span id="newLogoAttachVal">75</span>%</span></div>
+                <input type="range" class="sim-slider" id="newLogoAttach" min="0" max="100" step="5" value="75">
+                <div class="text-small text-muted">% of new customers bundling Companion at deal close. Higher than retroactive — sales motion is at signing, not retrofit.</div>
+            </div>
+
+            <div class="sim-group">
+                <div class="sim-label">New Logos / Year <span class="sim-value" id="newLogoCountVal">15</span></div>
+                <input type="range" class="sim-slider" id="newLogoCount" min="0" max="50" step="1" value="15">
+                <div class="text-small text-muted">Verified TTM: customer count grew from 103 → 116 (+13 net), 15 new customer records created. Slider goes to 50 for growth scenarios.</div>
+            </div>
+
+            <div class="sim-group">
+                <div class="sim-label">Customer Base Growth <span class="sim-value"><span id="growthVal">11</span>%</span></div>
+                <input type="range" class="sim-slider" id="growth" min="0" max="30" step="1" value="11">
+                <div class="text-small text-muted">Annual customer base growth (default: 11% organic)</div>
+            </div>
+
+            <div class="sim-group">
+                <div class="sim-label">Annual Churn <span class="sim-value"><span id="churnVal">5</span>%</span></div>
+                <input type="range" class="sim-slider" id="churn" min="0" max="25" step="1" value="5">
+                <div class="text-small text-muted">Companion-specific churn (base CERP churn not modeled)</div>
+            </div>
+        </div>
+
+        <div class="sim-output">
+            <div class="sim-big-label">Year 1 Total Incremental ARR</div>
+            <div class="sim-big" id="arrBig">$1.23M</div>
+
+            <div class="sim-track-grid">
+                <div class="sim-track-card sim-track-existing">
+                    <div class="sim-track-label">Existing-Customer Attach</div>
+                    <div class="sim-track-value" id="existingARR">$501K</div>
+                    <div class="sim-track-detail" id="existingDetail">70 of 116 existing</div>
+                </div>
+                <div class="sim-track-card sim-track-newlogo">
+                    <div class="sim-track-label">New-Logo Attach</div>
+                    <div class="sim-track-value" id="newLogoARR">$729K</div>
+                    <div class="sim-track-detail" id="newLogoDetail">81 of 108 new</div>
+                </div>
+            </div>
+
+            <div class="sim-sub">
+                <div class="sim-sub-card">
+                    <div class="sim-sub-value" id="arrPct">+16.8%</div>
+                    <div class="sim-sub-label">of base ARR</div>
+                </div>
+                <div class="sim-sub-card">
+                    <div class="sim-sub-value" id="attachCount">151</div>
+                    <div class="sim-sub-label">total attached Y1</div>
+                </div>
+                <div class="sim-sub-card">
+                    <div class="sim-sub-value" id="acvAvg">$9K</div>
+                    <div class="sim-sub-label">avg Companion ACV</div>
+                </div>
+                <div class="sim-sub-card">
+                    <div class="sim-sub-value" id="arrY3">$2.3M</div>
+                    <div class="sim-sub-label">Year 3 ARR</div>
+                </div>
+            </div>
+
+            <div class="sim-chart">
+                <h4 style="margin-top:0">Year-Over-Year Projection (Stacked)</h4>
+                <svg id="arrChart" viewBox="0 0 400 180" style="width:100%;height:180px"></svg>
+            </div>
+
+            <div class="sim-breakdown">
+                <h4 style="margin-top:0">By Edition (Existing-Customer Attach Only)</h4>
+                <div id="editionBars"></div>
+            </div>
+        </div>
+    </div>
+
+    <h3 style="margin-top:3rem">Recommended Scenario</h3>
+    <div class="card card-primary">
+        <h4>Our recommendation: Flat module at $750/mo with two-track GTM motion</h4>
+        <ul>
+            <li><strong>~$600K total incremental ARR in Year 1</strong> — roughly 8% lift on the current $7.33M base</li>
+            <li>Split: <strong>~$501K from existing-customer attach</strong> (60% of 116 existing) + <strong>~$101K from new-logo attach</strong> (75% of ~15 new logos closing this year)</li>
+            <li><strong>~$700K by Year 3</strong> with cumulative new-logo capture (each year's wins compound)</li>
+            <li>Price point sits between Advanced Barrel Management ($499–$805) and Commerce7 ($699–$999) — proven customer-willingness range</li>
+            <li>60% retroactive attach is achievable but not aggressive — ABM at narrower scope achieves ~28% attach on a similar customer base</li>
+            <li>75% new-logo attach is supportable when Companion is bundled into the standard Crafted ERP SKU at sale — but the absolute new-logo count is the constraint, not the attach rate</li>
+            <li><strong>The bigger lever is existing-customer attach.</strong> With only ~15 new logos/year, new-logo capture caps at ~$135K ARR even at 100% attach. Existing-customer retroactive attach is where the volume is.</li>
+        </ul>
+    </div>
+
+    <h3>Why This Is Different From a Typical ERP Add-On</h3>
+    <div class="two-col">
+        <div class="card card-success">
+            <h4>High-margin from day one</h4>
+            <p class="text-small">Already built (sunk cost). Minimal incremental engineering. Incremental revenue flows almost entirely to margin.</p>
+        </div>
+        <div class="card card-primary">
+            <h4>Strategic signal beyond ARR</h4>
+            <p class="text-small">Positions Doozy as Oracle's AI-native ISV for craft beverage. Category-defining posture matters for future deals, partnerships, and valuation.</p>
+        </div>
+    </div>
+
+    <h3>Reality Check — What This Is Not</h3>
+    <ul>
+        <li><strong>Not a replacement for base CERP revenue.</strong> It's additive. If we displace base subscription value, we've miscalculated.</li>
+        <li><strong>Not a substitute for services revenue.</strong> Implementation (~$5.5M annualized) isn't threatened — Companion <em>may</em> reduce some analyst hours post-go-live, but won't replace setup work.</li>
+        <li><strong>Not guaranteed without GTM motion.</strong> Good product + poor sales enablement = poor attach. The GTM muscle has to be built alongside the launch.</li>
+    </ul>
+</section>
+
+<!-- ================ 9. RISKS ================ -->
+<section class="panel" id="risks">
+    <h2>Risks &amp; Open Questions</h2>
+    <p class="lede">What could go wrong, and what we still need to decide.</p>
+
+    <h3>Strategic Risks</h3>
+    <div class="tool-grid">
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Oracle Framework Changes</span><span class="tool-domain-count" style="background:var(--ci-success)">LOW</span></div>
+            <p class="text-small">Oracle's AI Companion SuiteApp is bundle-locked. In v2 this was our highest-severity risk — the v3 independence rewrite resolved it at the data layer.</p>
+            <p class="text-small"><strong>Mitigation (v3):</strong> We have <em>no FK dependency</em> on Atlas. The only surface that reads Atlas is the Library's optional secondary tab, which uses try/catch probing and gracefully hides if Atlas schema changes or the SuiteApp is uninstalled. Crafted Intelligence's core data path is untouchable by Oracle updates.</p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Oracle Enters Craft Directly</span><span class="tool-domain-count" style="background:var(--ci-accent)">MEDIUM</span></div>
+            <p class="text-small">Oracle could ship industry-specific prompts themselves. Unlikely given craft's specialized vocabulary, but possible.</p>
+            <p class="text-small"><strong>Mitigation:</strong> Our moat is 41 deep domain tools + operational knowledge. Prompts are the surface; tools are the depth. Generic prompts without domain tools aren't competitive.</p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">AI Vendor Shifts</span><span class="tool-domain-count" style="background:var(--ci-accent)">MEDIUM</span></div>
+            <p class="text-small">Customers need Claude/ChatGPT subscriptions. If AI pricing changes drastically, or a vendor consolidates the space, our channel to customers shifts.</p>
+            <p class="text-small"><strong>Mitigation:</strong> MCP protocol is vendor-agnostic. Any MCP-compatible client works. Cowork is another viable channel.</p>
+        </div>
+        <div class="tool-domain">
+            <div class="tool-domain-head"><span class="tool-domain-name">Low Adoption</span><span class="tool-domain-count" style="background:var(--ci-accent)">MEDIUM</span></div>
+            <p class="text-small">Customers buy but don't use. Net revenue retention degrades; renewals drop.</p>
+            <p class="text-small"><strong>Mitigation:</strong> Usage analytics on <code>exec_log</code> to identify at-risk accounts. Quarterly customer success review. Prompt-of-the-month feature for ongoing discovery.</p>
+        </div>
+    </div>
+
+    <h3>Execution Risks</h3>
+    <table>
+        <thead><tr><th>Risk</th><th>Severity</th><th>Status</th></tr></thead>
+        <tbody>
+            <tr><td>Cross-edition defects surface only in Winery / Brewery</td><td>Medium</td><td>Mitigating via pre-GA Winery deploy</td></tr>
+            <tr><td>MCP connector caching causes stale tool inventory</td><td>Low</td><td>Known — documented in admin runbook</td></tr>
+            <tr><td>Governance limits (1,000 units) hit on complex prompts</td><td>Medium</td><td>Batched with retry loop; investigated per-tool</td></tr>
+            <tr><td>Customer data quality issues surface as prompt failures</td><td>Medium</td><td>Data quality audit tool exists; part of standard onboarding</td></tr>
+            <tr><td>Support triage unclear (prompt bug vs. tool bug vs. Oracle bug)</td><td>High</td><td><strong>Open — decision needed</strong></td></tr>
+        </tbody>
+    </table>
+
+    <h3>Open Product Questions</h3>
+    <div class="card card-accent">
+        <h4>Support Model</h4>
+        <p>When a customer reports "the AI gave me wrong numbers", who's on the hook — Doozy support, Oracle support, or the AI vendor? Need a clear triage matrix and escalation path. Recommended: Doozy L1 triages all; escalates to Oracle for platform issues; escalates to vendor for AI quality issues.</p>
+    </div>
+    <div class="card card-accent">
+        <h4>Upgrade Path for v1 Customers</h4>
+        <p>~10-15 Crafted Intelligence v1 customers exist. Do they auto-migrate? Pay again? Get a discount? Recommended: free migration for 12 months as good-faith conversion; new pricing applies at renewal.</p>
+    </div>
+    <div class="card card-accent">
+        <h4>Sales Motion</h4>
+        <p>Is Companion sold by AEs as an add-on, by CSMs as a renewal expansion, or both? Different incentives and enablement needs.</p>
+    </div>
+    <div class="card card-accent">
+        <h4>Pilot vs. Direct Launch</h4>
+        <p>Do we run a 3-5 customer beta before GA, or ship directly? Beta gives us real usage telemetry and reference customers. Direct ships faster but risks high-profile early failures.</p>
+    </div>
+</section>
+
+<!-- ================ 10. APPENDIX ================ -->
+<section class="panel" id="appendix">
+    <h2>Appendix</h2>
+    <p class="lede">Reference material &mdash; field schemas, tool inventory, and data sources.</p>
+
+    <h3>A. Record Schemas (v3)</h3>
+    <h4><code>customrecord_dz_companion_prompt</code> (29 fields — independent, owns everything)</h4>
+    <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Purpose</th></tr></thead>
+        <tbody>
+            <tr><td colspan="3" style="background:var(--ci-bg-muted);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px">Identity (5)</td></tr>
+            <tr><td><code>custrecord_dz_cp_prompt_text</code></td><td>CLOBTEXT (req)</td><td>Full user-facing prompt text with optional [Crafted Prompt #ID ...] header</td></tr>
+            <tr><td><code>custrecord_dz_cp_category</code></td><td>SELECT (req)</td><td>→ <code>customlist_dz_cp_category</code> (7 values including General)</td></tr>
+            <tr><td><code>custrecord_dz_cp_subcategory</code></td><td>TEXT</td><td>Finer grouping within category (e.g. "Barrel Valuation &amp; Finance")</td></tr>
+            <tr><td><code>custrecord_dz_cp_public</code></td><td>CHECKBOX (T)</td><td>Visible in Library UI? Set F for internal/testing prompts</td></tr>
+            <tr><td><code>custrecord_dz_cp_description</code></td><td>TEXT</td><td>1-2 sentence card description for the Library</td></tr>
+            <tr><td colspan="3" style="background:var(--ci-bg-muted);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px">Role Visibility (2)</td></tr>
+            <tr><td><code>custrecord_dz_cp_visible_roles</code></td><td>MULTISELECT → role</td><td>Native NS roles authorized to see this prompt. Empty = all roles.</td></tr>
+            <tr><td><code>custrecord_dz_cp_role_patterns</code></td><td>CLOBTEXT (HIDDEN)</td><td>JSON array of role-name patterns used by the seed script to auto-populate visible_roles</td></tr>
+            <tr><td colspan="3" style="background:var(--ci-bg-muted);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px">Orchestration (5)</td></tr>
+            <tr><td><code>custrecord_dz_cp_toolset</code></td><td>TEXT (req)</td><td>Primary toolset script ID (e.g. "barrel-intelligence") — hard-validated in the Library</td></tr>
+            <tr><td><code>custrecord_dz_cp_tool_chain</code></td><td>TEXT</td><td>Human-readable chain: "getBarrelProfile → getBarrelCostTrace"</td></tr>
+            <tr><td><code>custrecord_dz_cp_entry_tool</code></td><td>TEXT</td><td>First tool the AI should call</td></tr>
+            <tr><td><code>custrecord_dz_cp_steps</code></td><td>CLOBTEXT (JSON)</td><td>Ordered steps array with <code>call</code>, <code>purpose</code>, <code>condition</code>, <code>depends_on</code>, <code>params_from</code></td></tr>
+            <tr><td><code>custrecord_dz_cp_tool_deps</code></td><td>CLOBTEXT (JSON)</td><td>Array of required toolset script IDs — prompt hidden in Library if any missing</td></tr>
+            <tr><td colspan="3" style="background:var(--ci-bg-muted);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px">Edition (2)</td></tr>
+            <tr><td><code>custrecord_dz_cp_edition</code></td><td>SELECT (req)</td><td>Distillery / Winery / Brewery / Cross-Edition</td></tr>
+            <tr><td><code>custrecord_dz_cp_edition_notes</code></td><td>CLOBTEXT</td><td>Edition-specific behavior hints (e.g. "Distillery: PG. Winery: gallons.")</td></tr>
+            <tr><td colspan="3" style="background:var(--ci-bg-muted);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px">Parameters &amp; Safety (2)</td></tr>
+            <tr><td><code>custrecord_dz_cp_params</code></td><td>CLOBTEXT (JSON)</td><td>Parameter schema: type, required, hint, resolves_to</td></tr>
+            <tr><td><code>custrecord_dz_cp_safety_rules</code></td><td>CLOBTEXT (JSON)</td><td>Array of non-hallucination &amp; data-quality constraints the AI must enforce</td></tr>
+            <tr><td colspan="3" style="background:var(--ci-bg-muted);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px">Governance &amp; Artifacts (3)</td></tr>
+            <tr><td><code>custrecord_dz_cp_governance</code></td><td>SELECT (req)</td><td>Minimal / Standard / Governed / Supervised</td></tr>
+            <tr><td><code>custrecord_dz_cp_artifact</code></td><td>CHECKBOX (F)</td><td>Generates a visual artifact?</td></tr>
+            <tr><td><code>custrecord_dz_cp_artifact_type</code></td><td>TEXT</td><td>cost-waterfall, kpi-dashboard, aging-chart, compliance-scorecard, etc.</td></tr>
+            <tr><td colspan="3" style="background:var(--ci-bg-muted);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px">Metadata (4)</td></tr>
+            <tr><td><code>custrecord_dz_cp_version</code></td><td>TEXT</td><td>Semver; updated by updatePrompt</td></tr>
+            <tr><td><code>custrecord_dz_cp_author</code></td><td>TEXT</td><td>Typically "Doozy Labs"; set to current user for Save-as-User-Prompt records</td></tr>
+            <tr><td><code>custrecord_dz_cp_status</code></td><td>SELECT (req)</td><td>Active / Draft / Testing / Deprecated. Only Active shows in Library.</td></tr>
+            <tr><td><code>custrecord_dz_cp_changelog</code></td><td>CLOBTEXT</td><td>Version history notes visible in the Library detail modal</td></tr>
+            <tr><td colspan="3" style="background:var(--ci-bg-muted);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px">Usage Analytics (3)</td></tr>
+            <tr><td><code>custrecord_dz_cp_exec_count</code></td><td>INTEGER (0)</td><td>Total executions; incremented by logExecution</td></tr>
+            <tr><td><code>custrecord_dz_cp_last_executed</code></td><td>DATETIMETZ</td><td>Timestamp of most recent execution</td></tr>
+            <tr><td><code>custrecord_dz_cp_avg_duration</code></td><td>INTEGER (0)</td><td>Running average duration in seconds (incremental-average formula)</td></tr>
+            <tr><td colspan="3" style="background:var(--ci-bg-muted);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px">Collections &amp; Discovery (3)</td></tr>
+            <tr><td><code>custrecord_dz_cp_collection</code></td><td>TEXT</td><td>Workflow grouping label (e.g. "Month-End Close", "My Prompts")</td></tr>
+            <tr><td><code>custrecord_dz_cp_related</code></td><td>CLOBTEXT (JSON)</td><td>Array of external IDs for "run next" suggestions</td></tr>
+            <tr><td><code>custrecord_dz_cp_user_complexity</code></td><td>SELECT</td><td>→ <code>customlist_dz_cp_complexity</code> (Quick / Standard / Deep Analysis) — user-facing, distinct from governance</td></tr>
+        </tbody>
+    </table>
+
+    <h4><code>customrecord_dz_exec_log</code> (8 fields)</h4>
+    <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Purpose</th></tr></thead>
+        <tbody>
+            <tr><td><code>custrecord_dz_el_prompt_ref</code></td><td>INTEGER (req)</td><td>References <code>customrecord_dz_companion_prompt.id</code> (v3 independent record)</td></tr>
+            <tr><td><code>custrecord_dz_el_exec_date</code></td><td>DATETIMETZ (req)</td><td>When execution started</td></tr>
+            <tr><td><code>custrecord_dz_el_tools_called</code></td><td>CLOBTEXT (JSON)</td><td>Array of tool names actually called</td></tr>
+            <tr><td><code>custrecord_dz_el_success</code></td><td>CHECKBOX</td><td>Outcome</td></tr>
+            <tr><td><code>custrecord_dz_el_error</code></td><td>CLOBTEXT</td><td>Error details on failure</td></tr>
+            <tr><td><code>custrecord_dz_el_duration</code></td><td>INTEGER</td><td>Duration in seconds</td></tr>
+            <tr><td><code>custrecord_dz_el_version</code></td><td>TEXT</td><td>Prompt version at exec time</td></tr>
+            <tr><td><code>custrecord_dz_el_agent</code></td><td>TEXT</td><td>"claude", "chatgpt", "cowork"</td></tr>
+        </tbody>
+    </table>
+
+    <h3>B. Complete Tool Inventory (41 Domain Tools)</h3>
+
+    <h4>Barrel Operations — barrel-intelligence (8 tools)</h4>
+    <ul class="text-small">
+        <li><code>getBarrelProfile</code> — Single-barrel identity, status, location, cooperage</li>
+        <li><code>getBarrelActivityHistory</code> — Full event timeline for a barrel</li>
+        <li><code>getBarrelCostTrace</code> — Cost history from acquisition through aging</li>
+        <li><code>getBarrelKPIs</code> — Portfolio KPIs: inventory, activity, aging, angel's share</li>
+        <li><code>getBarrelAging</code> — Aging distribution by item/location/cooper/woodtype</li>
+        <li><code>getBarrelInventory</code> — Barrel counts by status/location/item/cooper/batch</li>
+        <li><code>getBarrelValuation</code> — Financial value by serial/item/location</li>
+        <li><code>getBarrelLocationMap</code> — Warehouse/bin/rack distribution with movements</li>
+    </ul>
+
+    <h4>Lot Profitability — lot-profitability (7 tools)</h4>
+    <ul class="text-small">
+        <li><code>getLotProfitability</code> — Summary P&amp;L for a lot</li>
+        <li><code>getLotCostTree</code> — Recursive backward cost trace (WO → components → PO)</li>
+        <li><code>getLotSalesTrail</code> — Forward revenue trace (lot → shipment → invoice)</li>
+        <li><code>getLotYieldAnalysis</code> — Manufacturing yield/OEE per operation</li>
+        <li><code>getLotCostVariance</code> — Standard vs. actual cost comparison</li>
+        <li><code>getLotGLDetail</code> — GL-level transaction accounting lines</li>
+        <li><code>getItemCostTrend</code> — Cost trend over time for an item</li>
+    </ul>
+
+    <h4>Inventory &amp; Supply — inventory-supply (9 tools)</h4>
+    <ul class="text-small">
+        <li><code>searchItems</code> — Resolve names to item IDs (front door)</li>
+        <li><code>getItemIntelligence</code> — Meta-orchestrator: position, aging, supply/demand, flags</li>
+        <li><code>getInventorySnapshot</code> — Current stock by location with lot detail</li>
+        <li><code>getInventoryAging</code> — Age distribution of inventory by lot</li>
+        <li><code>getInventoryTrend</code> — Stock level trends over time</li>
+        <li><code>getInventoryAlerts</code> — Low stock, expiring lots, negative on-hand</li>
+        <li><code>getCostedBOM</code> — Bill of materials with full cost explosion</li>
+        <li><code>getProductionCostVariance</code> — WO actual vs. standard cost</li>
+        <li><code>getSpotLightOccurrences</code> — Cross-reference item across all contexts</li>
+    </ul>
+
+    <h4>Compliance &amp; Audit — compliance-audit (8 tools)</h4>
+    <ul class="text-small">
+        <li><code>getComplianceReadiness</code> — Composite filing readiness score (0–100)</li>
+        <li><code>getComplianceFilingStatus</code> — TTB filing gaps per period</li>
+        <li><code>getGainLossAnalysis</code> — PG/LAL trending with dual-percentage analysis</li>
+        <li><code>getDataQualityAudit</code> — Missing fields, data integrity checks</li>
+        <li><code>getAccountingAnomalies</code> — COGS adjustments, WIP variance, inventory-to-COGS</li>
+        <li><code>getTransactionAuditTrail</code> — Complete transaction lineage</li>
+        <li><code>auditFieldChanges</code> — System notes: field changes with who/when/old/new</li>
+        <li><code>traceTransaction</code> — Forward/backward transaction tracing</li>
+    </ul>
+
+    <h4>MRP Intelligence — mrp-intelligence (6 tools)</h4>
+    <ul class="text-small">
+        <li><code>analyzeMRPSupplyDemand</code> — Time-phased PAB: on-hand, scheduled receipts, net req</li>
+        <li><code>getMRPActionMessages</code> — Prioritized planning recommendations</li>
+        <li><code>runMRPSetupAudit</code> — Item planning parameters audit</li>
+        <li><code>runShelfLifeMRP</code> — Shelf-life-aware MRP run</li>
+        <li><code>analyzeShelfLifeRisk</code> — Lots expiring in 30/60/90 days</li>
+        <li><code>getSupplyPlanAnalysis</code> — Native supply plan deep-dive</li>
+    </ul>
+
+    <h4>Batch &amp; Genealogy — batch-genealogy (3 tools, Winery-only)</h4>
+    <ul class="text-small">
+        <li><code>getBatchProfile</code> / <code>getBatchDetails</code> — Batch identity, tank, vintage, lab metrics</li>
+        <li><code>getBatchGenealogy</code> — Full composition: inputs, outputs, cellar orders</li>
+        <li><code>getBatchLineage</code> — Upstream sources &amp; downstream consumers (grape-to-glass)</li>
+    </ul>
+
+    <h3>C. Companion Toolset (4 Core Tools, v2.0.0)</h3>
+    <ul class="text-small">
+        <li><code>getPromptMeta(promptId | externalId)</code> — Single-table SELECT against <code>customrecord_dz_companion_prompt</code>. Returns the full v2.0.0 response shape (prompt_text, steps, params, safety_rules, governance, edition, category, description, complexity, collection, related, exec_count, last_executed, avg_duration, changelog). Call first before executing any Crafted prompt.</li>
+        <li><code>seedPrompt(...)</code> — Idempotent create of a Crafted Intelligence prompt record. Admin use. Supports <code>description</code>, <code>complexity</code>, <code>collection</code>, <code>related</code>, <code>rolePatterns</code>, <code>changelog</code>, and all orchestration fields. Does NOT touch Atlas.</li>
+        <li><code>updatePrompt(...)</code> — Single record update with auto patch-version bump. Writes directly to the independent record.</li>
+        <li><code>logExecution(promptId, success, toolsCalled, duration, agent)</code> — Creates exec log row AND writes usage analytics back to the prompt record (increments <code>exec_count</code>, sets <code>last_executed</code>, updates <code>avg_duration</code> via incremental-average formula). Analytics update is best-effort; log success is authoritative. All code paths return <code>Promise.resolve(JSON.stringify({...}))</code>.</li>
+    </ul>
+
+    <h3>D. Data Sources Used In This Deck</h3>
+    <table>
+        <thead><tr><th>Data</th><th>Source</th><th>Snapshot Date</th></tr></thead>
+        <tbody>
+            <tr><td>116 active Crafted ERP customers, $7.33M ARR</td><td><code>customrecord_ds_arr_metrics</code> (Doozy Internal)</td><td>Jan 2026</td></tr>
+            <tr><td>Edition &amp; tier breakdowns</td><td>CERP subscription items on active SOs (Doozy Internal)</td><td>2026-04-15</td></tr>
+            <tr><td>Pricing anchors</td><td><code>item</code> records w/ <code>custcol_ds_arr</code> on active SOs</td><td>2026-04-15</td></tr>
+            <tr><td>11% growth rate</td><td>ARR Metrics time series (Mar 25 → Jan 26)</td><td>2026-04-15</td></tr>
+            <tr><td>41-tool inventory</td><td>Crafted Companion SKILL.md + domain package source</td><td>2026-04-15</td></tr>
+            <tr><td>Atlas 8-object schema</td><td>Oracle Atlas AI Companion Record Browser trace</td><td>2026-04-14</td></tr>
+            <tr><td>Demo data validations</td><td>NetSuite Distillery Edition Demo (TSTDRV1912378) via MCP</td><td>2026-04-17</td></tr>
+        </tbody>
+    </table>
+
+    <h3>E. Glossary</h3>
+    <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+            <tr><td>Atlas</td><td>Oracle's internal code name for the AI Companion SuiteApp (customrecords prefixed <code>atlas_aicomp_*</code>)</td></tr>
+            <tr><td>MCP</td><td>Model Context Protocol — Anthropic-originated standard for AI tool use, adopted by OpenAI, Cowork, etc.</td></tr>
+            <tr><td>Toolset</td><td>A NetSuite <code>custtoolset</code> record that groups related Custom Tool Scripts for MCP exposure</td></tr>
+            <tr><td>Custom Tool Script</td><td>A SuiteScript 2.1 file exposing a typed function callable by AI via MCP</td></tr>
+            <tr><td>Edition</td><td>Crafted ERP vertical flavor: Distillery, Winery, Brewery (and RTD, Core variants)</td></tr>
+            <tr><td>PG / LAL</td><td>Proof Gallons / Litres of Absolute Alcohol — compliance volume units</td></tr>
+            <tr><td>TTB</td><td>Alcohol &amp; Tobacco Tax &amp; Trade Bureau — US federal alcohol regulator</td></tr>
+            <tr><td>SDF</td><td>SuiteCloud Development Framework — NetSuite's deployment tooling</td></tr>
+            <tr><td>Suitelet</td><td>A NetSuite-hosted server-rendered HTML endpoint</td></tr>
+        </tbody>
+    </table>
+</section>
+
+</main>
+
+<footer class="footer">
+    <p><strong>Crafted Intelligence</strong> &middot; Leadership Briefing &middot; 2026-04-17</p>
+    <p style="opacity:.7;font-size:.8rem;margin-top:.5rem">Doozy Labs &middot; Prepared for Product Leadership</p>
+</footer>
+
+<script>
+// === TABS ===
+document.querySelectorAll('.tab').forEach(function(btn){
+    btn.addEventListener('click',function(){
+        var target=btn.getAttribute('data-panel');
+        document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
+        document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+        btn.classList.add('active');
+        document.getElementById(target).classList.add('active');
+        window.scrollTo({top:0,behavior:'smooth'});
+    });
+});
+
+// === SIMULATOR ===
+var CUSTOMERS=116, BASE_ARR=7330000;
+var EDITIONS={Distillery:45, Brewery:32, Winery:21, RTD:5, Core:4};
+var TIERS={Basic:16, Standard:52, Enterprise:35};
+var EDITION_COLORS={Distillery:'#0785A8',Brewery:'#DB8A06',Winery:'#5CB8B2',RTD:'#84B75C',Core:'#A83137'};
+var currentModel='flat';
+
+function setModel(m){
+    currentModel=m;
+    document.getElementById('modelLabel').innerText=m==='flat'?'Flat':m==='per-seat'?'Per-Seat':'Tiered';
+    document.querySelectorAll('[data-model]').forEach(function(b){
+        b.classList.toggle('active',b.getAttribute('data-model')===m);
+    });
+    document.getElementById('flatGroup').style.display=m==='flat'?'':'none';
+    document.getElementById('perSeatGroup').style.display=m==='per-seat'?'':'none';
+    document.getElementById('tieredGroup').style.display=m==='tiered'?'':'none';
+    recalc();
+}
+
+function fmt(n){
+    if(n>=1e6)return '$'+(n/1e6).toFixed(2)+'M';
+    if(n>=1e3)return '$'+Math.round(n/1e3)+'K';
+    return '$'+Math.round(n);
+}
+function fmtFull(n){
+    return '$'+Math.round(n).toLocaleString();
+}
+
+function getMonthlyPerCustomer(editionMix, tierMix){
+    if(currentModel==='flat'){
+        return +document.getElementById('flatPrice').value;
+    }
+    if(currentModel==='per-seat'){
+        var p=+document.getElementById('seatPrice').value;
+        var c=+document.getElementById('seatCount').value;
+        return p*c;
+    }
+    // tiered: weighted avg across tier mix
+    var basic=+document.getElementById('tierBasic').value;
+    var std=+document.getElementById('tierStd').value;
+    var ent=+document.getElementById('tierEnt').value;
+    var total=TIERS.Basic+TIERS.Standard+TIERS.Enterprise;
+    return (basic*TIERS.Basic + std*TIERS.Standard + ent*TIERS.Enterprise)/total;
+}
+
+function recalc(){
+    var adoption=+document.getElementById('adoption').value/100;
+    var newLogoAttach=+document.getElementById('newLogoAttach').value/100;
+    var newLogoCount=+document.getElementById('newLogoCount').value;
+    var growth=+document.getElementById('growth').value/100;
+    var churn=+document.getElementById('churn').value/100;
+
+    // update display values
+    document.getElementById('flatPriceVal').innerText=document.getElementById('flatPrice').value;
+    document.getElementById('seatPriceVal').innerText=document.getElementById('seatPrice').value;
+    document.getElementById('seatCountVal').innerText=document.getElementById('seatCount').value;
+    document.getElementById('adoptionVal').innerText=document.getElementById('adoption').value;
+    document.getElementById('newLogoAttachVal').innerText=document.getElementById('newLogoAttach').value;
+    document.getElementById('newLogoCountVal').innerText=document.getElementById('newLogoCount').value;
+    document.getElementById('growthVal').innerText=document.getElementById('growth').value;
+    document.getElementById('churnVal').innerText=document.getElementById('churn').value;
+
+    // Reality-check warnings
+    var adoptionWarn=document.getElementById('adoptionWarning');
+    if(+document.getElementById('adoption').value > 79){
+        adoptionWarn.classList.add('show');
+    } else {
+        adoptionWarn.classList.remove('show');
+    }
+
+    var monthlyPerCust=getMonthlyPerCustomer();
+    var annualPerCust=monthlyPerCust*12;
+
+    // === TWO-TRACK MODEL ===
+    // Track 1: Existing-customer retroactive attach
+    var existingAttach=Math.round(CUSTOMERS*adoption);
+    var existingARR=existingAttach*annualPerCust;
+
+    // Track 2: New-logo attach (deals captured at close during the year)
+    var newLogoAttachCount=Math.round(newLogoCount*newLogoAttach);
+    var newLogoARR=newLogoAttachCount*annualPerCust;
+
+    // Y1 Combined
+    var y1Total=existingAttach+newLogoAttachCount;
+    var y1ARR=existingARR+newLogoARR;
+
+    // Y2 projection: existing (with churn) + new logos Y1 (with churn) + new logos Y2
+    // Customer base grows; new logo cadence grows proportionally
+    var y2NewLogoCount=Math.round(newLogoCount*(1+growth));
+    var y2NewLogoAttachCount=Math.round(y2NewLogoCount*newLogoAttach);
+    var y2ExistingAttach=Math.round(existingAttach*(1-churn));      // Y1 existing customers, churned
+    var y2NewLogoCarry=Math.round(newLogoAttachCount*(1-churn));    // Y1 new logos, churned
+    var y2TotalAttach=y2ExistingAttach+y2NewLogoCarry+y2NewLogoAttachCount;
+    var y2ARR=y2TotalAttach*annualPerCust;
+
+    // Y3 projection
+    var y3NewLogoCount=Math.round(y2NewLogoCount*(1+growth));
+    var y3NewLogoAttachCount=Math.round(y3NewLogoCount*newLogoAttach);
+    var y3ExistingAttach=Math.round(y2ExistingAttach*(1-churn));
+    var y3NewLogoCarryY1=Math.round(y2NewLogoCarry*(1-churn));
+    var y3NewLogoCarryY2=Math.round(y2NewLogoAttachCount*(1-churn));
+    var y3TotalAttach=y3ExistingAttach+y3NewLogoCarryY1+y3NewLogoCarryY2+y3NewLogoAttachCount;
+    var y3ARR=y3TotalAttach*annualPerCust;
+
+    // Update outputs
+    document.getElementById('arrBig').innerText=fmt(y1ARR);
+    document.getElementById('arrPct').innerText='+'+((y1ARR/BASE_ARR)*100).toFixed(1)+'%';
+    document.getElementById('attachCount').innerText=y1Total;
+    document.getElementById('acvAvg').innerText=fmt(annualPerCust);
+    document.getElementById('arrY3').innerText=fmt(y3ARR);
+
+    document.getElementById('existingARR').innerText=fmt(existingARR);
+    document.getElementById('existingDetail').innerText=existingAttach+' of 116 existing';
+    document.getElementById('newLogoARR').innerText=fmt(newLogoARR);
+    document.getElementById('newLogoDetail').innerText=newLogoAttachCount+' of '+newLogoCount+' new';
+
+    // Stacked Chart: existing vs new logo per year
+    drawStackedChart([
+        {existing: existingARR, newLogo: newLogoARR},
+        {existing: y2ExistingAttach*annualPerCust, newLogo: (y2NewLogoCarry+y2NewLogoAttachCount)*annualPerCust},
+        {existing: y3ExistingAttach*annualPerCust, newLogo: (y3NewLogoCarryY1+y3NewLogoCarryY2+y3NewLogoAttachCount)*annualPerCust}
+    ]);
+
+    // Edition bars (existing-customer attach only — new logos don't have known edition mix yet)
+    var editionBars='';
+    var maxEditionARR=0;
+    var editionARRs={};
+    for(var ed in EDITIONS){
+        var edAttach=Math.round(EDITIONS[ed]*adoption);
+        var edARR=edAttach*annualPerCust;
+        editionARRs[ed]=edARR;
+        if(edARR>maxEditionARR)maxEditionARR=edARR;
+    }
+    for(var ed2 in EDITIONS){
+        var pct=maxEditionARR>0?(editionARRs[ed2]/maxEditionARR)*100:0;
+        editionBars+='<div class="sim-bar-row">';
+        editionBars+='<span class="sim-bar-label">'+ed2+'</span>';
+        editionBars+='<div class="sim-bar-track"><div class="sim-bar-fill" style="width:'+pct+'%;background:'+EDITION_COLORS[ed2]+'"></div></div>';
+        editionBars+='<span class="sim-bar-val">'+fmt(editionARRs[ed2])+'</span>';
+        editionBars+='</div>';
+    }
+    document.getElementById('editionBars').innerHTML=editionBars;
+}
+
+function drawStackedChart(yearData){
+    var svg=document.getElementById('arrChart');
+    var w=400, h=180, padL=50, padR=20, padT=20, padB=35;
+    var innerW=w-padL-padR, innerH=h-padT-padB;
+    var totals=yearData.map(function(d){return d.existing+d.newLogo;});
+    var max=Math.max.apply(null,totals)*1.15 || 1;
+    var barW=innerW/yearData.length*0.55;
+    var gap=innerW/yearData.length*0.45;
+    var svgHtml='';
+    // grid
+    for(var i=0;i<=4;i++){
+        var y=padT+(innerH*i/4);
+        svgHtml+='<line x1="'+padL+'" y1="'+y+'" x2="'+(w-padR)+'" y2="'+y+'" stroke="#EEE" stroke-width="1"/>';
+        var val=max-(max*i/4);
+        svgHtml+='<text x="'+(padL-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="9" fill="#999">'+fmt(val)+'</text>';
+    }
+    // stacked bars
+    yearData.forEach(function(d,idx){
+        var x=padL+idx*(barW+gap)+gap/2;
+        var existingH=innerH*(d.existing/max);
+        var newLogoH=innerH*(d.newLogo/max);
+        var total=d.existing+d.newLogo;
+        // existing (bottom, teal)
+        svgHtml+='<rect x="'+x+'" y="'+(padT+innerH-existingH)+'" width="'+barW+'" height="'+existingH+'" fill="#0785A8" rx="2"/>';
+        // new logo (top, amber)
+        svgHtml+='<rect x="'+x+'" y="'+(padT+innerH-existingH-newLogoH)+'" width="'+barW+'" height="'+newLogoH+'" fill="#DB8A06" rx="2"/>';
+        // total label
+        svgHtml+='<text x="'+(x+barW/2)+'" y="'+(padT+innerH-existingH-newLogoH-5)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#333">'+fmt(total)+'</text>';
+        // year label
+        svgHtml+='<text x="'+(x+barW/2)+'" y="'+(h-padB+18)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#555">Year '+(idx+1)+'</text>';
+    });
+    // legend
+    svgHtml+='<rect x="'+(padL)+'" y="'+(h-12)+'" width="10" height="10" fill="#0785A8" rx="2"/>';
+    svgHtml+='<text x="'+(padL+14)+'" y="'+(h-3)+'" font-size="9" fill="#555">Existing</text>';
+    svgHtml+='<rect x="'+(padL+75)+'" y="'+(h-12)+'" width="10" height="10" fill="#DB8A06" rx="2"/>';
+    svgHtml+='<text x="'+(padL+89)+'" y="'+(h-3)+'" font-size="9" fill="#555">New Logo</text>';
+    svg.innerHTML=svgHtml;
+}
+
+// === PRESETS ===
+function applyPreset(name){
+    var p={
+        conservative:{model:'flat',flatPrice:499,adoption:30,newLogoAttach:50,newLogoCount:12,growth:11,churn:8},
+        recommended:{model:'flat',flatPrice:750,adoption:60,newLogoAttach:75,newLogoCount:15,growth:11,churn:5},
+        aggressive:{model:'flat',flatPrice:999,adoption:75,newLogoAttach:90,newLogoCount:20,growth:13,churn:4},
+        stretch:{model:'tiered',adoption:85,newLogoAttach:95,newLogoCount:30,growth:15,churn:3,basic:299,std:799,ent:1499}
+    }[name];
+    setModel(p.model);
+    if(p.flatPrice)document.getElementById('flatPrice').value=p.flatPrice;
+    if(p.basic)document.getElementById('tierBasic').value=p.basic;
+    if(p.std)document.getElementById('tierStd').value=p.std;
+    if(p.ent)document.getElementById('tierEnt').value=p.ent;
+    document.getElementById('adoption').value=p.adoption;
+    document.getElementById('newLogoAttach').value=p.newLogoAttach;
+    document.getElementById('newLogoCount').value=p.newLogoCount;
+    document.getElementById('growth').value=p.growth;
+    document.getElementById('churn').value=p.churn;
+    recalc();
+}
+
+// Attach all slider listeners
+['flatPrice','seatPrice','seatCount','adoption','newLogoAttach','newLogoCount','growth','churn','tierBasic','tierStd','tierEnt'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.addEventListener('input',recalc);
+});
+
+// Initial render
+recalc();
+</script>
+
+</body>
+</html>

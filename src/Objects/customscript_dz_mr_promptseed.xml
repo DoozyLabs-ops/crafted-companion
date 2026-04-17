@@ -1,0 +1,17 @@
+<mapreducescript scriptid="customscript_dz_mr_promptseed">
+    <name>Crafted Intelligence Prompt Seed</name>
+    <scriptfile>[/SuiteScripts/DoozyTools/companion-tools/dz_mr_prompt_seed.js]</scriptfile>
+    <description>Crafted Intelligence prompt seed Map/Reduce. Reads seed-data.json from File Cabinet and creates/updates companion prompt records idempotently. Handles role resolution by matching seed patterns against account's actual roles. Version-aware: skips records where deployed version is newer than or equal to seed version.</description>
+    <isinactive>F</isinactive>
+    <notifyadmins>F</notifyadmins>
+    <notifyowner>T</notifyowner>
+    <scriptdeployments>
+        <scriptdeployment scriptid="customdeploy_dz_mr_promptseed">
+            <title>Crafted Intelligence Prompt Seed</title>
+            <isdeployed>T</isdeployed>
+            <loglevel>AUDIT</loglevel>
+            <runasrole>ADMINISTRATOR</runasrole>
+            <status>NOTSCHEDULED</status>
+        </scriptdeployment>
+    </scriptdeployments>
+</mapreducescript>

@@ -1,5 +1,5 @@
-<customlist scriptid="customlist_dz_pm_domain">
-    <name>Companion Prompt Domain</name>
+<customlist scriptid="customlist_dz_cp_category">
+    <name>Crafted Intelligence Category</name>
     <customvalues>
         <customvalue scriptid="val_barrel_ops">
             <value>Barrel Operations</value>
@@ -18,6 +18,9 @@
         </customvalue>
         <customvalue scriptid="val_batch_gen">
             <value>Batch &amp; Genealogy</value>
+        </customvalue>
+        <customvalue scriptid="val_general">
+            <value>General</value>
         </customvalue>
     </customvalues>
 </customlist>
